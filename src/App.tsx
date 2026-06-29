@@ -72,7 +72,7 @@ function App() {
             style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
             onClick={() => setActiveTab('dashboard')}
           >
-            <img className="pulse-glow" src="/logo.png" alt="Uki Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--color-primary)' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            <img className="pulse-glow" src={`${import.meta.env.BASE_URL}logo.png`} alt="Uki Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--color-primary)' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
             <div>
               <h1 style={{ margin: 0, fontSize: '1.6rem' }}>Uki <span style={{ color: 'var(--color-primary)' }}>Bike Log</span></h1>
               <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Royal Enfield Bullet 350</p>
