@@ -213,6 +213,7 @@ a:hover {
   transition: all 0.2s ease;
   appearance: none;
   -webkit-appearance: none;
+  text-align: center;
 }
 
 .input-field:focus {
