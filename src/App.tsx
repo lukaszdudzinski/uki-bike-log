@@ -25,34 +25,54 @@ function App() {
       case 'settings':
         return (
           <div className="glass-panel" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h2 style={{ margin: 0 }}>Ustawienia</h2>
+            <h2 style={{ margin: 0 }}>Ustawienia i Terminy</h2>
             
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label">Stan początkowy licznika (km)</label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input 
-                  type="number" 
-                  className="input-field" 
-                  style={{ flex: 1 }}
-                  defaultValue={12000}
-                  id="settings-odo"
-                />
-                <button 
-                  className="btn-primary" 
-                  onClick={() => {
-                    const val = (document.getElementById('settings-odo') as HTMLInputElement).value;
-                    const numVal = Number(val);
-                    if (!isNaN(numVal)) {
-                      const currentSettings = storage.getSettings();
-                      storage.saveSettings({ ...currentSettings, initialOdo: numVal });
-                      alert(`Zaktualizowano stan początkowy na: ${val} km. Otwórz pulpit aby zobaczyć zmianę.`);
-                    }
-                  }}
-                >
-                  Zapisz
-                </button>
-              </div>
+              <input type="number" className="input-field" id="settings-odo" defaultValue={storage.getSettings().initialOdo} />
             </div>
+
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label">Wygasa ubezpieczenie OC</label>
+              <input type="date" className="input-field" id="settings-oc" defaultValue={storage.getSettings().insuranceExpiry} />
+            </div>
+
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label">Wygasa ubezpieczenie AC</label>
+              <input type="date" className="input-field" id="settings-ac" defaultValue={storage.getSettings().insuranceAcExpiry} />
+            </div>
+
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label">Data ostatniego przeglądu (wyliczy kolejny +1 rok)</label>
+              <input type="date" className="input-field" id="settings-inspection" defaultValue={storage.getSettings().lastInspectionDate} />
+            </div>
+
+            <button 
+              className="btn-primary" 
+              style={{ marginTop: '10px' }}
+              onClick={() => {
+                const odoVal = Number((document.getElementById('settings-odo') as HTMLInputElement).value);
+                const ocVal = (document.getElementById('settings-oc') as HTMLInputElement).value;
+                const acVal = (document.getElementById('settings-ac') as HTMLInputElement).value;
+                const inspVal = (document.getElementById('settings-inspection') as HTMLInputElement).value;
+
+                if (!isNaN(odoVal) && ocVal && acVal && inspVal) {
+                  const currentSettings = storage.getSettings();
+                  storage.saveSettings({ 
+                    ...currentSettings, 
+                    initialOdo: odoVal,
+                    insuranceExpiry: ocVal,
+                    insuranceAcExpiry: acVal,
+                    lastInspectionDate: inspVal
+                  });
+                  alert('Zaktualizowano ustawienia i terminy. Otwórz pulpit aby zobaczyć zmianę.');
+                } else {
+                  alert('Wypełnij poprawnie wszystkie pola.');
+                }
+              }}
+            >
+              Zapisz Ustawienia
+            </button>
 
             <button className="btn-outline" style={{marginTop: '10px'}} onClick={() => setIsDark(!isDark)}>
               Zmień motyw na {isDark ? 'Jasny' : 'Ciemny'}

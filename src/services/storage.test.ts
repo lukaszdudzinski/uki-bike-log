@@ -14,13 +14,14 @@ describe('Storage Service', () => {
   });
 
   it('should save and retrieve custom settings', () => {
-    const customSettings = {
-      initialOdo: 15000,
-      insuranceExpiry: '2026-12-31',
-      registrationExpiry: '2027-01-01',
-      serviceIntervalKm: 6000,
-      lastServiceOdo: 15000,
-    };
+      const customSettings = {
+        initialOdo: 15000,
+        insuranceExpiry: '2026-12-31',
+        insuranceAcExpiry: '2026-12-31',
+        lastInspectionDate: '2026-01-01',
+        serviceIntervalKm: 6000,
+        lastServiceOdo: 15000,
+      };
     storage.saveSettings(customSettings);
     
     const retrieved = storage.getSettings();

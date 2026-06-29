@@ -18,8 +18,9 @@ export interface ServiceEntry {
 
 export interface BikeSettings {
   initialOdo: number;
-  insuranceExpiry: string;
-  registrationExpiry: string;
+  insuranceExpiry: string; // OC
+  insuranceAcExpiry: string; // AC
+  lastInspectionDate: string;
   serviceIntervalKm: number;
   lastServiceOdo: number;
 }
@@ -67,8 +68,9 @@ export const storage = {
     // Default mock settings
     return {
       initialOdo: 12000,
-      insuranceExpiry: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
-      registrationExpiry: new Date(new Date().getTime() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 6 months
+      insuranceExpiry: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // OC 14 days from now
+      insuranceAcExpiry: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // AC 30 days from now
+      lastInspectionDate: new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 6 months ago
       serviceIntervalKm: 5000,
       lastServiceOdo: 12000,
     };

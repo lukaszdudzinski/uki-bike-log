@@ -23,8 +23,13 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
   const insuranceDate = new Date(settings.insuranceExpiry);
   const daysToInsurance = Math.ceil((insuranceDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
   
-  const registrationDate = new Date(settings.registrationExpiry);
-  const daysToRegistration = Math.ceil((registrationDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  const insuranceAcDate = new Date(settings.insuranceAcExpiry);
+  const daysToInsuranceAc = Math.ceil((insuranceAcDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  
+  const lastInspDate = new Date(settings.lastInspectionDate);
+  const nextInspDate = new Date(lastInspDate);
+  nextInspDate.setFullYear(nextInspDate.getFullYear() + 1);
+  const daysToInspection = Math.ceil((nextInspDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
 
   const serviceKmRemaining = settings.serviceIntervalKm - (odo - settings.lastServiceOdo);
 
@@ -54,7 +59,7 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
         <h3 style={{ marginBottom: '12px', fontSize: '1.2rem' }}>Wymagają uwagi</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           
-          {/* Insurance */}
+          {/* Insurance OC */}
           <div className="glass-panel" style={{ 
             padding: '16px', 
             border: daysToInsurance <= 14 ? `1px solid var(--color-${daysToInsurance <= 3 ? 'danger' : 'warning'})` : 'none',
@@ -66,6 +71,22 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
               <h4 style={{ margin: '0 0 4px 0', color: daysToInsurance <= 14 ? `var(--color-${daysToInsurance <= 3 ? 'danger' : 'warning'})` : 'inherit' }}>Ubezpieczenie OC</h4>
               <p style={{ margin: 0, fontSize: '0.9rem' }}>
                 {daysToInsurance < 0 ? 'Polisa wygasła!' : `Ważne jeszcze ${daysToInsurance} dni (${settings.insuranceExpiry})`}
+              </p>
+            </div>
+          </div>
+
+          {/* Insurance AC */}
+          <div className="glass-panel" style={{ 
+            padding: '16px', 
+            border: daysToInsuranceAc <= 14 ? `1px solid var(--color-${daysToInsuranceAc <= 3 ? 'danger' : 'warning'})` : 'none',
+            backgroundColor: daysToInsuranceAc <= 14 ? `var(--color-${daysToInsuranceAc <= 3 ? 'danger' : 'warning'}-bg)` : 'var(--color-glass-bg)',
+            display: 'flex', alignItems: 'flex-start', gap: '12px'
+          }}>
+            <ShieldCheck size={24} color={daysToInsuranceAc <= 14 ? `var(--color-${daysToInsuranceAc <= 3 ? 'danger' : 'warning'})` : 'var(--color-success)'} style={{ flexShrink: 0 }} />
+            <div>
+              <h4 style={{ margin: '0 0 4px 0', color: daysToInsuranceAc <= 14 ? `var(--color-${daysToInsuranceAc <= 3 ? 'danger' : 'warning'})` : 'inherit' }}>Ubezpieczenie AC</h4>
+              <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                {daysToInsuranceAc < 0 ? 'Polisa wygasła!' : `Ważne jeszcze ${daysToInsuranceAc} dni (${settings.insuranceAcExpiry})`}
               </p>
             </div>
           </div>
@@ -86,15 +107,19 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
             </div>
           </div>
 
-          {/* Registration */}
+          {/* Inspection */}
           <div className="glass-panel" style={{ 
             padding: '16px', 
-            display: 'flex', alignItems: 'center', gap: '12px'
+            border: daysToInspection <= 14 ? `1px solid var(--color-${daysToInspection <= 3 ? 'danger' : 'warning'})` : 'none',
+            backgroundColor: daysToInspection <= 14 ? `var(--color-${daysToInspection <= 3 ? 'danger' : 'warning'}-bg)` : 'var(--color-glass-bg)',
+            display: 'flex', alignItems: 'flex-start', gap: '12px'
           }}>
-            <FileText size={24} color={daysToRegistration <= 14 ? 'var(--color-warning)' : 'var(--color-success)'} style={{ flexShrink: 0 }} />
+            <FileText size={24} color={daysToInspection <= 14 ? `var(--color-${daysToInspection <= 3 ? 'danger' : 'warning'})` : 'var(--color-success)'} style={{ flexShrink: 0 }} />
             <div>
-              <h4 style={{ margin: '0 0 2px 0' }}>Przegląd rejestracyjny</h4>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Ważny do {settings.registrationExpiry}</p>
+              <h4 style={{ margin: '0 0 2px 0', color: daysToInspection <= 14 ? `var(--color-${daysToInspection <= 3 ? 'danger' : 'warning'})` : 'inherit' }}>Przegląd techniczny</h4>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                {daysToInspection < 0 ? 'Przegląd nieważny!' : `Ważny do ${nextInspDate.toISOString().split('T')[0]} (zostało ${daysToInspection} dni)`}
+              </p>
             </div>
           </div>
 
