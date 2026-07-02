@@ -23,6 +23,8 @@ export interface BikeSettings {
   lastInspectionDate: string;
   serviceIntervalKm: number;
   lastServiceOdo: number;
+  chainIntervalKm: number;
+  lastChainOdo: number;
 }
 
 const STORAGE_KEYS = {
@@ -73,6 +75,8 @@ export const storage = {
       lastInspectionDate: new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 6 months ago
       serviceIntervalKm: 5000,
       lastServiceOdo: 12000,
+      chainIntervalKm: 500,
+      lastChainOdo: 12000,
     };
   },
   saveSettings: (settings: BikeSettings) => {
@@ -85,5 +89,38 @@ export const storage = {
     const fuelLogs = storage.getFuelLogs();
     const maxFuelOdo = fuelLogs.length > 0 ? Math.max(...fuelLogs.map(l => l.odo)) : 0;
     return Math.max(settings.initialOdo, maxFuelOdo);
+  },
+
+  getAverageConsumption: (): number | null => {
+    // Calculates avg consumption (L/100km) using all full-tank logs.
+    const logs = storage.getFuelLogs().sort((a, b) => a.odo - b.odo);
+    if (logs.length < 2) return null; // Need at least 2 logs
+
+    let totalLiters = 0;
+    let startOdo = -1;
+    let endOdo = -1;
+    let foundFirstFull = false;
+
+    // Find the first full tank as the starting point
+    for (let i = 0; i < logs.length; i++) {
+      if (!foundFirstFull) {
+        if (logs[i].isFullTank) {
+          foundFirstFull = true;
+          startOdo = logs[i].odo;
+        }
+      } else {
+        totalLiters += logs[i].liters;
+        if (logs[i].isFullTank) {
+          endOdo = logs[i].odo;
+        }
+      }
+    }
+
+    if (startOdo === -1 || endOdo === -1 || endOdo <= startOdo) return null;
+
+    const distance = endOdo - startOdo;
+    if (distance <= 0) return null;
+
+    return (totalLiters / distance) * 100;
   }
 };

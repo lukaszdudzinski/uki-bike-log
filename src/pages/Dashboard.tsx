@@ -1,4 +1,4 @@
-import { AlertTriangle, ShieldCheck, FileText, Wrench, Fuel } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, FileText, Wrench, Fuel, Link } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { storage, type BikeSettings } from '../services/storage';
 
@@ -9,10 +9,12 @@ interface DashboardProps {
 export default function Dashboard({ setActiveTab }: DashboardProps) {
   const [odo, setOdo] = useState<number>(0);
   const [settings, setSettings] = useState<BikeSettings | null>(null);
+  const [avgConsumption, setAvgConsumption] = useState<number | null>(null);
 
   useEffect(() => {
     setOdo(storage.getCurrentOdo());
     setSettings(storage.getSettings());
+    setAvgConsumption(storage.getAverageConsumption());
   }, []);
 
   if (!settings) return null;
@@ -32,6 +34,7 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
   const daysToInspection = Math.ceil((nextInspDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
 
   const serviceKmRemaining = settings.serviceIntervalKm - (odo - settings.lastServiceOdo);
+  const chainKmRemaining = settings.chainIntervalKm - (odo - settings.lastChainOdo);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -50,7 +53,7 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
         </div>
         <div style={{ textAlign: 'right' }}>
           <p className="input-label" style={{ marginBottom: '4px' }}>Śr. spalanie</p>
-          <h3 style={{ margin: 0 }}>-- l/100</h3>
+          <h3 style={{ margin: 0 }}>{avgConsumption ? `${avgConsumption.toFixed(2)} l/100` : '-- l/100'}</h3>
         </div>
       </div>
 
@@ -105,6 +108,37 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
                 {serviceKmRemaining < 0 ? 'Przekroczono interwał!' : `Pozostało ${serviceKmRemaining} km`}
               </p>
             </div>
+          </div>
+
+          {/* Chain */}
+          <div className="glass-panel" style={{ 
+            padding: '16px', 
+            border: chainKmRemaining <= 100 ? `1px solid var(--color-${chainKmRemaining <= 0 ? 'danger' : 'warning'})` : 'none',
+            backgroundColor: chainKmRemaining <= 100 ? `var(--color-${chainKmRemaining <= 0 ? 'danger' : 'warning'}-bg)` : 'var(--color-glass-bg)',
+            display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap'
+          }}>
+            <Link size={24} color={chainKmRemaining <= 100 ? `var(--color-${chainKmRemaining <= 0 ? 'danger' : 'warning'})` : 'var(--color-success)'} style={{ flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 4px 0', color: chainKmRemaining <= 100 ? `var(--color-${chainKmRemaining <= 0 ? 'danger' : 'warning'})` : 'inherit' }}>Smarowanie łańcucha</h4>
+              <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                {chainKmRemaining < 0 ? 'Wymaga pilnego smarowania!' : `Pozostało ${chainKmRemaining} km`}
+              </p>
+            </div>
+            {chainKmRemaining <= 100 && (
+              <button 
+                className="btn-primary"
+                style={{ width: '100%', padding: '8px', fontSize: '0.9rem', marginTop: '8px' }}
+                onClick={() => {
+                  if (confirm('Czy na pewno chcesz zresetować licznik łańcucha?')) {
+                    const currentSettings = storage.getSettings();
+                    storage.saveSettings({ ...currentSettings, lastChainOdo: odo });
+                    setSettings(storage.getSettings()); // trigger re-render
+                  }
+                }}
+              >
+                Nasmarowano!
+              </button>
+            )}
           </div>
 
           {/* Inspection */}

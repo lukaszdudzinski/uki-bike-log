@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, Bell } from 'lucide-react';
+import { Settings, Fuel, Wrench, Bell, BarChart2 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
+import Stats from './pages/Stats';
 import { storage } from './services/storage';
 
 function App() {
@@ -22,6 +23,8 @@ function App() {
         return <FuelLog />;
       case 'service':
         return <ServiceLog />;
+      case 'stats':
+        return <Stats />;
       case 'settings':
         return (
           <div className="glass-panel" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -154,6 +157,12 @@ function App() {
           label="Serwis" 
           isActive={activeTab === 'service'} 
           onClick={() => setActiveTab('service')} 
+        />
+        <NavItem 
+          icon={<BarChart2 size={24} />} 
+          label="Statystyki" 
+          isActive={activeTab === 'stats'} 
+          onClick={() => setActiveTab('stats')} 
         />
         <NavItem 
           icon={<Settings size={24} />} 

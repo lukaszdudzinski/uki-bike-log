@@ -21,12 +21,14 @@ describe('Storage Service', () => {
         lastInspectionDate: '2026-01-01',
         serviceIntervalKm: 6000,
         lastServiceOdo: 15000,
+        chainIntervalKm: 600,
+        lastChainOdo: 15000,
       };
     storage.saveSettings(customSettings);
     
     const retrieved = storage.getSettings();
     expect(retrieved.initialOdo).toBe(15000);
-    expect(retrieved.serviceIntervalKm).toBe(6000);
+    expect(retrieved.chainIntervalKm).toBe(600);
   });
 
   it('should add a fuel log and sort by date descending', () => {
@@ -66,5 +68,27 @@ describe('Storage Service', () => {
     });
 
     expect(storage.getCurrentOdo()).toBe(12500);
+  });
+
+  it('should calculate average consumption based on full tanks', () => {
+    expect(storage.getAverageConsumption()).toBeNull();
+
+    // 1st full tank
+    storage.addFuelLog({ date: '2026-06-01T10:00:00.000Z', odo: 12000, liters: 10, price: 60, isFullTank: true });
+    // Not enough logs yet
+    expect(storage.getAverageConsumption()).toBeNull();
+
+    // Not full tank
+    storage.addFuelLog({ date: '2026-06-05T10:00:00.000Z', odo: 12200, liters: 5, price: 30, isFullTank: false });
+    // Still no second full tank
+    expect(storage.getAverageConsumption()).toBeNull();
+
+    // 2nd full tank
+    storage.addFuelLog({ date: '2026-06-10T10:00:00.000Z', odo: 12300, liters: 7, price: 42, isFullTank: true });
+    
+    // Distance = 12300 - 12000 = 300km
+    // Liters = 5 + 7 = 12L
+    // Avg = (12 / 300) * 100 = 4.0 L/100km
+    expect(storage.getAverageConsumption()).toBeCloseTo(4.0);
   });
 });
