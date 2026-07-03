@@ -16,6 +16,12 @@ export interface ServiceEntry {
   cost: number;
 }
 
+export interface RouteEntry {
+  id: string;
+  name: string;
+  address: string; // can be city, street, or lat,lng
+}
+
 export interface BikeSettings {
   initialOdo: number;
   insuranceExpiry: string; // OC
@@ -31,6 +37,7 @@ const STORAGE_KEYS = {
   FUEL: 'uki_fuel_logs',
   SERVICE: 'uki_service_logs',
   SETTINGS: 'uki_bike_settings',
+  ROUTES: 'uki_favorite_routes',
 };
 
 export const storage = {
@@ -55,11 +62,33 @@ export const storage = {
   },
   addServiceLog: (entry: Omit<ServiceEntry, 'id'>) => {
     const logs = storage.getServiceLogs();
-    const newEntry = { ...entry, id: Date.now().toString() };
+    const newEntry = { ...entry, id: crypto.randomUUID() };
     logs.push(newEntry);
-    logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     localStorage.setItem(STORAGE_KEYS.SERVICE, JSON.stringify(logs));
     return newEntry;
+  },
+
+  // --- Routes ---
+  getRoutes: (): RouteEntry[] => {
+    const data = localStorage.getItem(STORAGE_KEYS.ROUTES);
+    if (data) return JSON.parse(data);
+    
+    // Provide some default dummy routes to show how it works
+    return [
+      { id: '1', name: 'Serwis Janusz (Przykładowy)', address: 'Warszawa, Złote Tarasy' },
+      { id: '2', name: 'Bieszczady - Baza', address: 'Wetlina' },
+    ];
+  },
+  addRoute: (entry: Omit<RouteEntry, 'id'>) => {
+    const routes = storage.getRoutes();
+    const newEntry = { ...entry, id: crypto.randomUUID() };
+    routes.push(newEntry);
+    localStorage.setItem(STORAGE_KEYS.ROUTES, JSON.stringify(routes));
+    return newEntry;
+  },
+  deleteRoute: (id: string) => {
+    const routes = storage.getRoutes().filter(r => r.id !== id);
+    localStorage.setItem(STORAGE_KEYS.ROUTES, JSON.stringify(routes));
   },
 
   // --- Settings ---

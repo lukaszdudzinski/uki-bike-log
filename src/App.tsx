@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, Bell, BarChart2 } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
 import Stats from './pages/Stats';
+import Routes from './pages/Routes';
 import { storage } from './services/storage';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDark, setIsDark] = useState(true);
+  const [isPlayingRadio, setIsPlayingRadio] = useState(false);
 
   // Set initial theme
   useEffect(() => {
@@ -25,6 +27,8 @@ function App() {
         return <ServiceLog />;
       case 'stats':
         return <Stats />;
+      case 'routes':
+        return <Routes />;
       case 'settings':
         return (
           <div className="glass-panel" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -102,23 +106,39 @@ function App() {
             </div>
           </div>
           <div style={{ position: 'relative' }}>
-            <div style={{
-              width: '40px', height: '40px', borderRadius: '50%', 
-              backgroundColor: 'var(--color-glass-bg)', display: 'flex', 
-              alignItems: 'center', justifyContent: 'center',
-              border: '1px solid var(--color-glass-border)'
-            }}>
-              <Bell size={20} color="var(--color-primary)" />
-            </div>
-            {/* Notification dot */}
-            <div style={{
-              position: 'absolute', top: '0', right: '0', 
-              width: '10px', height: '10px', borderRadius: '50%', 
-              backgroundColor: 'var(--color-danger)',
-              border: '2px solid var(--color-bg)'
-            }}></div>
+            <button 
+              onClick={() => {
+                const audio = document.getElementById('global-radio-player') as HTMLAudioElement;
+                if (isPlayingRadio) {
+                  audio.pause();
+                } else {
+                  audio.play();
+                }
+                setIsPlayingRadio(!isPlayingRadio);
+              }}
+              style={{
+                width: '44px', height: '44px', borderRadius: '50%', 
+                backgroundColor: isPlayingRadio ? 'var(--color-primary-light)' : 'var(--color-glass-bg)', display: 'flex', 
+                alignItems: 'center', justifyContent: 'center',
+                border: `1px solid ${isPlayingRadio ? 'var(--color-primary)' : 'var(--color-glass-border)'}`,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}>
+              {isPlayingRadio ? <Pause size={20} color="var(--color-primary)" /> : <RadioIcon size={20} color="var(--color-primary)" />}
+            </button>
+            {isPlayingRadio && (
+              <div style={{
+                position: 'absolute', top: '0', right: '0', 
+                width: '10px', height: '10px', borderRadius: '50%', 
+                backgroundColor: 'var(--color-success)',
+                border: '2px solid var(--color-bg)',
+                boxShadow: '0 0 8px var(--color-success)'
+              }}></div>
+            )}
           </div>
         </header>
+
+        <audio id="global-radio-player" src="https://stream.rcs.revma.com/ye5kghkgcm0uv" preload="none"></audio>
 
         {renderContent()}
       </main>
