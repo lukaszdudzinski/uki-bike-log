@@ -1,10 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { storage } from './storage';
+import localforage from 'localforage';
 
 describe('Storage Service', () => {
-  beforeEach(() => {
-    // Clear localStorage before each test
+  beforeEach(async () => {
+    // Clear both storages before each test
     localStorage.clear();
+    await localforage.clear();
+    await storage.initDB();
   });
 
   it('should return default settings if none exist', () => {

@@ -1,3 +1,5 @@
+import localforage from 'localforage';
+
 export interface FuelEntry {
   id: string;
   date: string;
@@ -19,7 +21,7 @@ export interface ServiceEntry {
 export interface RouteEntry {
   id: string;
   name: string;
-  address: string; // can be city, street, or lat,lng
+  address: string;
 }
 
 export interface BikeSettings {
@@ -40,97 +42,140 @@ const STORAGE_KEYS = {
   ROUTES: 'uki_favorite_routes',
 };
 
+// Initialize localforage
+localforage.config({
+  name: 'UkiBikeLog',
+  storeName: 'logs'
+});
+
+// Synchronous memory cache
+let cache = {
+  fuel: [] as FuelEntry[],
+  service: [] as ServiceEntry[],
+  routes: [] as RouteEntry[],
+  settings: null as BikeSettings | null,
+};
+
 export const storage = {
-  // --- Fuel ---
-  getFuelLogs: (): FuelEntry[] => {
-    const data = localStorage.getItem(STORAGE_KEYS.FUEL);
-    return data ? JSON.parse(data) : [];
-  },
-  addFuelLog: (entry: Omit<FuelEntry, 'id'>) => {
-    const logs = storage.getFuelLogs();
-    const newEntry = { ...entry, id: Date.now().toString() };
-    logs.push(newEntry);
-    logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    localStorage.setItem(STORAGE_KEYS.FUEL, JSON.stringify(logs));
-    return newEntry;
-  },
+  // --- Initialization ---
+  initDB: async () => {
+    // Migrate from localStorage if needed (for backwards compatibility)
+    for (const key of Object.values(STORAGE_KEYS)) {
+      const localData = localStorage.getItem(key);
+      if (localData) {
+        const existingForage = await localforage.getItem(key);
+        if (!existingForage) {
+          await localforage.setItem(key, JSON.parse(localData));
+        }
+      }
+    }
 
-  // --- Service ---
-  getServiceLogs: (): ServiceEntry[] => {
-    const data = localStorage.getItem(STORAGE_KEYS.SERVICE);
-    return data ? JSON.parse(data) : [];
-  },
-  addServiceLog: (entry: Omit<ServiceEntry, 'id'>) => {
-    const logs = storage.getServiceLogs();
-    const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
-    logs.push(newEntry);
-    localStorage.setItem(STORAGE_KEYS.SERVICE, JSON.stringify(logs));
-    return newEntry;
-  },
-
-  // --- Routes ---
-  getRoutes: (): RouteEntry[] => {
-    const data = localStorage.getItem(STORAGE_KEYS.ROUTES);
-    if (data) return JSON.parse(data);
-    
-    // Provide some default dummy routes to show how it works
-    return [
+    // Load everything into memory cache
+    cache.fuel = (await localforage.getItem<FuelEntry[]>(STORAGE_KEYS.FUEL)) || [];
+    cache.service = (await localforage.getItem<ServiceEntry[]>(STORAGE_KEYS.SERVICE)) || [];
+    cache.routes = (await localforage.getItem<RouteEntry[]>(STORAGE_KEYS.ROUTES)) || [
       { id: '1', name: 'Serwis Janusz (Przykładowy)', address: 'Warszawa, Złote Tarasy' },
       { id: '2', name: 'Bieszczady - Baza', address: 'Wetlina' },
     ];
-  },
-  addRoute: (entry: Omit<RouteEntry, 'id'>) => {
-    const routes = storage.getRoutes();
-    const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
-    routes.push(newEntry);
-    localStorage.setItem(STORAGE_KEYS.ROUTES, JSON.stringify(routes));
-    return newEntry;
-  },
-  deleteRoute: (id: string) => {
-    const routes = storage.getRoutes().filter(r => r.id !== id);
-    localStorage.setItem(STORAGE_KEYS.ROUTES, JSON.stringify(routes));
-  },
-
-  // --- Settings ---
-  getSettings: (): BikeSettings => {
-    const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    if (data) return JSON.parse(data);
-    
-    // Default mock settings
-    return {
+    cache.settings = (await localforage.getItem<BikeSettings>(STORAGE_KEYS.SETTINGS)) || {
       initialOdo: 12000,
-      insuranceExpiry: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // OC 14 days from now
-      insuranceAcExpiry: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // AC 30 days from now
-      lastInspectionDate: new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 6 months ago
+      insuranceExpiry: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      insuranceAcExpiry: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      lastInspectionDate: new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       serviceIntervalKm: 5000,
       lastServiceOdo: 12000,
       chainIntervalKm: 500,
       lastChainOdo: 12000,
     };
   },
+
+  exportBackup: () => {
+    const backup = {
+      fuel: cache.fuel,
+      service: cache.service,
+      routes: cache.routes,
+      settings: cache.settings
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `uki_bikelog_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+
+  importBackup: async (jsonString: string) => {
+    try {
+      const backup = JSON.parse(jsonString);
+      if (backup.settings) await localforage.setItem(STORAGE_KEYS.SETTINGS, backup.settings);
+      if (backup.fuel) await localforage.setItem(STORAGE_KEYS.FUEL, backup.fuel);
+      if (backup.service) await localforage.setItem(STORAGE_KEYS.SERVICE, backup.service);
+      if (backup.routes) await localforage.setItem(STORAGE_KEYS.ROUTES, backup.routes);
+      // Reload cache
+      await storage.initDB();
+      return true;
+    } catch (e) {
+      console.error('Błąd importu', e);
+      return false;
+    }
+  },
+
+  // --- Fuel ---
+  getFuelLogs: (): FuelEntry[] => cache.fuel,
+  addFuelLog: (entry: Omit<FuelEntry, 'id'>) => {
+    const newEntry = { ...entry, id: Date.now().toString() };
+    cache.fuel.push(newEntry);
+    cache.fuel.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    localforage.setItem(STORAGE_KEYS.FUEL, cache.fuel);
+    return newEntry;
+  },
+
+  // --- Service ---
+  getServiceLogs: (): ServiceEntry[] => cache.service,
+  addServiceLog: (entry: Omit<ServiceEntry, 'id'>) => {
+    const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
+    cache.service.push(newEntry);
+    localforage.setItem(STORAGE_KEYS.SERVICE, cache.service);
+    return newEntry;
+  },
+
+  // --- Routes ---
+  getRoutes: (): RouteEntry[] => cache.routes,
+  addRoute: (entry: Omit<RouteEntry, 'id'>) => {
+    const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
+    cache.routes.push(newEntry);
+    localforage.setItem(STORAGE_KEYS.ROUTES, cache.routes);
+    return newEntry;
+  },
+  deleteRoute: (id: string) => {
+    cache.routes = cache.routes.filter(r => r.id !== id);
+    localforage.setItem(STORAGE_KEYS.ROUTES, cache.routes);
+  },
+
+  // --- Settings ---
+  getSettings: (): BikeSettings => cache.settings!,
   saveSettings: (settings: BikeSettings) => {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    cache.settings = settings;
+    localforage.setItem(STORAGE_KEYS.SETTINGS, settings);
   },
 
   // --- Calculated Stats ---
   getCurrentOdo: (): number => {
-    const settings = storage.getSettings();
-    const fuelLogs = storage.getFuelLogs();
-    const maxFuelOdo = fuelLogs.length > 0 ? Math.max(...fuelLogs.map(l => l.odo)) : 0;
-    return Math.max(settings.initialOdo, maxFuelOdo);
+    if (!cache.settings) return 0;
+    const maxFuelOdo = cache.fuel.length > 0 ? Math.max(...cache.fuel.map(l => l.odo)) : 0;
+    return Math.max(cache.settings.initialOdo, maxFuelOdo);
   },
 
   getAverageConsumption: (): number | null => {
-    // Calculates avg consumption (L/100km) using all full-tank logs.
-    const logs = storage.getFuelLogs().sort((a, b) => a.odo - b.odo);
-    if (logs.length < 2) return null; // Need at least 2 logs
+    const logs = [...cache.fuel].sort((a, b) => a.odo - b.odo);
+    if (logs.length < 2) return null;
 
     let totalLiters = 0;
     let startOdo = -1;
     let endOdo = -1;
     let foundFirstFull = false;
 
-    // Find the first full tank as the starting point
     for (let i = 0; i < logs.length; i++) {
       if (!foundFirstFull) {
         if (logs[i].isFullTank) {
@@ -146,7 +191,6 @@ export const storage = {
     }
 
     if (startOdo === -1 || endOdo === -1 || endOdo <= startOdo) return null;
-
     const distance = endOdo - startOdo;
     if (distance <= 0) return null;
 

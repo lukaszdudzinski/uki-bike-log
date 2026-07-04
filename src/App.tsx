@@ -8,14 +8,30 @@ import Routes from './pages/Routes';
 import { storage } from './services/storage';
 
 function App() {
+  const [isReady, setIsReady] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDark, setIsDark] = useState(true);
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
 
-  // Set initial theme
+  // Initialize DB and Set initial theme
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    
+    // Load localForage DB into memory cache
+    storage.initDB().then(() => {
+      setIsReady(true);
+    });
   }, [isDark]);
+
+  if (!isReady) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>
+        <h2 style={{ color: 'var(--color-primary)' }}>Uruchamianie silnika...</h2>
+        <div style={{ width: '40px', height: '40px', border: '4px solid var(--color-glass-border)', borderTopColor: 'var(--color-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -84,6 +100,50 @@ function App() {
             <button className="btn-outline" style={{marginTop: '10px'}} onClick={() => setIsDark(!isDark)}>
               Zmień motyw na {isDark ? 'Jasny' : 'Ciemny'}
             </button>
+            
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '12px 0' }} />
+            
+            <h3 style={{ margin: '0 0 8px 0' }}>Zarządzanie Danymi</h3>
+            <p style={{ margin: '0 0 16px 0', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+              Twoje dane są bezpiecznie przechowywane w pamięci urządzenia (IndexedDB). Warto jednak regularnie tworzyć kopię zapasową.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button 
+                className="btn-outline" 
+                onClick={() => storage.exportBackup()}
+              >
+                Pobierz Kopię Zapasową (JSON)
+              </button>
+              
+              <label className="btn-outline" style={{ display: 'block', textAlign: 'center', cursor: 'pointer' }}>
+                Wgraj Kopię Zapasową
+                <input 
+                  type="file" 
+                  accept=".json" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = async (event) => {
+                      const text = event.target?.result as string;
+                      if (confirm('UWAGA: Wgranie kopii nadpisze wszystkie obecne dane. Kontynuować?')) {
+                        const success = await storage.importBackup(text);
+                        if (success) {
+                          alert('Wgrano kopię zapasową pomyślnie!');
+                          window.location.reload();
+                        } else {
+                          alert('Błąd podczas wgrywania pliku. Plik jest uszkodzony lub ma zły format.');
+                        }
+                      }
+                    };
+                    reader.readAsText(file);
+                    // Reset input
+                    e.target.value = '';
+                  }} 
+                />
+              </label>
+            </div>
           </div>
         );
       default:
