@@ -62,7 +62,7 @@ export const storage = {
   },
   addServiceLog: (entry: Omit<ServiceEntry, 'id'>) => {
     const logs = storage.getServiceLogs();
-    const newEntry = { ...entry, id: crypto.randomUUID() };
+    const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
     logs.push(newEntry);
     localStorage.setItem(STORAGE_KEYS.SERVICE, JSON.stringify(logs));
     return newEntry;
@@ -81,7 +81,7 @@ export const storage = {
   },
   addRoute: (entry: Omit<RouteEntry, 'id'>) => {
     const routes = storage.getRoutes();
-    const newEntry = { ...entry, id: crypto.randomUUID() };
+    const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
     routes.push(newEntry);
     localStorage.setItem(STORAGE_KEYS.ROUTES, JSON.stringify(routes));
     return newEntry;
