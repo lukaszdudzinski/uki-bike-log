@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { storage, type BikeSettings } from '../services/storage';
 import AlertsList from '../components/AlertsList';
 import QuickActions from '../components/QuickActions';
+import WeatherWidget from '../components/WeatherWidget';
 
 interface DashboardProps {
   setActiveTab: (tab: string) => void;
@@ -40,6 +41,8 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
           <h3 style={{ margin: 0 }}>{avgConsumption ? `${avgConsumption.toFixed(2)} l/100` : '-- l/100'}</h3>
         </div>
       </div>
+
+      <WeatherWidget />
 
       <AlertsList settings={settings} odo={odo} setSettings={setSettings} />
 

@@ -20,6 +20,23 @@ function App() {
     // Load localForage DB into memory cache
     storage.initDB().then(() => {
       setIsReady(true);
+      
+      // Check for notifications
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const settings = storage.getSettings();
+        const odo = storage.getCurrentOdo();
+        const chainKmRemaining = settings.chainIntervalKm - (odo - settings.lastChainOdo);
+        
+        const lastNotified = localStorage.getItem('uki_last_notified');
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        if (lastNotified !== todayStr) {
+          if (chainKmRemaining <= 100) {
+            new Notification('Smarowanie łańcucha', { body: `Pozostało tylko ${chainKmRemaining} km do smarowania!`, icon: '/logo.png' });
+          }
+          localStorage.setItem('uki_last_notified', todayStr);
+        }
+      }
     });
   }, [isDark]);
 
@@ -97,9 +114,24 @@ function App() {
               Zapisz Ustawienia
             </button>
 
-            <button className="btn-outline" style={{marginTop: '10px'}} onClick={() => setIsDark(!isDark)}>
-              Zmień motyw na {isDark ? 'Jasny' : 'Ciemny'}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+              <button className="btn-outline" onClick={() => setIsDark(!isDark)}>
+                Zmień motyw na {isDark ? 'Jasny' : 'Ciemny'}
+              </button>
+              
+              <button className="btn-outline" onClick={() => {
+                if ('Notification' in window) {
+                  Notification.requestPermission().then(perm => {
+                    if (perm === 'granted') alert('Powiadomienia włączone!');
+                    else alert('Powiadomienia zostały zablokowane.');
+                  });
+                } else {
+                  alert('Twoja przeglądarka nie obsługuje powiadomień.');
+                }
+              }}>
+                Włącz powiadomienia (przypomnienia)
+              </button>
+            </div>
             
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '12px 0' }} />
             
