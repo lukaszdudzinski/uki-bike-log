@@ -73,6 +73,16 @@
   100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
 }
 
+@keyframes redAlertBlink {
+  0% { box-shadow: 0 0 0 0 rgba(184, 29, 34, 0.8); border-color: rgba(184, 29, 34, 1); }
+  50% { box-shadow: 0 0 20px 5px rgba(184, 29, 34, 0.2); border-color: rgba(184, 29, 34, 0.3); }
+  100% { box-shadow: 0 0 0 0 rgba(184, 29, 34, 0); border-color: rgba(184, 29, 34, 1); }
+}
+
+.red-alert-anim {
+  animation: redAlertBlink 1s infinite !important;
+}
+
 .pulse-glow {
   animation: borderPulse 2.5s infinite;
 }

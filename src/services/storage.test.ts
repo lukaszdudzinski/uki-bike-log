@@ -24,8 +24,11 @@ describe('Storage Service', () => {
         lastInspectionDate: '2026-01-01',
         serviceIntervalKm: 6000,
         lastServiceOdo: 15000,
+        lastServiceDate: '2026-01-01',
         chainIntervalKm: 600,
         lastChainOdo: 15000,
+        valveClearanceIntervalKm: 10000,
+        lastValveClearanceOdo: 15000,
       };
     storage.saveSettings(customSettings);
     

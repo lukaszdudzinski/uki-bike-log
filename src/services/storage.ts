@@ -31,8 +31,11 @@ export interface BikeSettings {
   lastInspectionDate: string;
   serviceIntervalKm: number;
   lastServiceOdo: number;
+  lastServiceDate: string; // Oil change date (12 months interval)
   chainIntervalKm: number;
   lastChainOdo: number;
+  valveClearanceIntervalKm: number;
+  lastValveClearanceOdo: number;
 }
 
 const STORAGE_KEYS = {
@@ -84,8 +87,11 @@ export const storage = {
       lastInspectionDate: new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       serviceIntervalKm: 5000,
       lastServiceOdo: 12000,
+      lastServiceDate: new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       chainIntervalKm: 500,
       lastChainOdo: 12000,
+      valveClearanceIntervalKm: 10000,
+      lastValveClearanceOdo: 10000,
     };
   },
 

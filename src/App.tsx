@@ -25,16 +25,22 @@ function App() {
       if ('Notification' in window && Notification.permission === 'granted') {
         const settings = storage.getSettings();
         const odo = storage.getCurrentOdo();
-        const chainKmRemaining = settings.chainIntervalKm - (odo - settings.lastChainOdo);
+        const chainTraveled = odo - settings.lastChainOdo;
         
         const lastNotified = localStorage.getItem('uki_last_notified');
         const todayStr = new Date().toISOString().split('T')[0];
         
         if (lastNotified !== todayStr) {
-          if (chainKmRemaining <= 100) {
-            new Notification('Smarowanie łańcucha', { body: `Pozostało tylko ${chainKmRemaining} km do smarowania!`, icon: '/logo.png' });
+          if (chainTraveled >= 700) {
+            new Notification('Smarowanie łańcucha (RED ALERT)', { body: `Krytyczny przebieg! Przejechano ${chainTraveled} km bez smarowania!`, icon: '/logo.png' });
+            localStorage.setItem('uki_last_notified', todayStr);
+          } else if (chainTraveled >= 600) {
+            new Notification('Smarowanie łańcucha (Ostrzeżenie)', { body: `Uwaga! Przejechano ${chainTraveled} km bez smarowania.`, icon: '/logo.png' });
+            localStorage.setItem('uki_last_notified', todayStr);
+          } else if (chainTraveled >= 500) {
+            new Notification('Smarowanie łańcucha', { body: `Czas nasmarować łańcuch. Przejechano ${chainTraveled} km.`, icon: '/logo.png' });
+            localStorage.setItem('uki_last_notified', todayStr);
           }
-          localStorage.setItem('uki_last_notified', todayStr);
         }
       }
     });
@@ -87,6 +93,31 @@ function App() {
               <input type="date" className="input-field" id="settings-inspection" defaultValue={storage.getSettings().lastInspectionDate} />
             </div>
 
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '8px 0' }} />
+            <h3 style={{ margin: '0', fontSize: '1.1rem' }}>Interwały Serwisowe</h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Wymiana oleju (km)</label>
+                <input type="number" className="input-field" id="settings-oil-odo" defaultValue={storage.getSettings().lastServiceOdo} />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Wymiana oleju (Data)</label>
+                <input type="date" className="input-field" id="settings-oil-date" defaultValue={storage.getSettings().lastServiceDate} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Luzy zaworowe (km)</label>
+                <input type="number" className="input-field" id="settings-valve-odo" defaultValue={storage.getSettings().lastValveClearanceOdo} />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Smarowanie łańcucha (km)</label>
+                <input type="number" className="input-field" id="settings-chain-odo" defaultValue={storage.getSettings().lastChainOdo} />
+              </div>
+            </div>
+
             <button 
               className="btn-primary" 
               style={{ marginTop: '10px' }}
@@ -95,15 +126,24 @@ function App() {
                 const ocVal = (document.getElementById('settings-oc') as HTMLInputElement).value;
                 const acVal = (document.getElementById('settings-ac') as HTMLInputElement).value;
                 const inspVal = (document.getElementById('settings-inspection') as HTMLInputElement).value;
+                
+                const oilOdo = Number((document.getElementById('settings-oil-odo') as HTMLInputElement).value);
+                const oilDate = (document.getElementById('settings-oil-date') as HTMLInputElement).value;
+                const valveOdo = Number((document.getElementById('settings-valve-odo') as HTMLInputElement).value);
+                const chainOdo = Number((document.getElementById('settings-chain-odo') as HTMLInputElement).value);
 
-                if (!isNaN(odoVal) && ocVal && acVal && inspVal) {
+                if (!isNaN(odoVal) && ocVal && acVal && inspVal && !isNaN(oilOdo) && oilDate && !isNaN(valveOdo) && !isNaN(chainOdo)) {
                   const currentSettings = storage.getSettings();
                   storage.saveSettings({ 
                     ...currentSettings, 
                     initialOdo: odoVal,
                     insuranceExpiry: ocVal,
                     insuranceAcExpiry: acVal,
-                    lastInspectionDate: inspVal
+                    lastInspectionDate: inspVal,
+                    lastServiceOdo: oilOdo,
+                    lastServiceDate: oilDate,
+                    lastValveClearanceOdo: valveOdo,
+                    lastChainOdo: chainOdo
                   });
                   alert('Zaktualizowano ustawienia i terminy. Otwórz pulpit aby zobaczyć zmianę.');
                 } else {

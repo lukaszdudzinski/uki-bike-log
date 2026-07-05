@@ -10,19 +10,40 @@ interface AlertsListProps {
 export default function AlertsList({ settings, odo, setSettings }: AlertsListProps) {
   const today = new Date();
   
+  // Insurance
   const insuranceDate = new Date(settings.insuranceExpiry);
   const daysToInsurance = Math.ceil((insuranceDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
   
   const insuranceAcDate = new Date(settings.insuranceAcExpiry);
   const daysToInsuranceAc = Math.ceil((insuranceAcDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
   
+  // Inspection
   const lastInspDate = new Date(settings.lastInspectionDate);
   const nextInspDate = new Date(lastInspDate);
   nextInspDate.setFullYear(nextInspDate.getFullYear() + 1);
   const daysToInspection = Math.ceil((nextInspDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
 
-  const serviceKmRemaining = settings.serviceIntervalKm - (odo - settings.lastServiceOdo);
-  const chainKmRemaining = settings.chainIntervalKm - (odo - settings.lastChainOdo);
+  // Service (Oil) - 5000km or 12 months
+  const actualServiceKmRemaining = settings.serviceIntervalKm - (odo - settings.lastServiceOdo);
+  
+  const lastServiceDateObj = new Date(settings.lastServiceDate || today);
+  const nextServiceDate = new Date(lastServiceDateObj);
+  nextServiceDate.setFullYear(nextServiceDate.getFullYear() + 1); // + 1 year
+  const daysToService = Math.ceil((nextServiceDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  
+  const isOilWarning = actualServiceKmRemaining <= 500 || daysToService <= 30;
+  const isOilDanger = actualServiceKmRemaining <= 0 || daysToService <= 0;
+
+  // Valves
+  const valveKmRemaining = settings.valveClearanceIntervalKm - (odo - settings.lastValveClearanceOdo);
+  const isValveWarning = valveKmRemaining <= 1000;
+  const isValveDanger = valveKmRemaining <= 0;
+
+  // Chain
+  const chainTraveled = odo - settings.lastChainOdo;
+  const isChainWarning = chainTraveled >= 500 && chainTraveled < 600;
+  const isChainDanger = chainTraveled >= 600 && chainTraveled < 700;
+  const isChainRedAlert = chainTraveled >= 700;
 
   return (
     <div>
@@ -61,37 +82,89 @@ export default function AlertsList({ settings, odo, setSettings }: AlertsListPro
           </div>
         </div>
 
-        {/* Service */}
+        {/* Service (Oil) */}
         <div className="glass-panel" style={{ 
           padding: '16px', 
-          border: serviceKmRemaining <= 500 ? `1px solid var(--color-${serviceKmRemaining <= 100 ? 'danger' : 'warning'})` : 'none',
-          backgroundColor: serviceKmRemaining <= 500 ? `var(--color-${serviceKmRemaining <= 100 ? 'danger' : 'warning'}-bg)` : 'var(--color-glass-bg)',
-          display: 'flex', alignItems: 'flex-start', gap: '12px'
+          border: isOilDanger ? '1px solid var(--color-danger)' : (isOilWarning ? '1px solid var(--color-warning)' : 'none'),
+          backgroundColor: isOilDanger ? 'var(--color-danger-bg)' : (isOilWarning ? 'var(--color-warning-bg)' : 'var(--color-glass-bg)'),
+          display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap'
         }}>
-          <Wrench size={24} color={serviceKmRemaining <= 500 ? `var(--color-${serviceKmRemaining <= 100 ? 'danger' : 'warning'})` : 'var(--color-success)'} style={{ flexShrink: 0 }} />
-          <div>
-            <h4 style={{ margin: '0 0 4px 0', color: serviceKmRemaining <= 500 ? `var(--color-${serviceKmRemaining <= 100 ? 'danger' : 'warning'})` : 'inherit' }}>Serwis olejowy</h4>
+          <Wrench size={24} color={isOilDanger ? 'var(--color-danger)' : (isOilWarning ? 'var(--color-warning)' : 'var(--color-success)')} style={{ flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 4px 0', color: isOilDanger ? 'var(--color-danger)' : (isOilWarning ? 'var(--color-warning)' : 'inherit') }}>Serwis olejowy (Olej + Filtr)</h4>
             <p style={{ margin: 0, fontSize: '0.9rem' }}>
-              {serviceKmRemaining < 0 ? 'Przekroczono interwał!' : `Pozostało ${serviceKmRemaining} km`}
+              {actualServiceKmRemaining <= 0 || daysToService <= 0 
+                ? 'Wymagany natychmiastowy serwis!' 
+                : `Pozostało ${actualServiceKmRemaining} km lub ${daysToService} dni`}
             </p>
           </div>
+          {(isOilWarning || isOilDanger) && (
+            <button 
+              className="btn-primary"
+              style={{ width: '100%', padding: '8px', fontSize: '0.9rem', marginTop: '8px' }}
+              onClick={() => {
+                if (confirm('Czy na pewno chcesz zanotować wymianę oleju?')) {
+                  const currentSettings = storage.getSettings();
+                  storage.saveSettings({ ...currentSettings, lastServiceOdo: odo, lastServiceDate: new Date().toISOString().split('T')[0] });
+                  setSettings(storage.getSettings()); // trigger re-render
+                }
+              }}
+            >
+              Wymieniono!
+            </button>
+          )}
+        </div>
+
+        {/* Valve Clearance */}
+        <div className="glass-panel" style={{ 
+          padding: '16px', 
+          border: isValveDanger ? '1px solid var(--color-danger)' : (isValveWarning ? '1px solid var(--color-warning)' : 'none'),
+          backgroundColor: isValveDanger ? 'var(--color-danger-bg)' : (isValveWarning ? 'var(--color-warning-bg)' : 'var(--color-glass-bg)'),
+          display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap'
+        }}>
+          <Wrench size={24} color={isValveDanger ? 'var(--color-danger)' : (isValveWarning ? 'var(--color-warning)' : 'var(--color-success)')} style={{ flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 4px 0', color: isValveDanger ? 'var(--color-danger)' : (isValveWarning ? 'var(--color-warning)' : 'inherit') }}>Luzy zaworowe</h4>
+            <p style={{ margin: 0, fontSize: '0.9rem' }}>
+              {isValveDanger 
+                ? 'Przekroczono interwał regulacji zaworów!' 
+                : `Pozostało ${valveKmRemaining} km`}
+            </p>
+          </div>
+          {(isValveWarning || isValveDanger) && (
+            <button 
+              className="btn-primary"
+              style={{ width: '100%', padding: '8px', fontSize: '0.9rem', marginTop: '8px' }}
+              onClick={() => {
+                if (confirm('Czy na pewno chcesz zanotować regulację luzów zaworowych?')) {
+                  const currentSettings = storage.getSettings();
+                  storage.saveSettings({ ...currentSettings, lastValveClearanceOdo: odo });
+                  setSettings(storage.getSettings()); // trigger re-render
+                }
+              }}
+            >
+              Wyregulowano!
+            </button>
+          )}
         </div>
 
         {/* Chain */}
-        <div className="glass-panel" style={{ 
+        <div className={`glass-panel ${isChainRedAlert ? 'red-alert-anim' : ''}`} style={{ 
           padding: '16px', 
-          border: chainKmRemaining <= 100 ? `1px solid var(--color-${chainKmRemaining <= 0 ? 'danger' : 'warning'})` : 'none',
-          backgroundColor: chainKmRemaining <= 100 ? `var(--color-${chainKmRemaining <= 0 ? 'danger' : 'warning'}-bg)` : 'var(--color-glass-bg)',
+          border: isChainRedAlert || isChainDanger ? '1px solid var(--color-danger)' : (isChainWarning ? '1px solid var(--color-warning)' : 'none'),
+          backgroundColor: isChainRedAlert || isChainDanger ? 'var(--color-danger-bg)' : (isChainWarning ? 'var(--color-warning-bg)' : 'var(--color-glass-bg)'),
           display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap'
         }}>
-          <Link size={24} color={chainKmRemaining <= 100 ? `var(--color-${chainKmRemaining <= 0 ? 'danger' : 'warning'})` : 'var(--color-success)'} style={{ flexShrink: 0 }} />
+          <Link size={24} color={isChainRedAlert || isChainDanger ? 'var(--color-danger)' : (isChainWarning ? 'var(--color-warning)' : 'var(--color-success)')} style={{ flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
-            <h4 style={{ margin: '0 0 4px 0', color: chainKmRemaining <= 100 ? `var(--color-${chainKmRemaining <= 0 ? 'danger' : 'warning'})` : 'inherit' }}>Smarowanie łańcucha</h4>
+            <h4 style={{ margin: '0 0 4px 0', color: isChainRedAlert || isChainDanger ? 'var(--color-danger)' : (isChainWarning ? 'var(--color-warning)' : 'inherit') }}>Smarowanie łańcucha</h4>
             <p style={{ margin: 0, fontSize: '0.9rem' }}>
-              {chainKmRemaining < 0 ? 'Wymaga pilnego smarowania!' : `Pozostało ${chainKmRemaining} km`}
+              {isChainRedAlert 
+                ? `RED ALERT! Przejechano już ${chainTraveled} km! Nasmaruj łańcuch!` 
+                : (isChainDanger ? `Uwaga! Przejechano ${chainTraveled} km.` : (isChainWarning ? `Przypomnienie: ${chainTraveled} km bez smarowania.` : `Łańcuch OK (${chainTraveled} km)`))}
             </p>
           </div>
-          {chainKmRemaining <= 100 && (
+          {(isChainWarning || isChainDanger || isChainRedAlert) && (
             <button 
               className="btn-primary"
               style={{ width: '100%', padding: '8px', fontSize: '0.9rem', marginTop: '8px' }}
