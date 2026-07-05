@@ -96,7 +96,7 @@ function App() {
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '8px 0' }} />
             <h3 style={{ margin: '0', fontSize: '1.1rem' }}>Interwały Serwisowe</h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
               <div className="input-group" style={{ marginBottom: 0 }}>
                 <label className="input-label">Wymiana oleju (km)</label>
                 <input type="number" className="input-field" id="settings-oil-odo" defaultValue={storage.getSettings().lastServiceOdo} />
@@ -107,7 +107,7 @@ function App() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
               <div className="input-group" style={{ marginBottom: 0 }}>
                 <label className="input-label">Luzy zaworowe (km)</label>
                 <input type="number" className="input-field" id="settings-valve-odo" defaultValue={storage.getSettings().lastValveClearanceOdo} />

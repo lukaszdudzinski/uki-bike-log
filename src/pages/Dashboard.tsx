@@ -44,9 +44,9 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
 
       <WeatherWidget />
 
-      <AlertsList settings={settings} odo={odo} setSettings={setSettings} />
-
       <QuickActions setActiveTab={setActiveTab} />
+
+      <AlertsList settings={settings} odo={odo} setSettings={setSettings} />
 
     </div>
   );
