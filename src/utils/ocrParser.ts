@@ -41,14 +41,40 @@ export function parseReceiptText(text: string): OcrResult {
     }
   }
 
-  // Fallback
-  if (!extTotal || !extLiters) {
-    const numbers = upperText.match(/\d+[.,]\d{2,3}/g);
+  let foundCount = 0;
+  if (extTotal) foundCount++;
+  if (extLiters) foundCount++;
+  if (extPricePerLiter) foundCount++;
+
+  // Fallback if specific regex fails to find at least 2 useful values
+  if (foundCount < 2) {
+    const numbers = upperText.match(/\d+[.,]\d{1,3}/g);
     if (numbers && numbers.length >= 2) {
       const parsed = Array.from(new Set(numbers.map(n => parseFloat(n.replace(',', '.'))))).sort((a,b)=>b-a);
-      extTotal = parsed[0] || extTotal;
-      extLiters = parsed[1] || extLiters;
-      extPricePerLiter = parsed[2] || extPricePerLiter;
+      if (!extTotal) extTotal = parsed[0];
+      if (!extLiters) extLiters = parsed[1];
+      if (!extPricePerLiter) extPricePerLiter = parsed[2] || 0;
+    }
+  }
+
+  // Mathematical Deduction and Cross-Validation
+  if (extTotal > 0 && extLiters > 0 && !extPricePerLiter) {
+    // We have Total and Liters, calculate Price per Liter
+    extPricePerLiter = Number((extTotal / extLiters).toFixed(2));
+  } else if (extTotal > 0 && extPricePerLiter > 0 && !extLiters) {
+    // We have Total and Price per Liter, calculate Liters
+    extLiters = Number((extTotal / extPricePerLiter).toFixed(2));
+  } else if (extLiters > 0 && extPricePerLiter > 0 && !extTotal) {
+    // We have Liters and Price per Liter, calculate Total
+    extTotal = Number((extLiters * extPricePerLiter).toFixed(2));
+  }
+
+  // If we have all 3, cross-validate. If they don't add up (allow small rounding error),
+  // recalculate price per liter based on total and liters (the most reliable values usually).
+  if (extTotal > 0 && extLiters > 0 && extPricePerLiter > 0) {
+    const calculatedTotal = extLiters * extPricePerLiter;
+    if (Math.abs(calculatedTotal - extTotal) > 0.1) {
+      extPricePerLiter = Number((extTotal / extLiters).toFixed(2));
     }
   }
 
