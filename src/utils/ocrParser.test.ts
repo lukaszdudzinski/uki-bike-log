@@ -58,4 +58,16 @@ describe('OCR Parser', () => {
     const result2 = parseReceiptText(textWithYYYYMMDD);
     expect(result2.date).toBe('2026-07-26');
   });
+
+  it('should correctly parse multiplier with OCR mistakes', () => {
+    const text1 = `5.96x7.69`;
+    const result1 = parseReceiptText(text1);
+    expect(result1.liters).toBe(5.96);
+    expect(result1.pricePerLiter).toBe(7.69);
+
+    const text2 = `5.96 k 7.69`;
+    const result2 = parseReceiptText(text2);
+    expect(result2.liters).toBe(5.96);
+    expect(result2.pricePerLiter).toBe(7.69);
+  });
 });

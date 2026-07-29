@@ -17,8 +17,8 @@ export function parseReceiptText(text: string): OcrResult {
   const sumMatch = upperText.match(/(?:DO\s+ZAPŁATY|DO\s+ZAPLATY|SUMA\s*:)[^\d]*(\d+[.,]\d{2})/);
   if (sumMatch) extTotal = parseFloat(sumMatch[1].replace(',', '.'));
 
-  // 2. Liters * Price (e.g. 5.96*7.69)
-  const literPriceMatch = upperText.match(/(\d+[.,]\d+)\s*\*\s*(\d+[.,]\d+)/);
+  // 2. Liters * Price (e.g. 5.96*7.69, OCR might read * as x, X, k, +, etc)
+  const literPriceMatch = upperText.match(/(\d+[.,]\d{1,3})\s*[xX*+kK%•-]\s*(\d+[.,]\d{1,3})/);
   if (literPriceMatch) {
     extLiters = parseFloat(literPriceMatch[1].replace(',', '.'));
     extPricePerLiter = parseFloat(literPriceMatch[2].replace(',', '.'));
