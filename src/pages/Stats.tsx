@@ -30,9 +30,17 @@ export default function Stats() {
     setAvgConsumption(storage.getAverageConsumption());
     const logs = storage.getFuelLogs();
     if (logs.length > 0) {
-      // average price per liter from last tanking
-      const latest = logs[0];
-      setLastFuelPrice(latest.price / latest.liters);
+      // Calculate average price per liter from last 3 tankings
+      const recentLogs = logs.slice(0, 3);
+      let totalLiters = 0;
+      let totalPrice = 0;
+      recentLogs.forEach(l => {
+        totalLiters += l.liters;
+        totalPrice += l.price;
+      });
+      if (totalLiters > 0) {
+        setLastFuelPrice(Number((totalPrice / totalLiters).toFixed(2)));
+      }
     }
   }, []);
 
@@ -79,15 +87,30 @@ export default function Stats() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <p style={{ margin: 0, fontSize: '0.9rem' }}>Twoje średnie spalanie: <strong>{avgConsumption.toFixed(2)} l/100km</strong></p>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label">Dystans wycieczki (km)</label>
-              <input 
-                type="number" 
-                className="input-field" 
-                value={calcDistance}
-                onChange={(e) => setCalcDistance(e.target.value ? Number(e.target.value) : '')}
-                placeholder="np. 350"
-              />
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Dystans wycieczki (km)</label>
+                <input 
+                  type="number" 
+                  className="input-field" 
+                  value={calcDistance}
+                  onChange={(e) => setCalcDistance(e.target.value ? Number(e.target.value) : '')}
+                  placeholder="np. 350"
+                />
+              </div>
+              
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Cena paliwa (PLN/l)</label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  className="input-field" 
+                  value={lastFuelPrice}
+                  onChange={(e) => setLastFuelPrice(Number(e.target.value))}
+                  placeholder="np. 6.50"
+                />
+              </div>
             </div>
             
             {calcDistance && (

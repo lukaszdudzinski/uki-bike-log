@@ -33,23 +33,31 @@ export default function FuelLog() {
       
       // Basic heuristic to find Liters and Price
       // Matches numbers like 12,34 or 12.34
-      const numbers = text.match(/\d+[.,]\d{2}/g);
+      const numbers = text.match(/\d+[.,]\d{2,3}/g);
       if (numbers && numbers.length > 0) {
-        // Typically the largest number on a gas receipt is the price, and the smaller is liters.
-        // Or if it says "PLN" or "PTU".
         const parsedNums = numbers.map(n => parseFloat(n.replace(',', '.')));
-        parsedNums.sort((a, b) => b - a); // Descending
+        // Remove duplicates and sort descending
+        const uniqueNums = Array.from(new Set(parsedNums)).sort((a, b) => b - a);
         
-        if (parsedNums.length >= 2) {
-          setPrice(parsedNums[0]); // highest is usually price
-          setLiters(parsedNums[1]); // second highest is usually liters
-          alert(`Odczytano (do weryfikacji):\nKwota: ${parsedNums[0]} PLN\nLitry: ${parsedNums[1]} L`);
+        if (uniqueNums.length >= 3) {
+          const total = uniqueNums[0]; // highest is usually total price
+          const liters = uniqueNums[1]; // second highest is usually liters
+          const pricePerLiter = uniqueNums[2]; // third is usually price per liter
+          
+          setPrice(total);
+          setLiters(liters);
+          
+          alert(`Odczytano z paragonu (do weryfikacji):\n\nKwota całkowita: ${total} PLN\nZatankowano: ${liters} L\nCena za litr: ${pricePerLiter} PLN/L\n\n(Zgadza się? ${Math.abs((liters * pricePerLiter) - total) <= 0.2 ? 'TAK' : 'Sprawdź wartości!'})`);
+        } else if (uniqueNums.length === 2) {
+          setPrice(uniqueNums[0]); 
+          setLiters(uniqueNums[1]);
+          alert(`Odczytano (do weryfikacji):\nKwota: ${uniqueNums[0]} PLN\nLitry: ${uniqueNums[1]} L`);
         } else {
-          setPrice(parsedNums[0]);
-          alert(`Odczytano tylko kwotę: ${parsedNums[0]} PLN. Wpisz litry ręcznie.`);
+          setPrice(uniqueNums[0]);
+          alert(`Odczytano tylko jedną kwotę: ${uniqueNums[0]}. Wpisz resztę ręcznie.`);
         }
       } else {
-        alert("Nie udało się odczytać kwot z paragonu. Wpisz ręcznie.");
+        alert("Nie udało się odczytać kwot z paragonu. Sprawdź ostrość zdjęcia i spróbuj ponownie, lub wpisz ręcznie.");
       }
     } catch (err) {
       console.error(err);
