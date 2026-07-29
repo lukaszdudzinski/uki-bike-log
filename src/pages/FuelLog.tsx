@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Fuel, Save, Camera, Loader2 } from 'lucide-react';
 import { storage, type FuelEntry } from '../services/storage';
 import Tesseract from 'tesseract.js';
+import { parseReceiptText } from '../utils/ocrParser';
 
 export default function FuelLog() {
   const [logs, setLogs] = useState<FuelEntry[]>([]);
@@ -9,6 +10,7 @@ export default function FuelLog() {
   const [odo, setOdo] = useState<number | ''>('');
   const [liters, setLiters] = useState<number | ''>('');
   const [price, setPrice] = useState<number | ''>('');
+  const [pricePerLiter, setPricePerLiter] = useState<number | ''>('');
   const [isFullTank, setIsFullTank] = useState<boolean>(true);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,32 +32,15 @@ export default function FuelLog() {
       });
       
       const text = result.data.text.toUpperCase();
-      
-      // Basic heuristic to find Liters and Price
-      // Matches numbers like 12,34 or 12.34
-      const numbers = text.match(/\d+[.,]\d{2,3}/g);
-      if (numbers && numbers.length > 0) {
-        const parsedNums = numbers.map(n => parseFloat(n.replace(',', '.')));
-        // Remove duplicates and sort descending
-        const uniqueNums = Array.from(new Set(parsedNums)).sort((a, b) => b - a);
+      const { total, liters: extLiters, pricePerLiter: extPricePerLiter, date: extDate } = parseReceiptText(text);
+
+      if (total || extLiters) {
+        if (total) setPrice(total);
+        if (extLiters) setLiters(extLiters);
+        if (extPricePerLiter) setPricePerLiter(extPricePerLiter);
+        if (extDate) setDate(extDate);
         
-        if (uniqueNums.length >= 3) {
-          const total = uniqueNums[0]; // highest is usually total price
-          const liters = uniqueNums[1]; // second highest is usually liters
-          const pricePerLiter = uniqueNums[2]; // third is usually price per liter
-          
-          setPrice(total);
-          setLiters(liters);
-          
-          alert(`Odczytano z paragonu (do weryfikacji):\n\nKwota całkowita: ${total} PLN\nZatankowano: ${liters} L\nCena za litr: ${pricePerLiter} PLN/L\n\n(Zgadza się? ${Math.abs((liters * pricePerLiter) - total) <= 0.2 ? 'TAK' : 'Sprawdź wartości!'})`);
-        } else if (uniqueNums.length === 2) {
-          setPrice(uniqueNums[0]); 
-          setLiters(uniqueNums[1]);
-          alert(`Odczytano (do weryfikacji):\nKwota: ${uniqueNums[0]} PLN\nLitry: ${uniqueNums[1]} L`);
-        } else {
-          setPrice(uniqueNums[0]);
-          alert(`Odczytano tylko jedną kwotę: ${uniqueNums[0]}. Wpisz resztę ręcznie.`);
-        }
+        alert(`Odczytano z paragonu:\nData: ${extDate || 'Brak'}\nKwota całkowita: ${total || '?'} PLN\nZatankowano: ${extLiters || '?'} L\nCena za litr: ${extPricePerLiter || '?'} PLN/L\n\nZweryfikuj dane w formularzu!`);
       } else {
         alert("Nie udało się odczytać kwot z paragonu. Sprawdź ostrość zdjęcia i spróbuj ponownie, lub wpisz ręcznie.");
       }
@@ -99,6 +84,7 @@ export default function FuelLog() {
     setOdo('');
     setLiters('');
     setPrice('');
+    setPricePerLiter('');
     
     alert('Zapisano pomyślnie!');
   };
@@ -170,23 +156,48 @@ export default function FuelLog() {
                 step="0.01"
                 className="input-field" 
                 value={liters} 
-                onChange={(e) => setLiters(e.target.value ? Number(e.target.value) : '')}
+                onChange={(e) => {
+                  const val = e.target.value ? Number(e.target.value) : '';
+                  setLiters(val);
+                  if (val && pricePerLiter) setPrice(Number((Number(val) * Number(pricePerLiter)).toFixed(2)));
+                }}
                 placeholder="np. 12.5"
                 required 
               />
             </div>
+            
             <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label">Koszt (PLN) *</label>
+              <label className="input-label">Cena za litr (PLN)</label>
               <input 
                 type="number" 
                 step="0.01"
                 className="input-field" 
-                value={price} 
-                onChange={(e) => setPrice(e.target.value ? Number(e.target.value) : '')}
-                placeholder="np. 85.50"
-                required 
+                value={pricePerLiter} 
+                onChange={(e) => {
+                  const val = e.target.value ? Number(e.target.value) : '';
+                  setPricePerLiter(val);
+                  if (val && liters) setPrice(Number((Number(liters) * Number(val)).toFixed(2)));
+                }}
+                placeholder="np. 6.50"
               />
             </div>
+          </div>
+
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label className="input-label">Koszt całkowity (PLN) *</label>
+            <input 
+              type="number" 
+              step="0.01"
+              className="input-field" 
+              value={price} 
+              onChange={(e) => {
+                const val = e.target.value ? Number(e.target.value) : '';
+                setPrice(val);
+                if (val && liters) setPricePerLiter(Number((Number(val) / Number(liters)).toFixed(2)));
+              }}
+              placeholder="np. 85.50"
+              required 
+            />
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '8px 0' }}>
