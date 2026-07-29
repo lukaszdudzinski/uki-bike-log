@@ -41,4 +41,21 @@ describe('OCR Parser', () => {
     expect(result.liters).toBe(20.30);
     expect(result.pricePerLiter).toBe(7.41);
   });
+
+  it('should correctly parse dates with spaces and common OCR mistakes', () => {
+    const textWithOcrMistakes = `
+      DO ZAPŁATY: 45.83
+      26 - O7 - 2026 
+    `;
+    const result = parseReceiptText(textWithOcrMistakes);
+    expect(result.date).toBe('2026-07-26');
+    expect(result.total).toBe(45.83);
+
+    const textWithYYYYMMDD = `
+      DO ZAPŁATY: 45.83
+      2026/07/26 
+    `;
+    const result2 = parseReceiptText(textWithYYYYMMDD);
+    expect(result2.date).toBe('2026-07-26');
+  });
 });

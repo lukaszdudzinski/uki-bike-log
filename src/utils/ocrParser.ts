@@ -24,10 +24,21 @@ export function parseReceiptText(text: string): OcrResult {
     extPricePerLiter = parseFloat(literPriceMatch[2].replace(',', '.'));
   }
 
-  // 3. Date (e.g. 26-07-2026)
-  const dateMatch = upperText.match(/(\d{2})[-/.](\d{2})[-/.](\d{4})/);
+  // 3. Date
+  // Fix common OCR mistakes for numbers (O -> 0, I/L -> 1, Z -> 2)
+  const fixedDateText = upperText.replace(/[O]/g, '0').replace(/[IL]/g, '1').replace(/[Z]/g, '2');
+  
+  // Match either YYYY-MM-DD or DD-MM-YYYY (enforce 20xx for the year)
+  const dateMatch = fixedDateText.match(/(?:(20\d{2})\s*[-/.]\s*(\d{2})\s*[-/.]\s*(\d{2})|(\d{2})\s*[-/.]\s*(\d{2})\s*[-/.]\s*(20\d{2}))/);
+  
   if (dateMatch) {
-    extDate = `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
+    if (dateMatch[1]) {
+      // Matched YYYY-MM-DD: dateMatch[1]=YYYY, dateMatch[2]=MM, dateMatch[3]=DD
+      extDate = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+    } else {
+      // Matched DD-MM-YYYY: dateMatch[4]=DD, dateMatch[5]=MM, dateMatch[6]=YYYY
+      extDate = `${dateMatch[6]}-${dateMatch[5]}-${dateMatch[4]}`;
+    }
   }
 
   // Fallback
