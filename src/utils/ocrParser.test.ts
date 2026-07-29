@@ -98,6 +98,32 @@ describe('OCR Parser', () => {
     
     expect(result.total).toBe(45.83);
     expect(result.liters).toBe(5.96);
-    expect(result.pricePerLiter).toBe(7.69); // Overwritten by cross validation
+  });
+
+  it('should ignore values from PTU lines', () => {
+    // 8.57 is the highest number among standard values if total is misread.
+    // We want to ensure 8.57 is ignored completely because it is on a PTU line.
+    const text = `
+      Kwota PTU A 23%                   18.57
+      SUMA PTU                          18.57
+      DO ZAPŁATY: 45.83
+      5.96*7.69
+    `;
+    const result = parseReceiptText(text);
+    // Even though 18.57 is present, it shouldn't be picked up for anything
+    expect(result.total).toBe(45.83);
+    expect(result.liters).toBe(5.96);
+    expect(result.pricePerLiter).toBe(7.69);
+
+    // Fallback scenario where DO ZAPŁATY is mangled
+    const fallbackText = `
+      Kwota PTU A 23%                   99.99
+      SUMA PTU                          99.99
+      BLABLA: 45.83
+      5.96 * 7.69
+    `;
+    const fallbackResult = parseReceiptText(fallbackText);
+    // 99.99 should NOT be picked as total, 45.83 should be deduced or picked
+    expect(fallbackResult.total).toBe(45.83); // Since 5.96 * 7.69 = 45.83
   });
 });

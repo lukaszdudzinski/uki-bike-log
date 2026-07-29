@@ -6,7 +6,12 @@ export interface OcrResult {
 }
 
 export function parseReceiptText(text: string): OcrResult {
-  const upperText = text.toUpperCase();
+  // 0. Clean the text: NEVER use numbers from lines containing "PTU" (taxes)
+  // We split by newline, filter out any line with "PTU", and join back.
+  const upperText = text.toUpperCase()
+    .split('\n')
+    .filter(line => !line.includes('PTU'))
+    .join('\n');
   
   let extTotal = 0;
   let extLiters = 0;
