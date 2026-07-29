@@ -33,8 +33,20 @@ export function parseReceiptText(text: string): OcrResult {
   // Fix common OCR mistakes for numbers (O -> 0, I/L -> 1, Z -> 2)
   const fixedDateText = upperText.replace(/[O]/g, '0').replace(/[IL]/g, '1').replace(/[Z]/g, '2');
   
-  // Match either YYYY-MM-DD or DD-MM-YYYY (enforce 20xx for the year)
-  const dateMatch = fixedDateText.match(/(?:(20\d{2})\s*[-/.]\s*(\d{2})\s*[-/.]\s*(\d{2})|(\d{2})\s*[-/.]\s*(\d{2})\s*[-/.]\s*(20\d{2}))/);
+  // Hint from user: Date is usually near the word "KASJER"
+  const kasjerLine = fixedDateText.split('\n').find(l => l.includes('KASJER'));
+  let dateMatch = null;
+  
+  const dateRegex = /(?:(20\d{2})\s*[-/.]\s*(\d{2})\s*[-/.]\s*(\d{2})|(\d{2})\s*[-/.]\s*(\d{2})\s*[-/.]\s*(20\d{2}))/;
+  
+  if (kasjerLine) {
+    dateMatch = kasjerLine.match(dateRegex);
+  }
+  
+  // Fallback to searching the whole receipt if KASJER line didn't have it
+  if (!dateMatch) {
+    dateMatch = fixedDateText.match(dateRegex);
+  }
   
   if (dateMatch) {
     if (dateMatch[1]) {
