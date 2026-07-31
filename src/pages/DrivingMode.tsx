@@ -87,8 +87,11 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
-    if (h > 0) return `${h}h ${m}m`;
-    return `${m}m ${s}s`;
+    
+    const pad = (num: number) => num.toString().padStart(2, '0');
+    
+    if (h > 0) return `${h}:${pad(m)}:${pad(s)}`;
+    return `${pad(m)}:${pad(s)}`;
   };
 
   useEffect(() => {
@@ -250,7 +253,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
         {/* Ride Timer */}
         <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={18} /> CZAS JAZDY</div>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{formatTime(rideTimeSec)}</div>
+          <div style={{ fontSize: '2rem', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>{formatTime(rideTimeSec)}</div>
         </div>
 
         {/* Fuel Prediction */}
