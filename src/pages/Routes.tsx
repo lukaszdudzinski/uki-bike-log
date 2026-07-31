@@ -66,8 +66,10 @@ export default function Routes() {
       alert('Podaj nazwę i adres trasy!');
       return;
     }
-    const added = storage.addRoute({ name: newName, address: newAddress });
-    setRoutes([...routes, added]);
+    // storage.addRoute mutates the internal cache.routes array.
+    storage.addRoute({ name: newName, address: newAddress });
+    // So we just need to get the updated array.
+    setRoutes([...storage.getRoutes()]);
     setNewName('');
     setNewAddress('');
     setShowAddForm(false);
