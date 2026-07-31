@@ -31,18 +31,32 @@ export interface BikeSettings {
   lastInspectionDate: string;
   serviceIntervalKm: number;
   lastServiceOdo: number;
-  lastServiceDate: string; // Oil change date (12 months interval)
+  lastServiceDate: string; // Oil change date
   chainIntervalKm: number;
   lastChainOdo: number;
   valveClearanceIntervalKm: number;
   lastValveClearanceOdo: number;
 }
 
-const STORAGE_KEYS = {
-  FUEL: 'uki_fuel_logs',
-  SERVICE: 'uki_service_logs',
-  SETTINGS: 'uki_bike_settings',
-  ROUTES: 'uki_favorite_routes',
+export interface BikeProfile {
+  id: string;
+  name: string;
+  createdAt: number;
+}
+
+const GLOBAL_KEYS = {
+  BIKES: 'uki_bikes_list',
+  ACTIVE_BIKE: 'uki_active_bike_id'
+};
+
+const getStorageKeys = (bikeId: string) => {
+  const prefix = bikeId === 'default' ? '' : `_${bikeId}`;
+  return {
+    FUEL: `uki_fuel_logs${prefix}`,
+    SERVICE: `uki_service_logs${prefix}`,
+    SETTINGS: `uki_bike_settings${prefix}`,
+    ROUTES: `uki_favorite_routes${prefix}`,
+  };
 };
 
 // Initialize localforage
@@ -53,6 +67,8 @@ localforage.config({
 
 // Synchronous memory cache
 let cache = {
+  bikes: [] as BikeProfile[],
+  activeBikeId: 'default',
   fuel: [] as FuelEntry[],
   service: [] as ServiceEntry[],
   routes: [] as RouteEntry[],
@@ -60,27 +76,49 @@ let cache = {
 };
 
 export const storage = {
-  // --- Initialization ---
+  // --- Initialization & Migration ---
   initDB: async () => {
-    // Migrate from localStorage if needed (for backwards compatibility)
-    for (const key of Object.values(STORAGE_KEYS)) {
-      const localData = localStorage.getItem(key);
-      if (localData) {
-        const existingForage = await localforage.getItem(key);
-        if (!existingForage) {
-          await localforage.setItem(key, JSON.parse(localData));
+    const savedBikes = await localforage.getItem<BikeProfile[]>(GLOBAL_KEYS.BIKES);
+    const savedActive = await localforage.getItem<string>(GLOBAL_KEYS.ACTIVE_BIKE);
+
+    if (!savedBikes || savedBikes.length === 0) {
+      const defaultBike = { id: 'default', name: 'Royal Enfield Bullet 350', createdAt: Date.now() };
+      cache.bikes = [defaultBike];
+      cache.activeBikeId = 'default';
+      await localforage.setItem(GLOBAL_KEYS.BIKES, cache.bikes);
+      await localforage.setItem(GLOBAL_KEYS.ACTIVE_BIKE, cache.activeBikeId);
+    } else {
+      cache.bikes = savedBikes;
+      cache.activeBikeId = savedActive || savedBikes[0].id;
+    }
+
+    await storage.loadBikeData(cache.activeBikeId);
+  },
+
+  loadBikeData: async (bikeId: string) => {
+    const keys = getStorageKeys(bikeId);
+    
+    // Migrate from localStorage if needed (for backward compatibility on default bike)
+    if (bikeId === 'default') {
+      for (const key of Object.values(keys)) {
+        const localData = localStorage.getItem(key);
+        if (localData) {
+          const existingForage = await localforage.getItem(key);
+          if (!existingForage) {
+            await localforage.setItem(key, JSON.parse(localData));
+          }
         }
       }
     }
 
     // Load everything into memory cache
-    cache.fuel = (await localforage.getItem<FuelEntry[]>(STORAGE_KEYS.FUEL)) || [];
-    cache.service = (await localforage.getItem<ServiceEntry[]>(STORAGE_KEYS.SERVICE)) || [];
-    cache.routes = (await localforage.getItem<RouteEntry[]>(STORAGE_KEYS.ROUTES)) || [
+    cache.fuel = (await localforage.getItem<FuelEntry[]>(keys.FUEL)) || [];
+    cache.service = (await localforage.getItem<ServiceEntry[]>(keys.SERVICE)) || [];
+    cache.routes = (await localforage.getItem<RouteEntry[]>(keys.ROUTES)) || [
       { id: '1', name: 'Serwis Janusz (Przykładowy)', address: 'Warszawa, Złote Tarasy' },
       { id: '2', name: 'Bieszczady - Baza', address: 'Wetlina' },
     ];
-    cache.settings = (await localforage.getItem<BikeSettings>(STORAGE_KEYS.SETTINGS)) || {
+    cache.settings = (await localforage.getItem<BikeSettings>(keys.SETTINGS)) || {
       initialOdo: 12000,
       insuranceExpiry: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       insuranceAcExpiry: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -95,13 +133,69 @@ export const storage = {
     };
   },
 
-  exportBackup: () => {
-    const backup = {
-      fuel: cache.fuel,
-      service: cache.service,
-      routes: cache.routes,
-      settings: cache.settings
-    };
+  // --- Bike Management ---
+  getBikes: (): BikeProfile[] => cache.bikes,
+  getActiveBikeId: (): string => cache.activeBikeId,
+  getActiveBike: (): BikeProfile | undefined => cache.bikes.find(b => b.id === cache.activeBikeId),
+  
+  addBike: async (name: string): Promise<BikeProfile> => {
+    const newId = 'bike_' + Date.now();
+    const newBike = { id: newId, name, createdAt: Date.now() };
+    cache.bikes.push(newBike);
+    await localforage.setItem(GLOBAL_KEYS.BIKES, cache.bikes);
+    return newBike;
+  },
+
+  deleteBike: async (id: string): Promise<boolean> => {
+    if (cache.bikes.length <= 1) return false;
+    cache.bikes = cache.bikes.filter(b => b.id !== id);
+    await localforage.setItem(GLOBAL_KEYS.BIKES, cache.bikes);
+    
+    // Switch if we just deleted the active bike
+    if (cache.activeBikeId === id) {
+      await storage.switchBike(cache.bikes[0].id);
+    }
+    
+    // Clean up localforage keys for deleted bike
+    const keys = getStorageKeys(id);
+    await localforage.removeItem(keys.FUEL);
+    await localforage.removeItem(keys.SERVICE);
+    await localforage.removeItem(keys.SETTINGS);
+    await localforage.removeItem(keys.ROUTES);
+    
+    return true;
+  },
+
+  editBike: async (id: string, newName: string) => {
+    const bike = cache.bikes.find(b => b.id === id);
+    if (bike) {
+      bike.name = newName;
+      await localforage.setItem(GLOBAL_KEYS.BIKES, cache.bikes);
+    }
+  },
+
+  switchBike: async (id: string): Promise<boolean> => {
+    if (cache.bikes.find(b => b.id === id)) {
+      cache.activeBikeId = id;
+      await localforage.setItem(GLOBAL_KEYS.ACTIVE_BIKE, id);
+      await storage.loadBikeData(id);
+      return true;
+    }
+    return false;
+  },
+
+  // --- Backup (Exports all bikes) ---
+  exportBackup: async () => {
+    const backup: any = { bikes: cache.bikes, activeBikeId: cache.activeBikeId, data: {} };
+    for (const bike of cache.bikes) {
+      const keys = getStorageKeys(bike.id);
+      backup.data[bike.id] = {
+        fuel: await localforage.getItem(keys.FUEL),
+        service: await localforage.getItem(keys.SERVICE),
+        routes: await localforage.getItem(keys.ROUTES),
+        settings: await localforage.getItem(keys.SETTINGS)
+      };
+    }
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -114,11 +208,28 @@ export const storage = {
   importBackup: async (jsonString: string) => {
     try {
       const backup = JSON.parse(jsonString);
-      if (backup.settings) await localforage.setItem(STORAGE_KEYS.SETTINGS, backup.settings);
-      if (backup.fuel) await localforage.setItem(STORAGE_KEYS.FUEL, backup.fuel);
-      if (backup.service) await localforage.setItem(STORAGE_KEYS.SERVICE, backup.service);
-      if (backup.routes) await localforage.setItem(STORAGE_KEYS.ROUTES, backup.routes);
-      // Reload cache
+      
+      // Backward compatibility logic: if backup doesn't have bikes array, it's an old backup
+      if (!backup.bikes) {
+        // It's a v1 backup. Load it into 'default'.
+        const keys = getStorageKeys('default');
+        if (backup.settings) await localforage.setItem(keys.SETTINGS, backup.settings);
+        if (backup.fuel) await localforage.setItem(keys.FUEL, backup.fuel);
+        if (backup.service) await localforage.setItem(keys.SERVICE, backup.service);
+        if (backup.routes) await localforage.setItem(keys.ROUTES, backup.routes);
+      } else {
+        // It's a v2 backup
+        await localforage.setItem(GLOBAL_KEYS.BIKES, backup.bikes);
+        await localforage.setItem(GLOBAL_KEYS.ACTIVE_BIKE, backup.activeBikeId);
+        for (const bikeId of Object.keys(backup.data)) {
+          const keys = getStorageKeys(bikeId);
+          if (backup.data[bikeId].settings) await localforage.setItem(keys.SETTINGS, backup.data[bikeId].settings);
+          if (backup.data[bikeId].fuel) await localforage.setItem(keys.FUEL, backup.data[bikeId].fuel);
+          if (backup.data[bikeId].service) await localforage.setItem(keys.SERVICE, backup.data[bikeId].service);
+          if (backup.data[bikeId].routes) await localforage.setItem(keys.ROUTES, backup.data[bikeId].routes);
+        }
+      }
+      
       await storage.initDB();
       return true;
     } catch (e) {
@@ -133,7 +244,7 @@ export const storage = {
     const newEntry = { ...entry, id: Date.now().toString() };
     cache.fuel.push(newEntry);
     cache.fuel.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    localforage.setItem(STORAGE_KEYS.FUEL, cache.fuel);
+    localforage.setItem(getStorageKeys(cache.activeBikeId).FUEL, cache.fuel);
     return newEntry;
   },
 
@@ -142,7 +253,7 @@ export const storage = {
   addServiceLog: (entry: Omit<ServiceEntry, 'id'>) => {
     const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
     cache.service.push(newEntry);
-    localforage.setItem(STORAGE_KEYS.SERVICE, cache.service);
+    localforage.setItem(getStorageKeys(cache.activeBikeId).SERVICE, cache.service);
     return newEntry;
   },
 
@@ -151,19 +262,19 @@ export const storage = {
   addRoute: (entry: Omit<RouteEntry, 'id'>) => {
     const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
     cache.routes.push(newEntry);
-    localforage.setItem(STORAGE_KEYS.ROUTES, cache.routes);
+    localforage.setItem(getStorageKeys(cache.activeBikeId).ROUTES, cache.routes);
     return newEntry;
   },
   deleteRoute: (id: string) => {
     cache.routes = cache.routes.filter(r => r.id !== id);
-    localforage.setItem(STORAGE_KEYS.ROUTES, cache.routes);
+    localforage.setItem(getStorageKeys(cache.activeBikeId).ROUTES, cache.routes);
   },
 
   // --- Settings ---
   getSettings: (): BikeSettings => cache.settings!,
   saveSettings: (settings: BikeSettings) => {
     cache.settings = settings;
-    localforage.setItem(STORAGE_KEYS.SETTINGS, settings);
+    localforage.setItem(getStorageKeys(cache.activeBikeId).SETTINGS, settings);
   },
 
   // --- Calculated Stats ---

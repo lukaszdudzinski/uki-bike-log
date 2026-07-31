@@ -1,52 +1,50 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
 import Stats from './pages/Stats';
 import Routes from './pages/Routes';
 import { storage } from './services/storage';
+import { useGarage } from './contexts/GarageContext';
 
 function App() {
-  const [isReady, setIsReady] = useState(false);
+  const { bikes, activeBike, isLoading, switchBike, addBike, editBike, deleteBike } = useGarage();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDark, setIsDark] = useState(true);
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
 
-  // Initialize DB and Set initial theme
+  // Set initial theme and handle notifications
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     
-    // Load localForage DB into memory cache
-    storage.initDB().then(() => {
-      setIsReady(true);
-      
-      // Check for notifications
+    if (!isLoading && activeBike) {
+      // Check for notifications for the active bike
       if ('Notification' in window && Notification.permission === 'granted') {
         const settings = storage.getSettings();
         const odo = storage.getCurrentOdo();
         const chainTraveled = odo - settings.lastChainOdo;
         
-        const lastNotified = localStorage.getItem('uki_last_notified');
+        const lastNotified = localStorage.getItem(`uki_last_notified_${activeBike.id}`);
         const todayStr = new Date().toISOString().split('T')[0];
         
         if (lastNotified !== todayStr) {
           if (chainTraveled >= 700) {
-            new Notification('Smarowanie łańcucha (RED ALERT)', { body: `Krytyczny przebieg! Przejechano ${chainTraveled} km bez smarowania!`, icon: '/logo.png' });
-            localStorage.setItem('uki_last_notified', todayStr);
+            new Notification(`${activeBike.name} - Łańcuch (RED ALERT)`, { body: `Krytyczny przebieg! Przejechano ${chainTraveled} km bez smarowania!`, icon: '/logo.png' });
+            localStorage.setItem(`uki_last_notified_${activeBike.id}`, todayStr);
           } else if (chainTraveled >= 600) {
-            new Notification('Smarowanie łańcucha (Ostrzeżenie)', { body: `Uwaga! Przejechano ${chainTraveled} km bez smarowania.`, icon: '/logo.png' });
-            localStorage.setItem('uki_last_notified', todayStr);
+            new Notification(`${activeBike.name} - Łańcuch (Ostrzeżenie)`, { body: `Uwaga! Przejechano ${chainTraveled} km bez smarowania.`, icon: '/logo.png' });
+            localStorage.setItem(`uki_last_notified_${activeBike.id}`, todayStr);
           } else if (chainTraveled >= 500) {
-            new Notification('Smarowanie łańcucha', { body: `Czas nasmarować łańcuch. Przejechano ${chainTraveled} km.`, icon: '/logo.png' });
-            localStorage.setItem('uki_last_notified', todayStr);
+            new Notification(`${activeBike.name} - Łańcuch`, { body: `Czas nasmarować łańcuch. Przejechano ${chainTraveled} km.`, icon: '/logo.png' });
+            localStorage.setItem(`uki_last_notified_${activeBike.id}`, todayStr);
           }
         }
       }
-    });
-  }, [isDark]);
+    }
+  }, [isDark, isLoading, activeBike]);
 
-  if (!isReady) {
+  if (isLoading || !activeBike) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>
         <h2 style={{ color: 'var(--color-primary)' }}>Uruchamianie silnika...</h2>
@@ -71,7 +69,72 @@ function App() {
       case 'settings':
         return (
           <div className="glass-panel" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            
+            {/* Garage Management Section */}
+            <h2 style={{ margin: 0, color: 'var(--color-primary)' }}>Mój Garaż</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select 
+                  className="input-field" 
+                  value={activeBike.id}
+                  onChange={(e) => switchBike(e.target.value)}
+                  style={{ flex: 1 }}
+                >
+                  {bikes.map(bike => (
+                    <option key={bike.id} value={bike.id}>{bike.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  className="btn-primary" 
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  onClick={() => {
+                    const newName = prompt('Wpisz nazwę nowego motocykla:');
+                    if (newName && newName.trim().length > 0) {
+                      addBike(newName.trim());
+                    }
+                  }}
+                >
+                  <Plus size={18} /> Dodaj pojazd
+                </button>
+                <button 
+                  className="btn-outline"
+                  title="Zmień nazwę"
+                  style={{ padding: '8px' }}
+                  onClick={() => {
+                    const newName = prompt('Nowa nazwa dla tego pojazdu:', activeBike.name);
+                    if (newName && newName.trim().length > 0) {
+                      editBike(activeBike.id, newName.trim());
+                    }
+                  }}
+                >
+                  <Edit2 size={18} />
+                </button>
+                <button 
+                  className="btn-outline"
+                  title="Usuń pojazd"
+                  style={{ padding: '8px', color: 'var(--color-danger)', borderColor: 'var(--color-danger)' }}
+                  onClick={() => {
+                    if (bikes.length === 1) {
+                      alert('Nie możesz usunąć jedynego pojazdu w garażu!');
+                      return;
+                    }
+                    if (confirm(`UWAGA! Czy na pewno chcesz trwale usunąć motocykl "${activeBike.name}" oraz WSZYSTKIE jego dane (tankowania, serwis)? Tej operacji nie można cofnąć!`)) {
+                      deleteBike(activeBike.id);
+                    }
+                  }}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '8px 0' }} />
+
             <h2 style={{ margin: 0 }}>Ustawienia i Terminy</h2>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Dotyczy: {activeBike.name}</p>
             
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label">Stan początkowy licznika (km)</label>
@@ -145,7 +208,7 @@ function App() {
                     lastValveClearanceOdo: valveOdo,
                     lastChainOdo: chainOdo
                   });
-                  alert('Zaktualizowano ustawienia i terminy. Otwórz pulpit aby zobaczyć zmianę.');
+                  alert('Zaktualizowano ustawienia i terminy dla tego pojazdu.');
                 } else {
                   alert('Wypełnij poprawnie wszystkie pola.');
                 }
@@ -177,14 +240,14 @@ function App() {
             
             <h3 style={{ margin: '0 0 8px 0' }}>Zarządzanie Danymi</h3>
             <p style={{ margin: '0 0 16px 0', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-              Twoje dane są bezpiecznie przechowywane w pamięci urządzenia (IndexedDB). Warto jednak regularnie tworzyć kopię zapasową.
+              Twoje dane są bezpiecznie przechowywane w pamięci urządzenia. Kopia zapasowa pobierze dane WSZYSTKICH motocykli.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button 
                 className="btn-outline" 
                 onClick={() => storage.exportBackup()}
               >
-                Pobierz Kopię Zapasową (JSON)
+                Pobierz Kopię Zapasową (Wszystkie Pojazdy)
               </button>
               
               <label className="btn-outline" style={{ display: 'block', textAlign: 'center', cursor: 'pointer' }}>
@@ -199,7 +262,7 @@ function App() {
                     const reader = new FileReader();
                     reader.onload = async (event) => {
                       const text = event.target?.result as string;
-                      if (confirm('UWAGA: Wgranie kopii nadpisze wszystkie obecne dane. Kontynuować?')) {
+                      if (confirm('UWAGA: Wgranie kopii nadpisze wszystkie obecne dane we wszystkich garażach. Kontynuować?')) {
                         const success = await storage.importBackup(text);
                         if (success) {
                           alert('Wgrano kopię zapasową pomyślnie!');
@@ -210,7 +273,6 @@ function App() {
                       }
                     };
                     reader.readAsText(file);
-                    // Reset input
                     e.target.value = '';
                   }} 
                 />
@@ -228,13 +290,40 @@ function App() {
       <main className="main-content">
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div 
-            style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', flex: 1 }}
             onClick={() => setActiveTab('dashboard')}
           >
             <img className="pulse-glow" src={`${import.meta.env.BASE_URL}logo.png`} alt="Uki Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--color-primary)' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-            <div>
+            <div style={{ width: '100%' }}>
               <h1 style={{ margin: 0, fontSize: '1.6rem' }}>Uki <span style={{ color: 'var(--color-primary)' }}>Bike Log</span></h1>
-              <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Royal Enfield Bullet 350</p>
+              
+              {/* Garage Dropdown Header */}
+              <select 
+                value={activeBike.id}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  switchBike(e.target.value);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--color-text-muted)',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  padding: '2px 0',
+                  marginTop: '2px',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  width: '90%',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {bikes.map(bike => (
+                  <option key={bike.id} value={bike.id} style={{ color: '#000' }}>
+                    {bike.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div style={{ position: 'relative' }}>
@@ -272,7 +361,10 @@ function App() {
 
         <audio id="global-radio-player" src="https://stream.rcs.revma.com/ye5kghkgcm0uv" preload="none"></audio>
 
-        {renderContent()}
+        {/* Use key to force unmount/remount of children when active bike changes, to reset internal component states if needed */}
+        <div key={activeBike.id}>
+          {renderContent()}
+        </div>
       </main>
 
       {/* Bottom Navigation */}
@@ -351,3 +443,4 @@ function NavItem({ icon, label, isActive, onClick }: { icon: React.ReactNode, la
 }
 
 export default App;
+

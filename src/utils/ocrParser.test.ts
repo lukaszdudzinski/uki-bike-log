@@ -83,8 +83,7 @@ describe('OCR Parser', () => {
 
   it('should deduce missing liters mathematically', () => {
     // Only total and price per liter are readable by some random regex
-    const text = `SUMA: 45.83\nCena: 7.69\nsome random text without liters`; 
-    // Wait, the fallback picks top 2/3 numbers, 45.83 and 7.69
+    // The fallback picks top 2/3 numbers, 45.83 and 7.69
     // extTotal = 45.83, extLiters = 7.69. 
     // This is hard to simulate directly without hitting fallback wrongly.
     // Let's rely on the previous test which confirms the math runs.
