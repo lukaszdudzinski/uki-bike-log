@@ -278,6 +278,10 @@ function App() {
                 />
               </label>
             </div>
+            
+            <p style={{ textAlign: 'center', marginTop: '30px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
+              Uki Bike Log v1.2.0 (Radar & Garaż)
+            </p>
           </div>
         );
       default:
