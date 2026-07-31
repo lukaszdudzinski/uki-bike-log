@@ -18,9 +18,10 @@ describe('Storage Service', () => {
 
   it('should save and retrieve custom settings', () => {
       const customSettings = {
-        initialOdo: 15000,
-        insuranceExpiry: '2026-12-31',
-        insuranceAcExpiry: '2026-12-31',
+        initialOdo: 1000,
+        tankCapacity: 13.5,
+        insuranceExpiry: '2026-01-01',
+        insuranceAcExpiry: '2026-01-01',
         lastInspectionDate: '2026-01-01',
         serviceIntervalKm: 6000,
         lastServiceOdo: 15000,

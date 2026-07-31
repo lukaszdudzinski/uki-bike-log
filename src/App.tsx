@@ -147,6 +147,11 @@ function App() {
             </div>
 
             <div className="input-group" style={{ marginBottom: 0 }}>
+              <label className="input-label">Pojemność baku (Litry)</label>
+              <input type="number" step="0.1" className="input-field" id="settings-tank-capacity" defaultValue={storage.getSettings().tankCapacity || 13.5} />
+            </div>
+
+            <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label">Wygasa ubezpieczenie OC</label>
               <input type="date" className="input-field" id="settings-oc" defaultValue={storage.getSettings().insuranceExpiry} />
             </div>
@@ -191,6 +196,7 @@ function App() {
               style={{ marginTop: '10px' }}
               onClick={() => {
                 const odoVal = Number((document.getElementById('settings-odo') as HTMLInputElement).value);
+                const tankCapVal = Number((document.getElementById('settings-tank-capacity') as HTMLInputElement).value);
                 const ocVal = (document.getElementById('settings-oc') as HTMLInputElement).value;
                 const acVal = (document.getElementById('settings-ac') as HTMLInputElement).value;
                 const inspVal = (document.getElementById('settings-inspection') as HTMLInputElement).value;
@@ -200,11 +206,12 @@ function App() {
                 const valveOdo = Number((document.getElementById('settings-valve-odo') as HTMLInputElement).value);
                 const chainOdo = Number((document.getElementById('settings-chain-odo') as HTMLInputElement).value);
 
-                if (!isNaN(odoVal) && ocVal && acVal && inspVal && !isNaN(oilOdo) && oilDate && !isNaN(valveOdo) && !isNaN(chainOdo)) {
+                if (!isNaN(odoVal) && !isNaN(tankCapVal) && ocVal && acVal && inspVal && !isNaN(oilOdo) && oilDate && !isNaN(valveOdo) && !isNaN(chainOdo)) {
                   const currentSettings = storage.getSettings();
                   storage.saveSettings({ 
                     ...currentSettings, 
                     initialOdo: odoVal,
+                    tankCapacity: tankCapVal,
                     insuranceExpiry: ocVal,
                     insuranceAcExpiry: acVal,
                     lastInspectionDate: inspVal,

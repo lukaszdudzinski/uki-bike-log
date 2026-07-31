@@ -26,6 +26,7 @@ export interface RouteEntry {
 
 export interface BikeSettings {
   initialOdo: number;
+  tankCapacity: number;
   insuranceExpiry: string; // OC
   insuranceAcExpiry: string; // AC
   lastInspectionDate: string;
@@ -120,6 +121,7 @@ export const storage = {
     ];
     cache.settings = (await localforage.getItem<BikeSettings>(keys.SETTINGS)) || {
       initialOdo: 12000,
+      tankCapacity: 13.5, // Default for Bullet 350
       insuranceExpiry: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       insuranceAcExpiry: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       lastInspectionDate: new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
