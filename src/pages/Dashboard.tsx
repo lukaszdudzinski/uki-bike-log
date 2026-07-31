@@ -6,9 +6,10 @@ import WeatherWidget from '../components/WeatherWidget';
 
 interface DashboardProps {
   setActiveTab: (tab: string) => void;
+  setIsDrivingMode: (val: boolean) => void;
 }
 
-export default function Dashboard({ setActiveTab }: DashboardProps) {
+export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardProps) {
   const [odo, setOdo] = useState<number>(0);
   const [settings, setSettings] = useState<BikeSettings | null>(null);
   const [avgConsumption, setAvgConsumption] = useState<number | null>(null);
@@ -41,6 +42,14 @@ export default function Dashboard({ setActiveTab }: DashboardProps) {
           <h3 style={{ margin: 0 }}>{avgConsumption ? `${avgConsumption.toFixed(2)} l/100` : '-- l/100'}</h3>
         </div>
       </div>
+
+      <button 
+        className="btn-primary" 
+        style={{ padding: '16px', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', justifyContent: 'center', gap: '8px', alignItems: 'center' }}
+        onClick={() => setIsDrivingMode(true)}
+      >
+        <span style={{ fontSize: '1.5rem' }}>🏍️</span> Uruchom Tryb Jazdy
+      </button>
 
       <WeatherWidget />
 

@@ -5,6 +5,7 @@ import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
 import Stats from './pages/Stats';
 import Routes from './pages/Routes';
+import DrivingMode from './pages/DrivingMode';
 import { storage } from './services/storage';
 import { useGarage } from './contexts/GarageContext';
 
@@ -13,6 +14,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDark, setIsDark] = useState(true);
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
+  const [isDrivingMode, setIsDrivingMode] = useState(false);
 
   // Set initial theme and handle notifications
   useEffect(() => {
@@ -55,9 +57,12 @@ function App() {
   }
 
   const renderContent = () => {
+    if (isDrivingMode) {
+      return <DrivingMode onExit={() => setIsDrivingMode(false)} />;
+    }
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard setActiveTab={setActiveTab} />;
+        return <Dashboard setActiveTab={setActiveTab} setIsDrivingMode={setIsDrivingMode} />;
       case 'fuel':
         return <FuelLog />;
       case 'service':
@@ -280,12 +285,12 @@ function App() {
             </div>
             
             <p style={{ textAlign: 'center', marginTop: '30px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-              Uki Bike Log v1.2.0 (Radar & Garaż)
+              Uki Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} (Radar & Garaż)
             </p>
           </div>
         );
       default:
-        return <Dashboard setActiveTab={setActiveTab} />;
+        return <Dashboard setActiveTab={setActiveTab} setIsDrivingMode={setIsDrivingMode} />;
     }
   };
 
