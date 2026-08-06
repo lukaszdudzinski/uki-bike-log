@@ -14,6 +14,19 @@ function App() {
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
     onRegistered(r: any) {
       console.log('SW Registered: ', r);
+      if (r) {
+        // Check for updates periodically every hour
+        setInterval(() => {
+          r.update();
+        }, 60 * 60 * 1000);
+        
+        // Also check for updates when app comes back to foreground
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            r.update();
+          }
+        });
+      }
     },
     onRegisterError(error: any) {
       console.log('SW registration error', error);
