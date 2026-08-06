@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/uki-bike-log/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Uki Bike Log</title>
+    <script type="module" crossorigin src="/uki-bike-log/assets/index-B_xf_Sy0.js"></script>
+    <link rel="stylesheet" crossorigin href="/uki-bike-log/assets/index-D2YGOfU6.css">
+  <link rel="manifest" href="/uki-bike-log/manifest.webmanifest"></head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
