@@ -1,5 +1,30 @@
 [
   {
+    "version": "2026.08.06.12",
+    "changes": [
+      "Aktualizacja wpisów w historii zmian (Co nowego?)."
+    ]
+  },
+  {
+    "version": "2026.08.06.11",
+    "changes": [
+      "Krótszy tekst na przycisku aktualizacji ('Zaktualizuj' zamiast 'Odśwież (Zaktualizuj)')."
+    ]
+  },
+  {
+    "version": "2026.08.06.10",
+    "changes": [
+      "Poprawka wizualna: tło w Trybie Jazdy jest teraz w pełni matowe, co zapobiega prześwitywaniu innych ekranów pod spodem."
+    ]
+  },
+  {
+    "version": "2026.08.06.09",
+    "changes": [
+      "Całkowita przebudowa Trybu Jazdy (Responsive Design) - obsługa orientacji poziomej i pionowej ekranu.",
+      "Dodano nową opcję wizualną: 'Efekt Liquid Glass' (do włączenia w zakładce Opcje)."
+    ]
+  },
+  {
     "version": "2026.08.06.08",
     "changes": [
       "Aktualizacja historii zmian (Co nowego?) - pełen wykaz nowości od wersji .05.",
