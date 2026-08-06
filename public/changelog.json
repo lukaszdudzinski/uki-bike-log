@@ -1,0 +1,32 @@
+[
+  {
+    "version": "202608.06.04",
+    "changes": [
+      "Nowy ekran z listą zmian (Co nowego?) dodany do banera aktualizacji.",
+      "Możliwość podglądu zmian wszystkich nowszych wersji przed instalacją aktualizacji."
+    ]
+  },
+  {
+    "version": "202608.06.03",
+    "changes": [
+      "Moduł AWARIA / ASSISTANCE na pulpicie głównym stale widoczny.",
+      "Szybki skrót do ustawień w przypadku braku dodanego ubezpieczenia."
+    ]
+  },
+  {
+    "version": "202608.06.02",
+    "changes": [
+      "Mechanizm ręcznego potwierdzania aktualizacji (pomarańczowy baner u góry ekranu).",
+      "Dodano sekcję TCO (Całkowity Koszt Utrzymania) na ekranie Statystyk.",
+      "Dodano możliwość przeliczania kosztów paliwa w wybranym przedziale czasowym (od-do).",
+      "W Opcjach dodano pola do numeru polisy, nazwy ubezpieczyciela oraz numeru ratunkowego."
+    ]
+  },
+  {
+    "version": "202608.06.01",
+    "changes": [
+      "Dodano wyliczanie trendu cen paliwa (wykres liniowy).",
+      "Obsługa awatarów i nicków w profilu użytkownika (Opcje)."
+    ]
+  }
+]

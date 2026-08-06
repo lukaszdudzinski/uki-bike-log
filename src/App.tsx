@@ -30,6 +30,24 @@ function App() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [nickname, setNickname] = useState<string>('');
 
+  // Changelog modal state
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+  const [changelogData, setChangelogData] = useState<any[]>([]);
+
+  const fetchChangelog = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}changelog.json?t=` + Date.now());
+      const data = await res.json();
+      const currentVersion = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0';
+      const newChanges = data.filter((item: any) => item.version > currentVersion);
+      setChangelogData(newChanges.length > 0 ? newChanges : data.slice(0, 1));
+      setIsChangelogOpen(true);
+    } catch (e) {
+      console.error('Failed to fetch changelog', e);
+      setIsChangelogOpen(true);
+    }
+  };
+
   // Set initial theme and handle notifications
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -404,15 +422,27 @@ function App() {
   return (
     <div className="app-container">
       {needRefresh && (
-        <div 
-          onClick={() => updateServiceWorker(true)}
-          style={{ 
-            background: '#FF9800', color: '#000', padding: '15px', textAlign: 'center', 
-            fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-            animation: 'slideDown 0.5s ease-out'
-          }}
-        >
-          Dostępna nowa aktualizacja! Kliknij tutaj, aby odświeżyć aplikację 🚀
+        <div style={{ 
+          background: '#FF9800', color: '#000', padding: '15px', textAlign: 'center', 
+          boxShadow: '0 4px 6px rgba(0,0,0,0.3)', animation: 'slideDown 0.5s ease-out'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>
+            Dostępna nowa aktualizacja! 🚀
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+            <button 
+              onClick={() => updateServiceWorker(true)}
+              style={{ padding: '8px 16px', background: '#000', color: '#FF9800', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
+            >
+              Odśwież (Zaktualizuj)
+            </button>
+            <button 
+              onClick={fetchChangelog}
+              style={{ padding: '8px 16px', background: 'rgba(0,0,0,0.1)', color: '#000', border: '1px solid #000', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
+            >
+              Co nowego?
+            </button>
+          </div>
         </div>
       )}
       <main className="main-content">
@@ -556,6 +586,59 @@ function App() {
           />
         </a>
       </nav>
+      {/* Changelog Modal */}
+      {isChangelogOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          background: 'rgba(0, 0, 0, 0.8)', zIndex: 1000,
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'var(--color-glass-bg)',
+            border: '1px solid var(--color-glass-border)',
+            borderRadius: 'var(--radius-lg)',
+            width: '100%', maxWidth: '500px',
+            maxHeight: '80vh', display: 'flex', flexDirection: 'column',
+            overflow: 'hidden'
+          }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid var(--color-glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>Co nowego?</h3>
+              <button onClick={() => setIsChangelogOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+            </div>
+            
+            <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+              {changelogData.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {changelogData.map((release, idx) => (
+                    <div key={idx}>
+                      <h4 style={{ margin: '0 0 10px 0', color: '#fff' }}>Wersja {release.version}</h4>
+                      <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--color-text-muted)' }}>
+                        {release.changes.map((change: string, i: number) => (
+                          <li key={i} style={{ marginBottom: '6px' }}>{change}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: 'var(--color-text-muted)' }}>Brak danych o zmianach.</p>
+              )}
+            </div>
+
+            <div style={{ padding: '20px', borderTop: '1px solid var(--color-glass-border)', textAlign: 'center' }}>
+              <button 
+                className="btn-primary" 
+                style={{ width: '100%', padding: '12px', fontSize: '1.1rem', fontWeight: 'bold' }}
+                onClick={() => updateServiceWorker(true)}
+              >
+                Zaktualizuj teraz 🚀
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
