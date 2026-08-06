@@ -22,7 +22,7 @@ test.describe('Fuel Log', () => {
     await page.click('button:has-text("Zapisz tankowanie")');
 
     // Verify entry is added in history
-    await expect(page.locator('h4:has-text("12.5")')).toBeVisible();
+    await expect(page.locator('p:has-text("12.5 L")')).toBeVisible();
     await expect(page.locator('h4:has-text("85.50 PLN")')).toBeVisible();
     
     // Edit Fuel Entry
@@ -35,13 +35,13 @@ test.describe('Fuel Log', () => {
     await page.click('button:has-text("Zapisz zmiany")');
     
     // Verify changes
-    await expect(page.locator('p:has-text("13")').first()).toBeVisible();
+    await expect(page.locator('p:has-text("13 L")')).toBeVisible();
 
     // Delete Fuel Entry
     page.once('dialog', dialog => dialog.accept()); // handle confirmation
     await page.click('button >> text=Usuń');
 
     // Verify deletion
-    await expect(page.locator('p:has-text("13")').first()).not.toBeVisible();
+    await expect(page.locator('p:has-text("13 L")')).not.toBeVisible();
   });
 });

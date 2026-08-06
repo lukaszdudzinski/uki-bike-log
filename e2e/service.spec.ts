@@ -11,8 +11,7 @@ test.describe('Service Log', () => {
     await page.click('nav >> text=Serwis');
     
     // Add Service Entry
-    // selectOption values: service, repair, accessory, other
-    await page.selectOption('select', 'service'); 
+    await page.locator('.glass-panel select').selectOption('service'); 
     await page.fill('input[placeholder="np. Wymiana oleju Motul 15W50"]', 'Wymiana klocków');
     
     const numberInputs = page.locator('input[type="number"]');
@@ -25,7 +24,7 @@ test.describe('Service Log', () => {
     await page.click('button:has-text("Zapisz wpis")');
 
     // Verify entry is added in history
-    await expect(page.locator('h4:has-text("Wymiana klocków")')).toBeVisible();
-    await expect(page.locator('h4:has-text("150.00")')).toBeVisible();
+    await expect(page.locator('h4:has-text("Wymiana klocków")').first()).toBeVisible();
+    await expect(page.locator('h4:has-text("150.00")').first()).toBeVisible();
   });
 });

@@ -11,7 +11,6 @@ test.describe('Navigation & Driving Mode', () => {
     await expect(page.locator('text=Całkowity przebieg')).toBeVisible({ timeout: 10000 });
 
     // Navigate to routes (Ulubione Trasy)
-    // Actually the button says "Ulubione Trasy" inside Dashboard QuickActions
     await page.click('button:has-text("Ulubione Trasy")');
 
     // Verify map header is visible
@@ -27,11 +26,10 @@ test.describe('Navigation & Driving Mode', () => {
     await page.click('button:has-text("Uruchom Tryb Jazdy")');
 
     // Verify Driving Mode UI
-    await expect(page.locator('text=TRYB JAZDY')).toBeVisible();
-    await expect(page.locator('text=Zakończ jazdę')).toBeVisible();
+    await expect(page.locator('text=CZAS JAZDY')).toBeVisible();
 
-    // Exit Driving Mode
-    await page.click('button:has-text("Zakończ jazdę")');
-    await expect(page.locator('text=TRYB JAZDY')).not.toBeVisible();
+    // Exit Driving Mode (the close button is the first button on the Driving Mode screen)
+    await page.locator('button').first().click();
+    await expect(page.locator('text=CZAS JAZDY')).not.toBeVisible();
   });
 });

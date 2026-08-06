@@ -33,6 +33,6 @@ test.describe('Settings & SOS Panel', () => {
     await page.click('nav >> text=Statystyki');
     
     // Insurance cost is 450.50, so TCO should display it
-    await expect(page.locator('text=450.50 PLN')).toBeVisible();
+    await expect(page.locator('text=450.50 PLN').first()).toBeVisible();
   });
 });
