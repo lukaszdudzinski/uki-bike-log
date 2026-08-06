@@ -464,7 +464,7 @@ function App() {
               onClick={() => updateServiceWorker(true)}
               style={{ padding: '8px 16px', background: '#000', color: '#FF9800', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
             >
-              Odśwież (Zaktualizuj)
+              Zaktualizuj
             </button>
             <button 
               onClick={fetchChangelog}
