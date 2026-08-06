@@ -1,20 +1,46 @@
 [
   {
-    "version": "202608.06.04",
+    "version": "2026.08.06.08",
+    "changes": [
+      "Aktualizacja historii zmian (Co nowego?) - pełen wykaz nowości od wersji .05.",
+      "Poprawka formatu numeracji wersji (zastosowano kropkę po roku)."
+    ]
+  },
+  {
+    "version": "2026.08.06.07",
+    "changes": [
+      "Automatyczne sprawdzanie aktualizacji w tle oraz przy wybudzeniu/powrocie do aplikacji.",
+      "Dodanie znaczników ułatwień dostępu (Aria) m.in. dla przycisku wyjścia z Trybu Jazdy."
+    ]
+  },
+  {
+    "version": "2026.08.06.06",
+    "changes": [
+      "Zakończenie stabilizacji automatycznych testów E2E (Playwright). Pełen zielony pasek."
+    ]
+  },
+  {
+    "version": "2026.08.06.05",
+    "changes": [
+      "Inicjalizacja pełnego środowiska testów automatycznych Playwright dla kluczowych modułów (Garaż, Paliwo, Serwis, Nawigacja)."
+    ]
+  },
+  {
+    "version": "2026.08.06.04",
     "changes": [
       "Nowy ekran z listą zmian (Co nowego?) dodany do banera aktualizacji.",
       "Możliwość podglądu zmian wszystkich nowszych wersji przed instalacją aktualizacji."
     ]
   },
   {
-    "version": "202608.06.03",
+    "version": "2026.08.06.03",
     "changes": [
       "Moduł AWARIA / ASSISTANCE na pulpicie głównym stale widoczny.",
       "Szybki skrót do ustawień w przypadku braku dodanego ubezpieczenia."
     ]
   },
   {
-    "version": "202608.06.02",
+    "version": "2026.08.06.02",
     "changes": [
       "Mechanizm ręcznego potwierdzania aktualizacji (pomarańczowy baner u góry ekranu).",
       "Dodano sekcję TCO (Całkowity Koszt Utrzymania) na ekranie Statystyk.",
@@ -23,7 +49,7 @@
     ]
   },
   {
-    "version": "202608.06.01",
+    "version": "2026.08.06.01",
     "changes": [
       "Dodano wyliczanie trendu cen paliwa (wykres liniowy).",
       "Obsługa awatarów i nicków w profilu użytkownika (Opcje)."
