@@ -11,13 +11,14 @@ test.describe('Navigation & Driving Mode', () => {
     await expect(page.locator('text=Całkowity przebieg')).toBeVisible({ timeout: 10000 });
 
     // Navigate to routes (Ulubione Trasy)
+    // Actually the button says "Ulubione Trasy" inside Dashboard QuickActions
     await page.click('button:has-text("Ulubione Trasy")');
 
     // Verify map header is visible
     await expect(page.locator('h2:has-text("Radar Pogodowy")')).toBeVisible();
 
     // Navigate back to Dashboard
-    await page.click('nav >> text=Strona Główna');
+    await page.click('nav >> text=Pulpit');
     
     // Check if app version is visible
     await expect(page.locator('text=Uki Bike Log v')).toBeVisible();

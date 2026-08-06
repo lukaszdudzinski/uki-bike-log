@@ -11,17 +11,16 @@ test.describe('Service Log', () => {
     await page.click('nav >> text=Serwis');
     
     // Add Service Entry
-    await page.selectOption('select', 'service'); // Serwis (Olej, klocki itp.)
+    // selectOption values: service, repair, accessory, other
+    await page.selectOption('select', 'service'); 
     await page.fill('input[placeholder="np. Wymiana oleju Motul 15W50"]', 'Wymiana klocków');
-    await page.fill('input[placeholder="0"]', '20000'); // ODO, placeholder uses currentOdo so it might not be exactly "0" 
-    // Actually the placeholder is `${currentOdo}`, so we select by label or type
-    const inputs = page.locator('input[type="number"]');
-    await inputs.nth(0).fill('20000'); // ODO
-    await inputs.nth(1).fill('150.00'); // Cost
+    
+    const numberInputs = page.locator('input[type="number"]');
+    await numberInputs.nth(0).fill('20000'); // ODO
+    await numberInputs.nth(1).fill('150.00'); // Cost
     
     // Playwright dismisses alerts automatically by default. 
-    // Just in case, let's catch it.
-    page.on('dialog', dialog => dialog.accept());
+    page.once('dialog', dialog => dialog.accept());
     
     await page.click('button:has-text("Zapisz wpis")');
 

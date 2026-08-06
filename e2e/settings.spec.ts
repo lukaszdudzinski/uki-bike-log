@@ -11,7 +11,6 @@ test.describe('Settings & SOS Panel', () => {
     await page.click('nav >> text=Opcje');
 
     // Fill Insurance Details
-    // We can identify inputs by ID or previous sibling label
     await page.fill('input#settings-ins-cost', '450.50');
     await page.fill('input#settings-ins-name', 'PZU E2E');
     await page.fill('input#settings-ins-policy', 'POL-123456');
@@ -22,7 +21,7 @@ test.describe('Settings & SOS Panel', () => {
     await page.click('button:has-text("Zapisz Ustawienia")');
 
     // Navigate back to Dashboard
-    await page.click('nav >> text=Strona Główna');
+    await page.click('nav >> text=Pulpit');
 
     // Check if SOS Panel exists and is visible
     await expect(page.locator('h3:has-text("AWARIA / ASSISTANCE")')).toBeVisible();

@@ -11,36 +11,37 @@ test.describe('Fuel Log', () => {
     await page.click('nav >> text=Paliwo');
     
     // Add Fuel Entry
-    await page.fill('input[placeholder="np. 15000"]', '15000');
-    await page.fill('input[placeholder="np. 12.5"]', '12.5');
-    await page.fill('input[placeholder="0.00"]', '75.50');
+    const numberInputs = page.locator('input[type="number"]');
+    await numberInputs.nth(0).fill('15000'); // ODO
+    await numberInputs.nth(1).fill('12.5'); // Liters
+    await numberInputs.nth(2).fill('6.50'); // Price/liter
+    await numberInputs.nth(3).fill('85.50'); // Cost
+    
+    // Handle dialog
+    page.once('dialog', dialog => dialog.accept());
     await page.click('button:has-text("Zapisz tankowanie")');
-
-    // Wait for alert and close it (browser native alert)
-    // Actually Playwright auto-dismisses dialogs, but it's good to handle it if needed
-    // In our app it uses window.alert, which Playwright auto-dismisses by default
 
     // Verify entry is added in history
     await expect(page.locator('h4:has-text("12.5")')).toBeVisible();
-    await expect(page.locator('p:has-text("75.50 PLN")')).toBeVisible();
+    await expect(page.locator('h4:has-text("85.50 PLN")')).toBeVisible();
     
     // Edit Fuel Entry
-    await page.click('button[title="Edytuj"]');
+    await page.click('button >> text=Edytuj');
     
     // Edit form appears, modify liters
-    const litersInput = page.locator('input[placeholder="np. 12.5"]').last();
-    await litersInput.fill('13.0');
+    await numberInputs.nth(1).fill('13.0');
     
+    page.once('dialog', dialog => dialog.accept());
     await page.click('button:has-text("Zapisz zmiany")');
     
     // Verify changes
-    await expect(page.locator('h4:has-text("13")')).toBeVisible();
+    await expect(page.locator('p:has-text("13")').first()).toBeVisible();
 
     // Delete Fuel Entry
     page.once('dialog', dialog => dialog.accept()); // handle confirmation
-    await page.click('button[title="Usuń"]');
+    await page.click('button >> text=Usuń');
 
     // Verify deletion
-    await expect(page.locator('h4:has-text("13")')).not.toBeVisible();
+    await expect(page.locator('p:has-text("13")').first()).not.toBeVisible();
   });
 });
