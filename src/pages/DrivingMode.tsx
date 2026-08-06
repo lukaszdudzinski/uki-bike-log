@@ -236,6 +236,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
         <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{time}</div>
         <button 
           onClick={onExit}
+          aria-label="Zamknij tryb jazdy"
           style={{
             background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%',
             width: '44px', height: '44px', display: 'flex', justifyContent: 'center', alignItems: 'center',

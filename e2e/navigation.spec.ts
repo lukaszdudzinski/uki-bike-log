@@ -28,8 +28,8 @@ test.describe('Navigation & Driving Mode', () => {
     // Verify Driving Mode UI
     await expect(page.locator('text=CZAS JAZDY')).toBeVisible();
 
-    // Exit Driving Mode (the close button is the first button on the Driving Mode screen)
-    await page.locator('button').first().click();
+    // Exit Driving Mode via the aria-label
+    await page.getByLabel('Zamknij tryb jazdy').click();
     await expect(page.locator('text=CZAS JAZDY')).not.toBeVisible();
   });
 });
