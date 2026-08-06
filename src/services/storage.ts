@@ -29,6 +29,10 @@ export interface BikeSettings {
   tankCapacity: number;
   insuranceExpiry: string; // OC
   insuranceAcExpiry: string; // AC
+  insuranceCost?: number;
+  insurerName?: string;
+  policyNumber?: string;
+  insuranceHotline?: string;
   lastInspectionDate: string;
   serviceIntervalKm: number;
   lastServiceOdo: number;

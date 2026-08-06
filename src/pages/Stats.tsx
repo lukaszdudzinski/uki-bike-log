@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { storage, type FuelEntry } from '../services/storage';
-import { Calculator, TrendingUp, CalendarDays } from 'lucide-react';
+import { storage, type FuelEntry, type ServiceEntry } from '../services/storage';
+import { Calculator, TrendingUp, CalendarDays, Wallet } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
@@ -11,11 +11,18 @@ export default function Stats() {
   const [calcDistance, setCalcDistance] = useState<number | ''>('');
   
   const [logs, setLogs] = useState<FuelEntry[]>([]);
+  const [serviceLogs, setServiceLogs] = useState<ServiceEntry[]>([]);
+  
+  // Custom Date Range State
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [customRangeCost, setCustomRangeCost] = useState<number>(0);
 
   useEffect(() => {
     setAvgConsumption(storage.getAverageConsumption());
     const allLogs = storage.getFuelLogs();
     setLogs(allLogs);
+    setServiceLogs(storage.getServiceLogs());
     
     if (allLogs.length > 0) {
       // Calculate average price per liter from last 3 tankings
@@ -30,7 +37,31 @@ export default function Stats() {
         setLastFuelPrice(Number((totalPrice / totalLiters).toFixed(2)));
       }
     }
+    
+    // Set default dates for custom range to current month
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    setStartDate(firstDay.toISOString().split('T')[0]);
+    setEndDate(lastDay.toISOString().split('T')[0]);
   }, []);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const start = new Date(startDate).getTime();
+      // add 1 day to include the entire end date
+      const end = new Date(endDate).getTime() + 24 * 60 * 60 * 1000; 
+      
+      const sum = logs.filter(l => {
+        const t = new Date(l.date).getTime();
+        return t >= start && t < end;
+      }).reduce((acc, curr) => acc + curr.price, 0);
+      
+      setCustomRangeCost(sum);
+    } else {
+      setCustomRangeCost(0);
+    }
+  }, [startDate, endDate, logs]);
 
   // Prepare price chart data
   const priceData = logs.slice().reverse().map(l => {
@@ -75,9 +106,86 @@ export default function Stats() {
 
   const expensesData = getExpenses();
 
+  // Total Cost of Ownership
+  const getTCO = () => {
+    const settings = storage.getSettings();
+    const fuelCost = logs.reduce((sum, l) => sum + l.price, 0);
+    const serviceCost = serviceLogs.reduce((sum, s) => sum + (s.cost || 0), 0);
+    const insuranceCost = settings.insuranceCost || 0;
+    
+    return {
+      fuel: fuelCost,
+      service: serviceCost,
+      insurance: insuranceCost,
+      total: fuelCost + serviceCost + insuranceCost
+    };
+  };
+
+  const tco = getTCO();
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
+      {/* TCO Overview */}
+      <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(20,20,20,0.8) 100%)', border: '1px solid var(--color-primary)' }}>
+        <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-primary)' }}>
+          <Wallet color="var(--color-primary)" /> Całkowity Koszt Utrzymania (TCO)
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--color-text-muted)' }}>Paliwo:</span>
+            <strong>{tco.fuel.toFixed(2)} PLN</strong>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--color-text-muted)' }}>Serwis i części:</span>
+            <strong>{tco.service.toFixed(2)} PLN</strong>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--color-text-muted)' }}>Ubezpieczenie:</span>
+            <strong>{tco.insurance.toFixed(2)} PLN</strong>
+          </div>
+          <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 'bold' }}>
+            <span>SUMA:</span>
+            <span style={{ color: 'var(--color-primary)' }}>{tco.total.toFixed(2)} PLN</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Custom Date Range Expenses */}
+      <div className="glass-panel">
+        <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <CalendarDays color="var(--color-primary)" /> Koszty Paliwa: Wybrany Okres
+        </h3>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label className="input-label">Data Od</label>
+            <input 
+              type="date" 
+              className="input-field" 
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+          
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label className="input-label">Data Do</label>
+            <input 
+              type="date" 
+              className="input-field" 
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+        </div>
+        
+        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '8px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '8px' }}>Suma wydatków na paliwo w tym okresie:</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>{customRangeCost.toFixed(2)} PLN</div>
+        </div>
+      </div>
+
       {/* Trip Calculator */}
       <div className="glass-panel">
         <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -128,7 +236,7 @@ export default function Stats() {
       {/* Expenses Overview */}
       <div className="glass-panel">
         <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <CalendarDays color="var(--color-primary)" /> Zestawienie Wydatków
+          <CalendarDays color="var(--color-primary)" /> Szybkie Zestawienie Paliwa
         </h3>
         
         {logs.length > 0 ? (

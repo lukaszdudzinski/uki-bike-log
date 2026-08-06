@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee } from 'lucide-react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
@@ -10,6 +11,15 @@ import { storage } from './services/storage';
 import { useGarage } from './contexts/GarageContext';
 
 function App() {
+  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
+    onRegistered(r: any) {
+      console.log('SW Registered: ', r);
+    },
+    onRegisterError(error: any) {
+      console.log('SW registration error', error);
+    },
+  });
+
   const { bikes, activeBike, isLoading, switchBike, addBike, editBike, deleteBike } = useGarage();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDark, setIsDark] = useState(true);
@@ -218,6 +228,28 @@ function App() {
               <input type="date" className="input-field" id="settings-ac" defaultValue={storage.getSettings().insuranceAcExpiry} />
             </div>
 
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Koszt ubezp. (PLN)</label>
+                <input type="number" step="0.01" className="input-field" id="settings-ins-cost" defaultValue={storage.getSettings().insuranceCost || ''} />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Ubezpieczyciel</label>
+                <input type="text" className="input-field" id="settings-ins-name" placeholder="np. PZU" defaultValue={storage.getSettings().insurerName || ''} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Numer Polisy</label>
+                <input type="text" className="input-field" id="settings-ins-policy" placeholder="Nr..." defaultValue={storage.getSettings().policyNumber || ''} />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Infolinia (Telefon)</label>
+                <input type="text" className="input-field" id="settings-ins-hotline" placeholder="Nr asysty..." defaultValue={storage.getSettings().insuranceHotline || ''} />
+              </div>
+            </div>
+
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label">Data ostatniego przeglądu (wyliczy kolejny +1 rok)</label>
               <input type="date" className="input-field" id="settings-inspection" defaultValue={storage.getSettings().lastInspectionDate} />
@@ -256,6 +288,13 @@ function App() {
                 const tankCapVal = Number((document.getElementById('settings-tank-capacity') as HTMLInputElement).value);
                 const ocVal = (document.getElementById('settings-oc') as HTMLInputElement).value;
                 const acVal = (document.getElementById('settings-ac') as HTMLInputElement).value;
+                
+                const insCostValStr = (document.getElementById('settings-ins-cost') as HTMLInputElement).value;
+                const insCostVal = insCostValStr ? Number(insCostValStr) : undefined;
+                const insNameVal = (document.getElementById('settings-ins-name') as HTMLInputElement).value;
+                const insPolicyVal = (document.getElementById('settings-ins-policy') as HTMLInputElement).value;
+                const insHotlineVal = (document.getElementById('settings-ins-hotline') as HTMLInputElement).value;
+                
                 const inspVal = (document.getElementById('settings-inspection') as HTMLInputElement).value;
                 
                 const oilOdo = Number((document.getElementById('settings-oil-odo') as HTMLInputElement).value);
@@ -271,6 +310,10 @@ function App() {
                     tankCapacity: tankCapVal,
                     insuranceExpiry: ocVal,
                     insuranceAcExpiry: acVal,
+                    insuranceCost: insCostVal,
+                    insurerName: insNameVal,
+                    policyNumber: insPolicyVal,
+                    insuranceHotline: insHotlineVal,
                     lastInspectionDate: inspVal,
                     lastServiceOdo: oilOdo,
                     lastServiceDate: oilDate,
@@ -360,6 +403,18 @@ function App() {
 
   return (
     <div className="app-container">
+      {needRefresh && (
+        <div 
+          onClick={() => updateServiceWorker(true)}
+          style={{ 
+            background: '#FF9800', color: '#000', padding: '15px', textAlign: 'center', 
+            fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+            animation: 'slideDown 0.5s ease-out'
+          }}
+        >
+          Dostępna nowa aktualizacja! Kliknij tutaj, aby odświeżyć aplikację 🚀
+        </div>
+      )}
       <main className="main-content">
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div 

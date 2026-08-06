@@ -57,6 +57,46 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
 
       <AlertsList settings={settings} odo={odo} setSettings={setSettings} />
 
+      {/* Awaria / SOS Panel */}
+      {(settings.insuranceHotline || settings.policyNumber) && (
+        <div style={{
+          background: 'rgba(255, 60, 60, 0.1)',
+          border: '1px solid var(--color-danger)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '16px',
+          marginTop: '10px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
+        }}>
+          <h3 style={{ margin: 0, color: 'var(--color-danger)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>🚨</span> AWARIA / ASSISTANCE
+          </h3>
+          <div style={{ fontSize: '0.9rem', color: '#fff' }}>
+            {settings.insurerName && <div><strong>Ubezpieczyciel:</strong> {settings.insurerName}</div>}
+            {settings.policyNumber && <div><strong>Nr Polisy:</strong> {settings.policyNumber}</div>}
+          </div>
+          {settings.insuranceHotline && (
+            <a 
+              href={`tel:${settings.insuranceHotline.replace(/\s+/g, '')}`}
+              style={{
+                display: 'block',
+                background: 'var(--color-danger)',
+                color: '#fff',
+                textAlign: 'center',
+                padding: '12px',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontWeight: 'bold',
+                fontSize: '1.1rem'
+              }}
+            >
+              📞 Zadzwoń po pomoc ({settings.insuranceHotline})
+            </a>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }
