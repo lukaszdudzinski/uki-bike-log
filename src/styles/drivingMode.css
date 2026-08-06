@@ -1,0 +1,252 @@
+.dm-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  color: #ffffff;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  padding-bottom: 30px;
+  overflow: hidden;
+  transition: background-color 1s ease;
+}
+
+/* Rain Warning Animation */
+.dm-rain-warning {
+  animation: dm-flash 2s infinite;
+}
+
+@keyframes dm-flash {
+  0% { background-color: #8b0000; }
+  50% { background-color: #ff0000; }
+  100% { background-color: #8b0000; }
+}
+
+.dm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  z-index: 10;
+}
+
+.dm-header-time {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.dm-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dm-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Layout Container */
+.dm-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+  position: relative;
+  height: 100%;
+}
+
+.dm-speedometer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 24px;
+  padding: 20px;
+  min-height: 180px;
+}
+
+.dm-speed-value {
+  font-size: 7rem;
+  font-weight: 900;
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+.dm-speed-unit {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 2px;
+  margin-top: 5px;
+}
+
+.dm-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex: 1;
+}
+
+.dm-stat-card {
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.dm-stat-title {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.dm-stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+.dm-stat-unit {
+  font-size: 1rem;
+  color: #888;
+}
+
+.dm-stat-desc {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* Glassmorphism Classes */
+.dm-glass {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.dm-liquid-glass {
+  background: rgba(20, 20, 20, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Map specific styling */
+.dm-map-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45vh; /* Takes roughly half screen in portrait */
+  border-radius: 24px;
+  overflow: hidden;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.dm-controls {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 110;
+  padding-top: 10px;
+}
+
+.dm-map-toggle {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 110;
+}
+
+
+/* LANDSCAPE MODE (Poziom) */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+  .dm-container {
+    padding: 10px 20px;
+  }
+  
+  .dm-header {
+    margin-bottom: 10px;
+  }
+
+  .dm-layout {
+    flex-direction: row;
+  }
+
+  .dm-left-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+  }
+  
+  .dm-right-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .dm-speedometer {
+    flex: 1;
+  }
+
+  /* When map is shown in landscape, right pane is FULL map */
+  .dm-map-container {
+    position: relative;
+    height: 100%;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    border-radius: 20px;
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .dm-stats-grid {
+    height: 100%;
+  }
+  
+  .dm-controls {
+    margin-top: 0;
+  }
+  
+  .dm-speed-value {
+    font-size: 5rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

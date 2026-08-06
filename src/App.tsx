@@ -42,6 +42,7 @@ function App() {
   // Profile state for active bike
   const [avatar, setAvatar] = useState<string | null>(null);
   const [nickname, setNickname] = useState<string>('');
+  const [liquidGlass, setLiquidGlass] = useState<boolean>(true);
 
   // Changelog modal state
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
@@ -69,6 +70,7 @@ function App() {
       const settings = storage.getSettings();
       setAvatar(settings.avatar || null);
       setNickname(settings.nickname || '');
+      setLiquidGlass(settings.liquidGlassEnabled !== false);
 
       // Check for notifications for the active bike
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -112,6 +114,12 @@ function App() {
     setNickname(e.target.value);
     const settings = storage.getSettings();
     storage.saveSettings({ ...settings, nickname: e.target.value });
+  };
+
+  const handleLiquidGlassChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLiquidGlass(e.target.checked);
+    const settings = storage.getSettings();
+    storage.saveSettings({ ...settings, liquidGlassEnabled: e.target.checked });
   };
 
   if (isLoading || !activeBike) {
@@ -168,6 +176,15 @@ function App() {
                   onChange={handleNicknameChange}
                   style={{ padding: '8px', fontSize: '1rem' }}
                 />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={liquidGlass} 
+                    onChange={handleLiquidGlassChange} 
+                    style={{ accentColor: 'var(--color-primary)', width: '18px', height: '18px' }}
+                  />
+                  Efekt Liquid Glass (Głębia interfejsu)
+                </label>
               </div>
             </div>
 

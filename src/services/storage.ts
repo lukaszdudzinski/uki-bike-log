@@ -43,6 +43,7 @@ export interface BikeSettings {
   lastValveClearanceOdo: number;
   avatar?: string;
   nickname?: string;
+  liquidGlassEnabled?: boolean;
 }
 
 export interface BikeProfile {

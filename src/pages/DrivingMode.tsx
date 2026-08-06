@@ -4,6 +4,7 @@ import { storage } from '../services/storage';
 import { MapContainer, TileLayer, CircleMarker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { weatherService } from '../services/weather';
+import '../styles/drivingMode.css';
 
 interface DrivingModeProps {
   onExit: () => void;
@@ -47,6 +48,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
   const [radarTimestamp, setRadarTimestamp] = useState<number>(0);
+  const [liquidGlass, setLiquidGlass] = useState<boolean>(true);
 
   const watchId = useRef<number | null>(null);
   const wakeLock = useRef<WakeLockSentinel | null>(null);
@@ -59,6 +61,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     const settings = storage.getSettings();
     if (settings) {
       setTankCapacity(settings.tankCapacity || 13.5);
+      setLiquidGlass(settings.liquidGlassEnabled !== false);
     }
     const consumption = storage.getAverageConsumption();
     if (consumption) {
@@ -214,160 +217,151 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     estimatedRange = Math.max(0, theoreticalMaxRange - tripDistance);
   }
 
-  return (
-    <div 
-      style={{
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: rainWarning ? '#8b0000' : '#121212',
-        color: '#ffffff', zIndex: 9999,
-        display: 'flex', flexDirection: 'column',
-        padding: '20px', paddingBottom: '30px',
-        animation: rainWarning ? 'flash 2s infinite' : 'none',
-        transition: 'background-color 1s ease',
-        overflow: 'hidden'
-      }}
-    >
-      <style>{`
-        @keyframes flash { 0% { background-color: #8b0000; } 50% { background-color: #ff0000; } 100% { background-color: #8b0000; } }
-      `}</style>
+  const glassClass = liquidGlass ? 'dm-liquid-glass' : 'dm-glass';
+  
+  // Speedometer color logic
+  let speedColor = 'var(--color-primary)';
+  if (speed !== null) {
+    if (speed >= 140) speedColor = '#ff3333';
+    else if (speed >= 90) speedColor = '#ffcc00';
+  }
 
+  return (
+    <div className={`dm-container ${rainWarning ? 'dm-rain-warning' : ''}`}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{time}</div>
+      <div className="dm-header">
+        <div className="dm-header-time">{time}</div>
         <button 
           onClick={onExit}
           aria-label="Zamknij tryb jazdy"
-          style={{
-            background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%',
-            width: '44px', height: '44px', display: 'flex', justifyContent: 'center', alignItems: 'center',
-            color: 'white', cursor: 'pointer'
-          }}
+          className="dm-close-btn"
         >
           <X size={24} />
         </button>
       </div>
 
-      {/* Main Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', flex: 1, maxHeight: 'calc(100vh - 150px)', overflowY: 'auto' }}>
+      <div className="dm-layout">
         
-        {/* Speedometer (Span 2 cols) */}
-        <div style={{ gridColumn: 'span 2', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: 'rgba(0,0,0,0.3)', borderRadius: '24px', padding: '20px' }}>
-          {errorMsg ? (
-            <div style={{ color: '#ffcc00', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-              <AlertTriangle size={40} />
-              <span>{errorMsg}</span>
-            </div>
-          ) : (
-            <>
-              <div style={{ fontSize: '7rem', fontWeight: '900', lineHeight: 1, color: 'var(--color-primary)' }}>
-                {speed !== null ? speed : '--'}
+        <div className="dm-left-pane">
+          {/* Speedometer */}
+          <div className={`dm-speedometer ${glassClass}`}>
+            {errorMsg ? (
+              <div style={{ color: '#ffcc00', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                <AlertTriangle size={40} />
+                <span>{errorMsg}</span>
               </div>
-              <div style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '2px', marginTop: '5px' }}>KM/H</div>
-            </>
-          )}
-        </div>
-
-        {/* Trip Meter */}
-        <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}><Target size={18} /> TRIP</div>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{tripDistance.toFixed(1)} <span style={{fontSize: '1rem', color: '#888'}}>km</span></div>
-        </div>
-
-        {/* Ride Timer */}
-        <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={18} /> CZAS JAZDY</div>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}>{formatTime(rideTimeSec)}</div>
-        </div>
-
-        {/* Fuel Prediction */}
-        <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}><Activity size={18} /> SPALANIE (SZAC.)</div>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{estimatedFuelConsumed.toFixed(1)} <span style={{fontSize: '1rem', color: '#888'}}>L</span></div>
-          {avgConsumption > 0 ? (
-            <div style={{ fontSize: '0.8rem', color: '#888' }}>Bazując na {avgConsumption.toFixed(1)} L/100km</div>
-          ) : (
-            <div style={{ fontSize: '0.8rem', color: '#888' }}>Brak historii spalania</div>
-          )}
-        </div>
-
-        {/* Nearest Gas Station */}
-        <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}><Fuel size={18} /> NAJBLIŻSZA CPN</div>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>
-            {nearestGasDist !== null ? nearestGasDist.toFixed(1) : '--'} <span style={{fontSize: '1rem', color: '#888'}}>km</span>
-          </div>
-          {avgConsumption > 0 && (
-            <div style={{ fontSize: '0.8rem', color: '#888' }}>Zasięg max: {estimatedRange.toFixed(0)} km</div>
-          )}
-          {nearestGasCoords && (
-            <button 
-              onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearestGasCoords.lat},${nearestGasCoords.lng}`, '_blank')}
-              style={{
-                marginTop: 'auto',
-                background: 'var(--color-primary)', border: 'none', borderRadius: '8px', padding: '8px',
-                color: '#000', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer'
-              }}
-            >
-              <Navigation size={14} /> Prowadź
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Bottom Controls / Warnings */}
-      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        
-        <button 
-          onClick={() => setShowMap(!showMap)}
-          style={{
-            background: showMap ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
-            border: 'none', borderRadius: '12px', padding: '12px 20px',
-            color: showMap ? '#000' : 'white', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
-          }}
-        >
-          <MapIcon size={20} /> Mapa
-        </button>
-
-        {rainWarning && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff3333', fontWeight: 'bold', animation: 'pulse 1s infinite' }}>
-            <CloudRain size={24} /> BURZA / DESZCZ!
-          </div>
-        )}
-      </div>
-
-      {/* Mini Map Modal */}
-      {showMap && (
-        <div style={{
-          position: 'absolute', bottom: '80px', left: '20px', right: '20px', height: '300px',
-          borderRadius: '20px', overflow: 'hidden', border: '2px solid var(--color-primary)',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.5)', zIndex: 100
-        }}>
-          <MapContainer 
-            center={userLoc ? [userLoc.lat, userLoc.lng] : [52.069, 19.480]} 
-            zoom={13} 
-            style={{ height: '100%', width: '100%', zIndex: 0 }}
-            zoomControl={false}
-            attributionControl={false}
-          >
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
-            
-            {/* Minimalist Radar Layer from RainViewer */}
-            {radarTimestamp > 0 && (
-              <TileLayer
-                url={`https://tilecache.rainviewer.com/v2/radar/${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`}
-                opacity={0.6}
-              />
-            )}
-
-            {userLoc && (
+            ) : (
               <>
-                <CircleMarker center={[userLoc.lat, userLoc.lng]} radius={8} color="var(--color-primary)" fillColor="var(--color-primary)" fillOpacity={1} />
-                <MapCenter position={[userLoc.lat, userLoc.lng]} />
+                <div className="dm-speed-value" style={{ color: speedColor }}>
+                  {speed !== null ? speed : '--'}
+                </div>
+                <div className="dm-speed-unit">KM/H</div>
               </>
             )}
-          </MapContainer>
+          </div>
+
+          <div className="dm-controls">
+            <button 
+              onClick={() => setShowMap(!showMap)}
+              className="dm-map-toggle"
+              style={{
+                background: showMap ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
+                color: showMap ? '#000' : 'white',
+              }}
+            >
+              <MapIcon size={20} /> Mapa
+            </button>
+
+            {rainWarning && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff3333', fontWeight: 'bold', animation: 'pulse 1s infinite' }}>
+                <CloudRain size={24} /> BURZA / DESZCZ!
+              </div>
+            )}
+          </div>
         </div>
-      )}
+
+        <div className="dm-right-pane">
+          {showMap ? (
+            <div className="dm-map-container">
+              <MapContainer 
+                center={userLoc ? [userLoc.lat, userLoc.lng] : [52.069, 19.480]} 
+                zoom={13} 
+                style={{ height: '100%', width: '100%', zIndex: 0 }}
+                zoomControl={false}
+                attributionControl={false}
+              >
+                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+                
+                {radarTimestamp > 0 && (
+                  <TileLayer
+                    url={`https://tilecache.rainviewer.com/v2/radar/${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`}
+                    opacity={0.6}
+                  />
+                )}
+
+                {userLoc && (
+                  <>
+                    <CircleMarker center={[userLoc.lat, userLoc.lng]} radius={8} color="var(--color-primary)" fillColor="var(--color-primary)" fillOpacity={1} />
+                    <MapCenter position={[userLoc.lat, userLoc.lng]} />
+                  </>
+                )}
+              </MapContainer>
+            </div>
+          ) : (
+            <div className="dm-stats-grid">
+              
+              <div className={`dm-stat-card ${glassClass}`}>
+                <div className="dm-stat-title"><Target size={18} /> TRIP</div>
+                <div>
+                  <span className="dm-stat-value">{tripDistance.toFixed(1)}</span> <span className="dm-stat-unit">km</span>
+                </div>
+              </div>
+
+              <div className={`dm-stat-card ${glassClass}`}>
+                <div className="dm-stat-title"><Clock size={18} /> CZAS JAZDY</div>
+                <div className="dm-stat-value">{formatTime(rideTimeSec)}</div>
+              </div>
+
+              <div className={`dm-stat-card ${glassClass}`}>
+                <div className="dm-stat-title"><Activity size={18} /> SPALANIE</div>
+                <div>
+                  <span className="dm-stat-value">{estimatedFuelConsumed.toFixed(1)}</span> <span className="dm-stat-unit">L</span>
+                </div>
+                {avgConsumption > 0 ? (
+                  <div className="dm-stat-desc">Bazując na {avgConsumption.toFixed(1)} L/100km</div>
+                ) : (
+                  <div className="dm-stat-desc">Brak historii spalania</div>
+                )}
+              </div>
+
+              <div className={`dm-stat-card ${glassClass}`}>
+                <div className="dm-stat-title"><Fuel size={18} /> NAJBLIŻSZA CPN</div>
+                <div>
+                  <span className="dm-stat-value">
+                    {nearestGasDist !== null ? nearestGasDist.toFixed(1) : '--'}
+                  </span> <span className="dm-stat-unit">km</span>
+                </div>
+                {avgConsumption > 0 && (
+                  <div className="dm-stat-desc">Zasięg max: {estimatedRange.toFixed(0)} km</div>
+                )}
+                {nearestGasCoords && (
+                  <button 
+                    onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearestGasCoords.lat},${nearestGasCoords.lng}`, '_blank')}
+                    style={{
+                      marginTop: 'auto',
+                      background: 'var(--color-primary)', border: 'none', borderRadius: '8px', padding: '8px',
+                      color: '#000', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifySelf: 'center', width: '100%', gap: '4px', cursor: 'pointer'
+                    }}
+                  >
+                    <Navigation size={14} /> Prowadź
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+      </div>
 
       {/* GPS Activity Indicator */}
       {!errorMsg && speed === null && (
