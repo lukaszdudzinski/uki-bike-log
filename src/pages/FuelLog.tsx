@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Fuel, Save, Camera, Loader2 } from 'lucide-react';
+import { Fuel, Save, Camera, Loader2, Edit2, Trash2, X } from 'lucide-react';
 import { storage, type FuelEntry } from '../services/storage';
 import Tesseract from 'tesseract.js';
 import { parseReceiptText } from '../utils/ocrParser';
 
 export default function FuelLog() {
   const [logs, setLogs] = useState<FuelEntry[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [odo, setOdo] = useState<number | ''>('');
   const [liters, setLiters] = useState<number | ''>('');
@@ -49,75 +51,126 @@ export default function FuelLog() {
       alert("Błąd podczas skanowania paragonu.");
     } finally {
       setIsScanning(false);
-      // Reset input so the same file can be selected again
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleEdit = (log: FuelEntry) => {
+    setEditingId(log.id);
+    setDate(log.date.split('T')[0]);
+    setOdo(log.odo);
+    setLiters(log.liters);
+    setPrice(log.price);
+    setPricePerLiter(Number((log.price / log.liters).toFixed(2)));
+    setIsFullTank(log.isFullTank);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Czy na pewno chcesz usunąć ten wpis z historii tankowań?")) {
+      storage.deleteFuelLog(id);
+      setLogs(storage.getFuelLogs());
+    }
+  };
+
+  const resetForm = () => {
+    setEditingId(null);
+    setDate(new Date().toISOString().split('T')[0]);
+    setOdo('');
+    setLiters('');
+    setPrice('');
+    setPricePerLiter('');
+    setIsFullTank(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !odo || !liters || !price) return;
     
-    // Prevent adding ODO lower than current
-    if (Number(odo) < currentOdo && logs.length > 0) {
+    // Prevent adding ODO lower than current (only when not editing)
+    if (!editingId && Number(odo) < currentOdo && logs.length > 0) {
       alert(`Stan licznika nie może być mniejszy niż ostatnio zapisany (${currentOdo} km)!`);
       return;
     }
 
-    // Combine chosen date with current time for uniqueness and sorting
+    // Combine chosen date with current time (or keep original time if editing)
     const now = new Date();
     const timeString = now.toISOString().split('T')[1];
-    const fullDateString = `${date}T${timeString}`;
-
-    const newEntry = storage.addFuelLog({
-      date: fullDateString,
-      odo: Number(odo),
-      liters: Number(liters),
-      price: Number(price),
-      isFullTank
-    });
-
-    setLogs([newEntry, ...logs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     
-    // Reset form
-    setDate(new Date().toISOString().split('T')[0]);
-    setOdo('');
-    setLiters('');
-    setPrice('');
-    setPricePerLiter('');
+    let fullDateString = `${date}T${timeString}`;
     
-    alert('Zapisano pomyślnie!');
+    if (editingId) {
+      const originalLog = logs.find(l => l.id === editingId);
+      if (originalLog) {
+        // preserve original time of day if date hasn't changed
+        const origDate = originalLog.date.split('T')[0];
+        if (origDate === date) {
+          fullDateString = originalLog.date;
+        }
+      }
+      
+      storage.editFuelLog(editingId, {
+        date: fullDateString,
+        odo: Number(odo),
+        liters: Number(liters),
+        price: Number(price),
+        isFullTank
+      });
+      alert('Zaktualizowano wpis pomyślnie!');
+    } else {
+      storage.addFuelLog({
+        date: fullDateString,
+        odo: Number(odo),
+        liters: Number(liters),
+        price: Number(price),
+        isFullTank
+      });
+      alert('Zapisano nowe tankowanie pomyślnie!');
+    }
+
+    setLogs([...storage.getFuelLogs()]);
+    resetForm();
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
-      {/* Add Fuel Form */}
-      <div className="glass-panel">
+      {/* Add/Edit Fuel Form */}
+      <div className="glass-panel" style={editingId ? { borderColor: 'var(--color-primary)', boxShadow: '0 0 15px rgba(255,204,0,0.2)' } : {}}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-            <Fuel color="var(--color-primary)" /> Dodaj tankowanie
+            {editingId ? (
+              <><Edit2 color="var(--color-primary)" /> Edytuj tankowanie</>
+            ) : (
+              <><Fuel color="var(--color-primary)" /> Dodaj tankowanie</>
+            )}
           </h2>
-          <div>
-            <input 
-              type="file" 
-              accept="image/*" 
-              capture="environment" 
-              ref={fileInputRef}
-              onChange={handleScanReceipt}
-              style={{ display: 'none' }} 
-            />
-            <button 
-              type="button" 
-              className="btn-outline" 
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', fontSize: '0.9rem' }}
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isScanning}
-            >
-              {isScanning ? <Loader2 size={16} className="spin" /> : <Camera size={16} />}
-              {isScanning ? 'Skanowanie...' : 'Skanuj paragon'}
+          {!editingId ? (
+            <div>
+              <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment" 
+                ref={fileInputRef}
+                onChange={handleScanReceipt}
+                style={{ display: 'none' }} 
+              />
+              <button 
+                type="button" 
+                className="btn-outline" 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', fontSize: '0.9rem' }}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isScanning}
+              >
+                {isScanning ? <Loader2 size={16} className="spin" /> : <Camera size={16} />}
+                {isScanning ? 'Skanowanie...' : 'Skanuj paragon'}
+              </button>
+            </div>
+          ) : (
+            <button type="button" className="btn-outline" onClick={resetForm} style={{ padding: '8px', display: 'flex', gap: '4px' }}>
+              <X size={18} /> Anuluj
             </button>
-          </div>
+          )}
         </div>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -143,7 +196,6 @@ export default function FuelLog() {
                 onChange={(e) => setOdo(e.target.value ? Number(e.target.value) : '')}
                 placeholder={`Aktualny: ${currentOdo}`}
                 required 
-                min={currentOdo}
               />
             </div>
           </div>
@@ -212,7 +264,7 @@ export default function FuelLog() {
           </div>
 
           <button type="submit" className="btn-primary" style={{ width: '100%' }}>
-            <Save size={20} /> Zapisz tankowanie
+            <Save size={20} /> {editingId ? 'Zapisz zmiany' : 'Zapisz tankowanie'}
           </button>
         </form>
       </div>
@@ -229,18 +281,30 @@ export default function FuelLog() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {logs.map((log) => {
               const dateObj = new Date(log.date);
+              const pricePerL = (log.price / log.liters).toFixed(2);
               return (
-                <div key={log.id} className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
+                <div key={log.id} className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px' }}>
                   <div>
                     <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem' }}>{log.odo.toLocaleString()} km</h4>
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                    <p style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
                       {dateObj.toLocaleDateString()} {dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </p>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                      <button className="btn-outline" style={{ padding: '4px 8px', fontSize: '0.8rem', display: 'flex', alignItems: 'center' }} onClick={() => handleEdit(log)}>
+                        <Edit2 size={14} style={{ marginRight: '4px' }} /> Edytuj
+                      </button>
+                      <button className="btn-outline" style={{ padding: '4px 8px', fontSize: '0.8rem', color: 'var(--color-danger)', borderColor: 'var(--color-danger)', display: 'flex', alignItems: 'center' }} onClick={() => handleDelete(log.id)}>
+                        <Trash2 size={14} style={{ marginRight: '4px' }} /> Usuń
+                      </button>
+                    </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <h4 style={{ margin: '0 0 4px 0', color: 'var(--color-primary)' }}>{log.price.toFixed(2)} PLN</h4>
                     <p style={{ margin: 0, fontSize: '0.85rem' }}>
                       {log.liters} L {log.isFullTank ? '(Pełny)' : ''}
+                    </p>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#888' }}>
+                      {pricePerL} PLN/L
                     </p>
                   </div>
                 </div>

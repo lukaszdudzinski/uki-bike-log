@@ -43,11 +43,13 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
   const [rainWarning, setRainWarning] = useState<boolean>(false);
   const [nearestGasDist, setNearestGasDist] = useState<number | null>(null);
+  const [nearestGasCoords, setNearestGasCoords] = useState<{lat: number, lng: number} | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
   const [radarTimestamp, setRadarTimestamp] = useState<number>(0);
 
   const watchId = useRef<number | null>(null);
+  const wakeLock = useRef<WakeLockSentinel | null>(null);
   const lastWeatherCheck = useRef<number>(0);
   const lastGasCheck = useRef<number>(0);
   const lastCoord = useRef<{lat: number, lng: number} | null>(null);
@@ -67,6 +69,25 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     weatherService.getLatestRadarTimestamp().then(ts => {
       setRadarTimestamp(ts);
     }).catch(e => console.error(e));
+
+    // Request Wake Lock
+    const requestWakeLock = async () => {
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLock.current = await navigator.wakeLock.request('screen');
+        } catch (err) {
+          console.error('Wake Lock error:', err);
+        }
+      }
+    };
+    requestWakeLock();
+
+    return () => {
+      if (wakeLock.current !== null) {
+        wakeLock.current.release().catch(console.error);
+        wakeLock.current = null;
+      }
+    };
   }, []);
 
   // Ride Timer & Clock
@@ -178,6 +199,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
         const stLat = data.elements[0].lat;
         const stLon = data.elements[0].lon;
         setNearestGasDist(getDistanceFromLatLonInKm(lat, lng, stLat, stLon));
+        setNearestGasCoords({lat: stLat, lng: stLon});
       }
     } catch (e) {
       console.error('Overpass API error', e);
@@ -275,6 +297,18 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
           </div>
           {avgConsumption > 0 && (
             <div style={{ fontSize: '0.8rem', color: '#888' }}>Zasięg max: {estimatedRange.toFixed(0)} km</div>
+          )}
+          {nearestGasCoords && (
+            <button 
+              onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearestGasCoords.lat},${nearestGasCoords.lng}`, '_blank')}
+              style={{
+                marginTop: 'auto',
+                background: 'var(--color-primary)', border: 'none', borderRadius: '8px', padding: '8px',
+                color: '#000', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer'
+              }}
+            >
+              <Navigation size={14} /> Prowadź
+            </button>
           )}
         </div>
       </div>

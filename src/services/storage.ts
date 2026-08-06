@@ -37,6 +37,8 @@ export interface BikeSettings {
   lastChainOdo: number;
   valveClearanceIntervalKm: number;
   lastValveClearanceOdo: number;
+  avatar?: string;
+  nickname?: string;
 }
 
 export interface BikeProfile {
@@ -248,6 +250,18 @@ export const storage = {
     cache.fuel.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     localforage.setItem(getStorageKeys(cache.activeBikeId).FUEL, cache.fuel);
     return newEntry;
+  },
+  editFuelLog: (id: string, updatedEntry: Omit<FuelEntry, 'id'>) => {
+    const index = cache.fuel.findIndex(f => f.id === id);
+    if (index !== -1) {
+      cache.fuel[index] = { ...updatedEntry, id };
+      cache.fuel.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      localforage.setItem(getStorageKeys(cache.activeBikeId).FUEL, cache.fuel);
+    }
+  },
+  deleteFuelLog: (id: string) => {
+    cache.fuel = cache.fuel.filter(f => f.id !== id);
+    localforage.setItem(getStorageKeys(cache.activeBikeId).FUEL, cache.fuel);
   },
 
   // --- Service ---

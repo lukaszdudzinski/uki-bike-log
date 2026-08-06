@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2 } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
@@ -15,15 +15,22 @@ function App() {
   const [isDark, setIsDark] = useState(true);
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
   const [isDrivingMode, setIsDrivingMode] = useState(false);
+  
+  // Profile state for active bike
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [nickname, setNickname] = useState<string>('');
 
   // Set initial theme and handle notifications
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     
     if (!isLoading && activeBike) {
+      const settings = storage.getSettings();
+      setAvatar(settings.avatar || null);
+      setNickname(settings.nickname || '');
+
       // Check for notifications for the active bike
       if ('Notification' in window && Notification.permission === 'granted') {
-        const settings = storage.getSettings();
         const odo = storage.getCurrentOdo();
         const chainTraveled = odo - settings.lastChainOdo;
         
@@ -45,6 +52,26 @@ function App() {
       }
     }
   }, [isDark, isLoading, activeBike]);
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setAvatar(base64String);
+        const settings = storage.getSettings();
+        storage.saveSettings({ ...settings, avatar: base64String });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNickname(e.target.value);
+    const settings = storage.getSettings();
+    storage.saveSettings({ ...settings, nickname: e.target.value });
+  };
 
   if (isLoading || !activeBike) {
     return (
@@ -75,6 +102,36 @@ function App() {
         return (
           <div className="glass-panel" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             
+            {/* Profile Section */}
+            <h2 style={{ margin: 0, color: 'var(--color-primary)' }}>Twój Profil</h2>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '12px' }}>
+              <div 
+                style={{ 
+                  width: '80px', height: '80px', borderRadius: '50%', 
+                  background: avatar ? `url(${avatar}) center/cover` : '#333',
+                  border: '2px solid var(--color-primary)', display: 'flex', justifyContent: 'center', alignItems: 'center'
+                }}
+              >
+                {!avatar && <span style={{ fontSize: '2rem' }}>👤</span>}
+              </div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label className="btn-outline" style={{ display: 'inline-block', textAlign: 'center', cursor: 'pointer', padding: '6px 12px', fontSize: '0.9rem' }}>
+                  Zmień Awatar
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
+                </label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Twój Nick..." 
+                  value={nickname}
+                  onChange={handleNicknameChange}
+                  style={{ padding: '8px', fontSize: '1rem' }}
+                />
+              </div>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '8px 0' }} />
+
             {/* Garage Management Section */}
             <h2 style={{ margin: 0, color: 'var(--color-primary)' }}>Mój Garaż</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -430,6 +487,19 @@ function App() {
           isActive={activeTab === 'settings'} 
           onClick={() => setActiveTab('settings')} 
         />
+        <a 
+          href="https://suppi.pl/ukidives" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ textDecoration: 'none' }}
+        >
+          <NavItem 
+            icon={<Coffee size={24} />} 
+            label="Kawa" 
+            isActive={false} 
+            onClick={() => {}} 
+          />
+        </a>
       </nav>
     </div>
   );
