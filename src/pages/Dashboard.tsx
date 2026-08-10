@@ -115,7 +115,7 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
       </div>
 
       <p style={{ textAlign: 'center', marginTop: '20px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-        Uki Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} (Radar & Garaż)
+        Uki's Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} (Radar & Garaż)
       </p>
 
     </div>

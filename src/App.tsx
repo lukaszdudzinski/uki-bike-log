@@ -440,7 +440,7 @@ function App() {
             </div>
             
             <p style={{ textAlign: 'center', marginTop: '30px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-              Uki Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} (Radar & Garaż)
+              Uki's Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} (Radar & Garaż)
             </p>
           </div>
         );
@@ -483,7 +483,7 @@ function App() {
           >
             <img className="pulse-glow" src={`${import.meta.env.BASE_URL}logo.png`} alt="Uki Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--color-primary)' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
             <div style={{ width: '100%' }}>
-              <h1 style={{ margin: 0, fontSize: '1.6rem' }}>Uki <span style={{ color: 'var(--color-primary)' }}>Bike Log</span></h1>
+              <h1 style={{ margin: 0, fontSize: '1.6rem' }}>Uki's <span style={{ color: 'var(--color-primary)' }}>Bike Log</span></h1>
               
               {/* Garage Dropdown Header */}
               <select 
