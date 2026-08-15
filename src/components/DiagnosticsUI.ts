@@ -133,7 +133,7 @@ export const DiagnosticsUI = {
                 const now = new Date();
                 const dateStr = now.toISOString().split('T')[0];
                 const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-mm-ss
-                a.download = \`bikelog_backup_\${dateStr}_\${timeStr}.json\`;
+                a.download = `bikelog_backup_${dateStr}_${timeStr}.json`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -210,9 +210,9 @@ export const DiagnosticsUI = {
                         grouped[v].push(log);
                     });
                     for (const v in grouped) {
-                        text += \`--- Wersja: \${v} ---\\n\`;
+                        text += `--- Wersja: ${v} ---\n`;
                         grouped[v].forEach((l: any) => {
-                            text += \`[\${l.time}] \${l.msg}\\n\${l.stack}\\n\\n\`;
+                            text += `[${l.time}] ${l.msg}\n${l.stack}\n\n`;
                         });
                     }
                 } catch (e) {
@@ -227,7 +227,7 @@ export const DiagnosticsUI = {
                         console.log("Share failed:", err);
                     });
                 } else {
-                    window.location.href = \`mailto:?subject=Uki%20Bike%20Log%20Logi&body=\${encodeURIComponent(text)}\`;
+                    window.location.href = `mailto:?subject=Uki%20Bike%20Log%20Logi&body=${encodeURIComponent(text)}`;
                 }
             });
         }
