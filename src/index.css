@@ -99,6 +99,9 @@ body {
   /* Subtle static gradient to mimic curved glossy tank reflection */
   background-image: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, transparent 40%);
   background-attachment: fixed;
+  
+  overflow: hidden;
+  height: 100dvh;
 }
 
 /* Typography */
@@ -136,16 +139,18 @@ a:hover {
 .app-container {
   max-width: 600px; /* Mobile width constraint on desktop */
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
+  background-color: var(--color-bg);
 }
 
 .main-content {
   flex: 1;
   padding: 20px;
-  padding-bottom: 80px; /* Space for bottom nav */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Interactive elements */

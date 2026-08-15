@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee, Activity } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee, Activity, Home } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
@@ -388,6 +388,16 @@ function App() {
               >
                 Przejdź do Diagnostyki / Kopii zapasowej
               </button>
+              <a 
+                href="https://suppi.pl/ukidives" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none', display: 'block' }}
+              >
+                <button className="btn-outline" style={{ width: '100%', borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>
+                  <Coffee size={18} /> Postaw mi Kawę ☕
+                </button>
+              </a>
             </div>
             
             <p style={{ textAlign: 'center', margin: '30px 0', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
@@ -486,12 +496,7 @@ function App() {
 
       {/* Bottom Navigation */}
       <nav style={{
-        position: 'fixed',
-        bottom: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
         width: '100%',
-        maxWidth: '600px',
         backgroundColor: 'var(--color-glass-bg)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
@@ -502,7 +507,7 @@ function App() {
         zIndex: 1000
       }}>
         <NavItem 
-          icon={<Settings size={24} />} 
+          icon={<Home size={24} />} 
           label="Pulpit" 
           isActive={activeTab === 'dashboard'} 
           onClick={() => setActiveTab('dashboard')} 
@@ -531,25 +536,6 @@ function App() {
           isActive={activeTab === 'settings'} 
           onClick={() => setActiveTab('settings')} 
         />
-        <NavItem 
-          icon={<Activity size={24} />} 
-          label="Diagnostyka" 
-          isActive={activeTab === 'diagnostics'} 
-          onClick={() => setActiveTab('diagnostics')} 
-        />
-        <a 
-          href="https://suppi.pl/ukidives" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          style={{ textDecoration: 'none' }}
-        >
-          <NavItem 
-            icon={<Coffee size={24} />} 
-            label="Kawa" 
-            isActive={false} 
-            onClick={() => {}} 
-          />
-        </a>
       </nav>
       {/* Changelog Modal */}
       {isChangelogOpen && (
