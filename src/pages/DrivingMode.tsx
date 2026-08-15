@@ -49,6 +49,8 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
   const [showMap, setShowMap] = useState<boolean>(false);
   const [radarTimestamp, setRadarTimestamp] = useState<number>(0);
   const [liquidGlass, setLiquidGlass] = useState<boolean>(true);
+  const [leanAngle, setLeanAngle] = useState<number | null>(null);
+  const [needsOrientationPermission, setNeedsOrientationPermission] = useState<boolean>(false);
 
   const watchId = useRef<number | null>(null);
   const wakeLock = useRef<WakeLockSentinel | null>(null);
@@ -85,13 +87,63 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     };
     requestWakeLock();
 
+    // Orientation (Lean Angle) setup
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      let angle = 0;
+      const orientation = (window.screen.orientation || {}).type || '';
+      if (orientation.includes('landscape') || window.orientation === 90 || window.orientation === -90) {
+        angle = event.beta || 0;
+      } else {
+        angle = event.gamma || 0;
+      }
+      
+      // Limit to 90 degrees max to avoid weird flips
+      if (angle > 90) angle = 90;
+      if (angle < -90) angle = -90;
+      
+      setLeanAngle(Math.round(angle));
+    };
+
+    if (typeof (window as any).DeviceOrientationEvent !== 'undefined' && typeof (window as any).DeviceOrientationEvent.requestPermission === 'function') {
+      // iOS 13+ requires user gesture to request permission
+      setNeedsOrientationPermission(true);
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+
     return () => {
       if (wakeLock.current !== null) {
         wakeLock.current.release().catch(console.error);
         wakeLock.current = null;
       }
+      window.removeEventListener('deviceorientation', handleOrientation);
     };
   }, []);
+
+  const requestOrientationPermission = async () => {
+    try {
+      const permissionState = await (window as any).DeviceOrientationEvent.requestPermission();
+      if (permissionState === 'granted') {
+        setNeedsOrientationPermission(false);
+        // have to re-declare handleOrientation here if we bind it, or just rely on a global one.
+        // Actually, we can just bind an inline one for simplicity since we don't unbind it differently.
+        window.addEventListener('deviceorientation', (event: DeviceOrientationEvent) => {
+          let angle = 0;
+          const orientation = (window.screen.orientation || {}).type || '';
+          if (orientation.includes('landscape') || window.orientation === 90 || window.orientation === -90) {
+            angle = event.beta || 0;
+          } else {
+            angle = event.gamma || 0;
+          }
+          if (angle > 90) angle = 90;
+          if (angle < -90) angle = -90;
+          setLeanAngle(Math.round(angle));
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Ride Timer & Clock
   useEffect(() => {
@@ -320,6 +372,21 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
               <div className={`dm-stat-card ${glassClass}`}>
                 <div className="dm-stat-title"><Clock size={18} /> CZAS JAZDY</div>
                 <div className="dm-stat-value">{formatTime(rideTimeSec)}</div>
+              </div>
+
+              <div className={`dm-stat-card ${glassClass}`}>
+                <div className="dm-stat-title">
+                  <Navigation size={18} style={{ transform: `rotate(${leanAngle || 0}deg)`, transition: 'transform 0.1s linear' }} /> 
+                  POCHYLENIE
+                </div>
+                {needsOrientationPermission ? (
+                  <button onClick={requestOrientationPermission} style={{ marginTop: 'auto', background: 'transparent', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', borderRadius: '15px', padding: '5px', fontSize: '0.8rem', cursor: 'pointer' }}>Aktywuj żyroskop</button>
+                ) : (
+                  <div>
+                    <span className="dm-stat-value">{leanAngle !== null ? Math.abs(leanAngle) : '--'}</span> 
+                    <span className="dm-stat-unit">° {leanAngle !== null ? (leanAngle < -2 ? 'L' : (leanAngle > 2 ? 'P' : '')) : ''}</span>
+                  </div>
+                )}
               </div>
 
               <div className={`dm-stat-card ${glassClass}`}>

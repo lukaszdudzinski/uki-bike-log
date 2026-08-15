@@ -1,5 +1,17 @@
 [
   {
+    "version": "v2026.8.15.22",
+    "changes": [
+      "✨ Nowość w Trybie Jazdy: Zintegrowano żyroskop telefonu, dodając dynamiczny wskaźnik pochylenia motocykla (w stopniach) działający w czasie rzeczywistym."
+    ]
+  },
+  {
+    "version": "v2026.8.15.21",
+    "changes": [
+      "🛠️ Naprawiono moduł aktualizacji PWA – poprawiono przycisk instalacji oraz przywrócono wbudowany podgląd listy zmian."
+    ]
+  },
+  {
     "version": "2026.08.15.20",
     "changes": [
       "Zoptymalizowano dolny pasek nawigacyjny: usunięto zbędne zakładki (Diagnostyka, Kawa) przenosząc je do sekcji Opcje. Uporządkowano ikony (dodano ikonę Home dla Pulpitu).",
