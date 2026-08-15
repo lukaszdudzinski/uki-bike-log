@@ -295,22 +295,59 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
       <div className="dm-layout">
         
         <div className="dm-left-pane">
-          {/* Speedometer */}
-          <div className={`dm-speedometer ${glassClass}`}>
-            {errorMsg ? (
-              <div style={{ color: '#ffcc00', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                <AlertTriangle size={40} />
-                <span>{errorMsg}</span>
+          {/* Speedometer Area */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+            
+            {/* Left Lean Indicator */}
+            <div style={{ 
+              display: 'flex', flexDirection: 'column', alignItems: 'center', 
+              opacity: (leanAngle !== null && leanAngle < -2) ? 1 : 0.3, 
+              color: 'var(--color-primary)', transition: 'opacity 0.2s',
+              width: '60px'
+            }}>
+              <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
+                {leanAngle !== null && leanAngle < -2 ? Math.abs(leanAngle) : 0}°
               </div>
-            ) : (
-              <>
-                <div className="dm-speed-value" style={{ color: speedColor }}>
-                  {speed !== null ? speed : '--'}
+              <div style={{ fontSize: '0.7rem', letterSpacing: '2px' }}>LEWO</div>
+            </div>
+
+            {/* Speedometer Center */}
+            <div className={`dm-speedometer ${glassClass}`} style={{ flex: '0 0 auto' }}>
+              {errorMsg ? (
+                <div style={{ color: '#ffcc00', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                  <AlertTriangle size={40} />
+                  <span>{errorMsg}</span>
                 </div>
-                <div className="dm-speed-unit">KM/H</div>
-              </>
-            )}
+              ) : (
+                <>
+                  <div className="dm-speed-value" style={{ color: speedColor }}>
+                    {speed !== null ? speed : '--'}
+                  </div>
+                  <div className="dm-speed-unit">KM/H</div>
+                </>
+              )}
+            </div>
+
+            {/* Right Lean Indicator */}
+            <div style={{ 
+              display: 'flex', flexDirection: 'column', alignItems: 'center', 
+              opacity: (leanAngle !== null && leanAngle > 2) ? 1 : 0.3, 
+              color: 'var(--color-primary)', transition: 'opacity 0.2s',
+              width: '60px'
+            }}>
+              <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
+                {leanAngle !== null && leanAngle > 2 ? leanAngle : 0}°
+              </div>
+              <div style={{ fontSize: '0.7rem', letterSpacing: '2px' }}>PRAWO</div>
+            </div>
+
           </div>
+
+          {needsOrientationPermission && (
+            <button onClick={requestOrientationPermission} className="btn-outline" style={{ margin: '15px auto', display: 'block', padding: '8px 16px', fontSize: '0.8rem' }}>
+              Aktywuj żyroskop dla pochylenia
+            </button>
+          )}
 
           <div className="dm-controls">
             <button 
@@ -374,20 +411,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
                 <div className="dm-stat-value">{formatTime(rideTimeSec)}</div>
               </div>
 
-              <div className={`dm-stat-card ${glassClass}`}>
-                <div className="dm-stat-title">
-                  <Navigation size={18} style={{ transform: `rotate(${leanAngle || 0}deg)`, transition: 'transform 0.1s linear' }} /> 
-                  POCHYLENIE
-                </div>
-                {needsOrientationPermission ? (
-                  <button onClick={requestOrientationPermission} style={{ marginTop: 'auto', background: 'transparent', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', borderRadius: '15px', padding: '5px', fontSize: '0.8rem', cursor: 'pointer' }}>Aktywuj żyroskop</button>
-                ) : (
-                  <div>
-                    <span className="dm-stat-value">{leanAngle !== null ? Math.abs(leanAngle) : '--'}</span> 
-                    <span className="dm-stat-unit">° {leanAngle !== null ? (leanAngle < -2 ? 'L' : (leanAngle > 2 ? 'P' : '')) : ''}</span>
-                  </div>
-                )}
-              </div>
+
 
               <div className={`dm-stat-card ${glassClass}`}>
                 <div className="dm-stat-title"><Activity size={18} /> SPALANIE</div>
