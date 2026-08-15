@@ -1,38 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee } from 'lucide-react';
-import { useRegisterSW } from 'virtual:pwa-register/react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee, Activity } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
 import Stats from './pages/Stats';
 import Routes from './pages/Routes';
 import DrivingMode from './pages/DrivingMode';
+import Diagnostics from './pages/Diagnostics';
 import { storage } from './services/storage';
 import { useGarage } from './contexts/GarageContext';
 
 function App() {
-  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
-    onRegistered(r: any) {
-      console.log('SW Registered: ', r);
-      if (r) {
-        // Check for updates periodically every hour
-        setInterval(() => {
-          r.update();
-        }, 60 * 60 * 1000);
-        
-        // Also check for updates when app comes back to foreground
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
-            r.update();
-          }
-        });
-      }
-    },
-    onRegisterError(error: any) {
-      console.log('SW registration error', error);
-    },
-  });
-
   const { bikes, activeBike, isLoading, switchBike, addBike, editBike, deleteBike } = useGarage();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDark, setIsDark] = useState(true);
@@ -147,6 +125,8 @@ function App() {
         return <Stats />;
       case 'routes':
         return <Routes />;
+      case 'diagnostics':
+        return <Diagnostics />;
       case 'settings':
         return (
           <div className="glass-panel" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -398,49 +378,22 @@ function App() {
             
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '12px 0' }} />
             
-            <h3 style={{ margin: '0 0 8px 0' }}>Zarządzanie Danymi</h3>
             <p style={{ margin: '0 0 16px 0', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-              Twoje dane są bezpiecznie przechowywane w pamięci urządzenia. Kopia zapasowa pobierze dane WSZYSTKICH motocykli.
+              Twoje dane są bezpiecznie przechowywane w pamięci urządzenia. Do tworzenia kopii użyj zakładki "Diagnostyka".
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button 
                 className="btn-outline" 
-                onClick={() => storage.exportBackup()}
+                onClick={() => setActiveTab('diagnostics')}
               >
-                Pobierz Kopię Zapasową (Wszystkie Pojazdy)
+                Przejdź do Diagnostyki / Kopii zapasowej
               </button>
-              
-              <label className="btn-outline" style={{ display: 'block', textAlign: 'center', cursor: 'pointer' }}>
-                Wgraj Kopię Zapasową
-                <input 
-                  type="file" 
-                  accept=".json" 
-                  style={{ display: 'none' }} 
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = async (event) => {
-                      const text = event.target?.result as string;
-                      if (confirm('UWAGA: Wgranie kopii nadpisze wszystkie obecne dane we wszystkich garażach. Kontynuować?')) {
-                        const success = await storage.importBackup(text);
-                        if (success) {
-                          alert('Wgrano kopię zapasową pomyślnie!');
-                          window.location.reload();
-                        } else {
-                          alert('Błąd podczas wgrywania pliku. Plik jest uszkodzony lub ma zły format.');
-                        }
-                      }
-                    };
-                    reader.readAsText(file);
-                    e.target.value = '';
-                  }} 
-                />
-              </label>
             </div>
             
-            <p style={{ textAlign: 'center', marginTop: '30px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-              Uki's Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} (Radar & Garaż)
+            <p style={{ textAlign: 'center', margin: '30px 0', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
+              Uki's Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'}
+              <br/>
+              <button id="trigger-changelog-modal" onClick={fetchChangelog} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', textDecoration: 'underline', marginTop: '8px', cursor: 'pointer' }}>Zobacz co nowego (Changelog)</button>
             </p>
           </div>
         );
@@ -451,30 +404,6 @@ function App() {
 
   return (
     <div className="app-container">
-      {needRefresh && (
-        <div style={{ 
-          background: '#FF9800', color: '#000', padding: '15px', textAlign: 'center', 
-          boxShadow: '0 4px 6px rgba(0,0,0,0.3)', animation: 'slideDown 0.5s ease-out'
-        }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>
-            Dostępna nowa aktualizacja! 🚀
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-            <button 
-              onClick={() => updateServiceWorker(true)}
-              style={{ padding: '8px 16px', background: '#000', color: '#FF9800', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
-            >
-              Zaktualizuj
-            </button>
-            <button 
-              onClick={fetchChangelog}
-              style={{ padding: '8px 16px', background: 'rgba(0,0,0,0.1)', color: '#000', border: '1px solid #000', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
-            >
-              Co nowego?
-            </button>
-          </div>
-        </div>
-      )}
       <main className="main-content">
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div 
@@ -602,6 +531,12 @@ function App() {
           isActive={activeTab === 'settings'} 
           onClick={() => setActiveTab('settings')} 
         />
+        <NavItem 
+          icon={<Activity size={24} />} 
+          label="Diagnostyka" 
+          isActive={activeTab === 'diagnostics'} 
+          onClick={() => setActiveTab('diagnostics')} 
+        />
         <a 
           href="https://suppi.pl/ukidives" 
           target="_blank" 
@@ -660,7 +595,10 @@ function App() {
               <button 
                 className="btn-primary" 
                 style={{ width: '100%', padding: '12px', fontSize: '1.1rem', fontWeight: 'bold' }}
-                onClick={() => updateServiceWorker(true)}
+                onClick={() => {
+                  setIsChangelogOpen(false);
+                  if ((window as any).PWAUpdateUI) (window as any).PWAUpdateUI.doPwaUpdate();
+                }}
               >
                 Zaktualizuj teraz 🚀
               </button>

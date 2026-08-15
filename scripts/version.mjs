@@ -28,4 +28,20 @@ if (currentVersion.startsWith(prefix)) {
 packageJson.version = newVersion;
 fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\n');
 
-console.log(`Version bumped to ${newVersion}`);
+// Zaktualizuj public/sw.js
+const swPath = path.resolve(process.cwd(), 'public/sw.js');
+if (fs.existsSync(swPath)) {
+  let swContent = fs.readFileSync(swPath, 'utf8');
+  swContent = swContent.replace(/ukis-bikelog-v[\d\.]+/, `ukis-bikelog-v${newVersion}`);
+  fs.writeFileSync(swPath, swContent);
+}
+
+// Zaktualizuj index.html
+const indexPath = path.resolve(process.cwd(), 'index.html');
+if (fs.existsSync(indexPath)) {
+  let indexContent = fs.readFileSync(indexPath, 'utf8');
+  indexContent = indexContent.replace(/<meta name="app-version" content="[^"]+">/, `<meta name="app-version" content="${newVersion}">`);
+  fs.writeFileSync(indexPath, indexContent);
+}
+
+console.log(`Version bumped to ${newVersion} in package.json, sw.js and index.html`);

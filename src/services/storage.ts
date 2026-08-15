@@ -194,7 +194,7 @@ export const storage = {
   },
 
   // --- Backup (Exports all bikes) ---
-  exportBackup: async () => {
+  exportDatabase: async (): Promise<string> => {
     const backup: any = { bikes: cache.bikes, activeBikeId: cache.activeBikeId, data: {} };
     for (const bike of cache.bikes) {
       const keys = getStorageKeys(bike.id);
@@ -205,7 +205,43 @@ export const storage = {
         settings: await localforage.getItem(keys.SETTINGS)
       };
     }
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    return JSON.stringify(backup, null, 2);
+  },
+
+  importDatabase: async (jsonString: string) => {
+    const backup = JSON.parse(jsonString);
+    if (!backup.bikes && !backup.settings) {
+      throw new Error("Invalid backup format: missing required data structures.");
+    }
+    
+    // Czyszczenie obecnych danych
+    await localforage.clear();
+    
+    // Backward compatibility logic
+    if (!backup.bikes) {
+      const keys = getStorageKeys('default');
+      if (backup.settings) await localforage.setItem(keys.SETTINGS, backup.settings);
+      if (backup.fuel) await localforage.setItem(keys.FUEL, backup.fuel);
+      if (backup.service) await localforage.setItem(keys.SERVICE, backup.service);
+      if (backup.routes) await localforage.setItem(keys.ROUTES, backup.routes);
+    } else {
+      await localforage.setItem(GLOBAL_KEYS.BIKES, backup.bikes);
+      await localforage.setItem(GLOBAL_KEYS.ACTIVE_BIKE, backup.activeBikeId);
+      for (const bikeId of Object.keys(backup.data)) {
+        const keys = getStorageKeys(bikeId);
+        if (backup.data[bikeId].settings) await localforage.setItem(keys.SETTINGS, backup.data[bikeId].settings);
+        if (backup.data[bikeId].fuel) await localforage.setItem(keys.FUEL, backup.data[bikeId].fuel);
+        if (backup.data[bikeId].service) await localforage.setItem(keys.SERVICE, backup.data[bikeId].service);
+        if (backup.data[bikeId].routes) await localforage.setItem(keys.ROUTES, backup.data[bikeId].routes);
+      }
+    }
+    
+    await storage.initDB();
+  },
+
+  exportBackup: async () => {
+    const dataStr = await storage.exportDatabase();
+    const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -216,30 +252,7 @@ export const storage = {
 
   importBackup: async (jsonString: string) => {
     try {
-      const backup = JSON.parse(jsonString);
-      
-      // Backward compatibility logic: if backup doesn't have bikes array, it's an old backup
-      if (!backup.bikes) {
-        // It's a v1 backup. Load it into 'default'.
-        const keys = getStorageKeys('default');
-        if (backup.settings) await localforage.setItem(keys.SETTINGS, backup.settings);
-        if (backup.fuel) await localforage.setItem(keys.FUEL, backup.fuel);
-        if (backup.service) await localforage.setItem(keys.SERVICE, backup.service);
-        if (backup.routes) await localforage.setItem(keys.ROUTES, backup.routes);
-      } else {
-        // It's a v2 backup
-        await localforage.setItem(GLOBAL_KEYS.BIKES, backup.bikes);
-        await localforage.setItem(GLOBAL_KEYS.ACTIVE_BIKE, backup.activeBikeId);
-        for (const bikeId of Object.keys(backup.data)) {
-          const keys = getStorageKeys(bikeId);
-          if (backup.data[bikeId].settings) await localforage.setItem(keys.SETTINGS, backup.data[bikeId].settings);
-          if (backup.data[bikeId].fuel) await localforage.setItem(keys.FUEL, backup.data[bikeId].fuel);
-          if (backup.data[bikeId].service) await localforage.setItem(keys.SERVICE, backup.data[bikeId].service);
-          if (backup.data[bikeId].routes) await localforage.setItem(keys.ROUTES, backup.data[bikeId].routes);
-        }
-      }
-      
-      await storage.initDB();
+      await storage.importDatabase(jsonString);
       return true;
     } catch (e) {
       console.error('Błąd importu', e);
