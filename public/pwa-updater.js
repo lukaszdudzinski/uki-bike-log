@@ -57,20 +57,24 @@
             if (window.PWAUpdateUI.pwaWorker) {
                 window.PWAUpdateUI.pwaWorker.postMessage('SKIP_WAITING');
                 setTimeout(async () => {
-                    const keys = await caches.keys();
-                    await Promise.all(keys.map(k => caches.delete(k)));
+                    try {
+                        const keys = await caches.keys();
+                        await Promise.all(keys.map(k => caches.delete(k)));
+                    } catch(e) { console.error('Cache clear error:', e); }
                     window.location.reload(true);
                 }, 1000);
             } else {
                 // Twarde czyszczenie jeśli nie złapaliśmy nowego workera
-                if ('serviceWorker' in navigator) {
-                    const regs = await navigator.serviceWorker.getRegistrations();
-                    for (let reg of regs) {
-                        await reg.unregister();
+                try {
+                    if ('serviceWorker' in navigator) {
+                        const regs = await navigator.serviceWorker.getRegistrations();
+                        for (let reg of regs) {
+                            await reg.unregister();
+                        }
                     }
-                }
-                const keys = await caches.keys();
-                await Promise.all(keys.map(k => caches.delete(k)));
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                } catch(e) { console.error('Hard reset error:', e); }
                 window.location.reload(true);
             }
         },
@@ -89,7 +93,41 @@
                     const metaVersion = document.querySelector('meta[name="app-version"]')?.content || 'v.0.0.0';
                     window.showChangelogModal(metaVersion);
                 } else {
-                    alert('Więcej szczegółów wewnątrz aplikacji po aktualizacji!');
+                    if (!document.getElementById('pwa-changelog-modal-standalone')) {
+                        const modalHtml = `
+                        <div id="pwa-changelog-modal-standalone" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100000; justify-content: center; align-items: center;">
+                            <div style="background: #222; color: #fff; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                                <h3 style="margin-top: 0; color: #FF9800;">Co nowego?</h3>
+                                <div id="pwa-changelog-body-standalone">Ładowanie...</div>
+                                <button id="pwa-changelog-close-btn" style="margin-top: 20px; padding: 10px; width: 100%; background: #444; color: #fff; border: 1px solid #555; border-radius: 4px; cursor: pointer;">Zamknij</button>
+                            </div>
+                        </div>`;
+                        document.body.insertAdjacentHTML('beforeend', modalHtml);
+                        
+                        document.getElementById('pwa-changelog-close-btn').addEventListener('click', () => {
+                            document.getElementById('pwa-changelog-modal-standalone').style.display = 'none';
+                        });
+                    }
+                    
+                    document.getElementById('pwa-changelog-modal-standalone').style.display = 'flex';
+                    const body = document.getElementById('pwa-changelog-body-standalone');
+                    body.innerHTML = '<p>Ładowanie zmian...</p>';
+                    
+                    fetch('changelog.json?t=' + Date.now())
+                        .then(res => res.json())
+                        .then(data => {
+                            body.innerHTML = data.map(v => `
+                                <div style="margin-bottom: 20px;">
+                                    <h4 style="margin: 0 0 10px 0; color: #FF9800;">Wersja ${v.version}</h4>
+                                    <ul style="margin: 0; padding-left: 20px; color: #ccc;">
+                                        ${v.changes.map(c => `<li style="margin-bottom: 6px;">${c}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            `).join('');
+                        })
+                        .catch(e => {
+                            body.innerHTML = '<p>Błąd ładowania changeloga.</p>';
+                        });
                 }
             });
 
