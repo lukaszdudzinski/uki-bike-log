@@ -1,5 +1,14 @@
 [
   {
+    "version": "2026.08.15.20",
+    "changes": [
+      "Zoptymalizowano dolny pasek nawigacyjny: usunięto zbędne zakładki (Diagnostyka, Kawa) przenosząc je do sekcji Opcje. Uporządkowano ikony (dodano ikonę Home dla Pulpitu).",
+      "Wdrożono natywne wsparcie dla przeglądarek mobilnych, rozwiązując problem z nakładającym się lub przesuwającym się dolnym paskiem przy przewijaniu ekranu.",
+      "Zintegrowano nowy, kuloodporny i niezależny od głównego interfejsu mechanizm aktualizacji PWA, poprawiający responsywność paska 'Co nowego?'.",
+      "Zintegrowano zakładkę Diagnostyka umożliwiającą pełen eksport i import zawartości bazy danych, a także mechanizm twardego resetu Cache PWA."
+    ]
+  },
+  {
     "version": "2026.08.06.12",
     "changes": [
       "Aktualizacja wpisów w historii zmian (Co nowego?)."
