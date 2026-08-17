@@ -49,15 +49,15 @@ export default function Routes() {
   const [userLoc, setUserLoc] = useState<Coordinates | null>(null);
   const [targetLoc, setTargetLoc] = useState<Coordinates | null>(null);
   const [routePolyline, setRoutePolyline] = useState<[number, number][] | null>(null);
-  const [radarTimestamp, setRadarTimestamp] = useState<number>(0);
+  const [radarUrl, setRadarUrl] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanStatus, setScanStatus] = useState<string>('');
 
   useEffect(() => {
     setRoutes(storage.getRoutes());
-    // Load latest radar timestamp on mount
-    weatherService.getLatestRadarTimestamp().then(ts => {
-      if (ts) setRadarTimestamp(ts);
+    // Load latest radar url on mount
+    weatherService.getLatestRadarUrl().then(url => {
+      if (url) setRadarUrl(url);
     });
   }, []);
 
@@ -142,9 +142,9 @@ export default function Routes() {
             />
             
             {/* RainViewer Radar Layer */}
-            {radarTimestamp > 0 && (
+            {radarUrl && (
               <TileLayer
-                url={`https://tilecache.rainviewer.com/v2/radar/${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`}
+                url={radarUrl}
                 opacity={0.6}
               />
             )}
