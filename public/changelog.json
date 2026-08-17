@@ -1,5 +1,11 @@
 [
   {
+    "version": "v2026.8.17.05",
+    "changes": [
+      "☁️ Gorąca poprawka: Synchronizacja modułu Moje Trasy z nowym silnikiem RainViewer API."
+    ]
+  },
+  {
     "version": "v2026.8.17.04",
     "changes": [
       "🛠️ Krytyczna poprawka mechanizmu PWA: usunięto błąd powodujący wpadanie aplikacji w nieskończoną pętlę instalacji aktualizacji.",
