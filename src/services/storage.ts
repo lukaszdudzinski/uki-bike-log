@@ -44,6 +44,7 @@ export interface BikeSettings {
   avatar?: string;
   nickname?: string;
   liquidGlassEnabled?: boolean;
+  rainWarningRadius?: number;
 }
 
 export interface BikeProfile {

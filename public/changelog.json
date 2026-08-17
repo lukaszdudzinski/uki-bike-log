@@ -1,5 +1,13 @@
 [
   {
+    "version": "v2026.8.17.02",
+    "changes": [
+      "✨ Nowy algorytm meteorologiczny w Trybie Jazdy: ostrzega przed burzą/deszczem analizując symultanicznie 5 punktów geodezyjnych w ustalonej odległości.",
+      "⚙️ W Opcjach aplikacji można teraz wybrać promień wczesnego ostrzegania o opadach (10 km, 30 km lub 50 km).",
+      "🗺️ Dodano sprzętowe sterowanie przybliżaniem/oddalaniem mapy pogodowej."
+    ]
+  },
+  {
     "version": "v2026.8.15.22",
     "changes": [
       "✨ Nowość w Trybie Jazdy: Zintegrowano żyroskop telefonu, dodając dynamiczny wskaźnik pochylenia motocykla (w stopniach) działający w czasie rzeczywistym."

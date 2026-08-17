@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee, Activity, Home } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee, Home } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
@@ -21,6 +21,7 @@ function App() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [nickname, setNickname] = useState<string>('');
   const [liquidGlass, setLiquidGlass] = useState<boolean>(true);
+  const [rainWarningRadius, setRainWarningRadius] = useState<number>(10);
 
   // Changelog modal state
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
@@ -49,6 +50,7 @@ function App() {
       setAvatar(settings.avatar || null);
       setNickname(settings.nickname || '');
       setLiquidGlass(settings.liquidGlassEnabled !== false);
+      setRainWarningRadius(settings.rainWarningRadius || 10);
 
       // Check for notifications for the active bike
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -98,6 +100,13 @@ function App() {
     setLiquidGlass(e.target.checked);
     const settings = storage.getSettings();
     storage.saveSettings({ ...settings, liquidGlassEnabled: e.target.checked });
+  };
+
+  const handleRainWarningRadiusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = parseInt(e.target.value, 10);
+    setRainWarningRadius(val);
+    const settings = storage.getSettings();
+    storage.saveSettings({ ...settings, rainWarningRadius: val });
   };
 
   if (isLoading || !activeBike) {
@@ -164,6 +173,18 @@ function App() {
                     style={{ accentColor: 'var(--color-primary)', width: '18px', height: '18px' }}
                   />
                   Efekt Liquid Glass (Głębia interfejsu)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer', marginTop: '4px' }}>
+                  <select 
+                    value={rainWarningRadius}
+                    onChange={handleRainWarningRadiusChange}
+                    style={{ background: 'var(--color-bg)', color: '#fff', border: '1px solid var(--color-glass-border)', padding: '4px', borderRadius: '4px' }}
+                  >
+                    <option value="10">10 km</option>
+                    <option value="30">30 km</option>
+                    <option value="50">50 km</option>
+                  </select>
+                  Promień ostrzegania przed burzą
                 </label>
               </div>
             </div>
