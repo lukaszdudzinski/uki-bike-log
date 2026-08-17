@@ -385,6 +385,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
                   <TileLayer
                     url={`https://tilecache.rainviewer.com/v2/radar/${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`}
                     opacity={0.6}
+                    maxNativeZoom={12}
                   />
                 )}
 
