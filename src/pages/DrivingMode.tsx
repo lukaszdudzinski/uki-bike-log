@@ -47,7 +47,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
   const [nearestGasCoords, setNearestGasCoords] = useState<{lat: number, lng: number} | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
-  const [radarTimestamp, setRadarTimestamp] = useState<number>(0);
+  const [radarUrl, setRadarUrl] = useState<string | null>(null);
   const [liquidGlass, setLiquidGlass] = useState<boolean>(true);
   const [leanAngle, setLeanAngle] = useState<number | null>(null);
   const [needsOrientationPermission, setNeedsOrientationPermission] = useState<boolean>(false);
@@ -73,8 +73,8 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     }
     
     // Get latest radar layer for map
-    weatherService.getLatestRadarTimestamp().then(ts => {
-      setRadarTimestamp(ts);
+    weatherService.getLatestRadarUrl().then(url => {
+      setRadarUrl(url);
     }).catch(e => console.error(e));
 
     // Request Wake Lock
@@ -412,9 +412,9 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
               >
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
                 
-                {radarTimestamp > 0 && (
+                {radarUrl && (
                   <TileLayer
-                    url={`https://tilecache.rainviewer.com/v2/radar/${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`}
+                    url={radarUrl}
                     opacity={0.6}
                     maxNativeZoom={12}
                   />

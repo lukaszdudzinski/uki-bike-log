@@ -62,20 +62,22 @@ export const weatherService = {
     }
   },
 
-  // 4. Get Latest RainViewer Timestamp
-  getLatestRadarTimestamp: async (): Promise<number> => {
+  // 4. Get Latest RainViewer URL
+  getLatestRadarUrl: async (): Promise<string | null> => {
     try {
       const response = await fetch('https://api.rainviewer.com/public/weather-maps.json');
       const data = await response.json();
       if (data && data.radar && data.radar.past && data.radar.past.length > 0) {
-        // Get the most recent past timestamp
         const past = data.radar.past;
-        return past[past.length - 1].time;
+        const latest = past[past.length - 1];
+        const host = data.host || 'https://tilecache.rainviewer.com';
+        // Returns the base tile URL string format for Leaflet
+        return `${host}${latest.path}/256/{z}/{x}/{y}/2/1_1.png`;
       }
-      return 0;
+      return null;
     } catch (e) {
       console.error('Rainviewer API error', e);
-      return 0;
+      return null;
     }
   }
 };

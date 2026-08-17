@@ -190,7 +190,12 @@
                             // W React app używamy zmiennej ze skryptu, albo parsujemy headera
                             const localVersion = window.__APP_VERSION__ || document.querySelector('meta[name="app-version"]')?.content || '1.0.0';
                             
-                            if (localVersion && serverVersion !== localVersion) {
+                            // Normalizacja wersji (usuwamy "v" i zera wiodące) do porównania
+                            const normalize = (v) => v.replace(/^v/, '').split('.').map(n => parseInt(n, 10)).join('.');
+                            const normServer = normalize(serverVersion);
+                            const normLocal = normalize(localVersion);
+                            
+                            if (normLocal && normServer !== normLocal) {
                                 window.PWAUpdateUI.showUpdateBanner(registration.waiting); 
                                 registration.update();
                             }

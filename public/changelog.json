@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.17.04",
+    "changes": [
+      "🛠️ Krytyczna poprawka mechanizmu PWA: usunięto błąd powodujący wpadanie aplikacji w nieskończoną pętlę instalacji aktualizacji.",
+      "☁️ Zoptymalizowano silnik pobierania kafelków mapy radarowej RainViewer, zapewniając bezpośrednie i niezawodne wczytywanie chmur burzowych na żywo."
+    ]
+  },
+  {
     "version": "v2026.8.17.02",
     "changes": [
       "✨ Nowy algorytm meteorologiczny w Trybie Jazdy: ostrzega przed burzą/deszczem analizując symultanicznie 5 punktów geodezyjnych w ustalonej odległości.",
