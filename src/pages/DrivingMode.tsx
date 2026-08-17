@@ -404,6 +404,8 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
               <MapContainer 
                 center={userLoc ? [userLoc.lat, userLoc.lng] : [52.069, 19.480]} 
                 zoom={13} 
+                minZoom={4}
+                maxZoom={18}
                 style={{ height: '100%', width: '100%', zIndex: 0 }}
                 zoomControl={true}
                 attributionControl={false}
