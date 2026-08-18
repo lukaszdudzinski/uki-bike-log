@@ -31,7 +31,7 @@ function MapCenter({ center }: { center: Coordinates | null }) {
   const map = useMap();
   useEffect(() => {
     if (center) {
-      map.setView([center.lat, center.lng], 10);
+      map.setView([center.lat, center.lng], map.getZoom());
     }
   }, [map, center]);
   return null;

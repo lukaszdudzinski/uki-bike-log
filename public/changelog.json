@@ -1,5 +1,11 @@
 [
   {
+    "version": "v2026.8.18.02",
+    "changes": [
+      "🗺️ Usunięto błąd odświeżania GPS, który uniemożliwiał swobodne oddalanie mapy (efekt przyciągania do określonego przybliżenia)."
+    ]
+  },
+  {
     "version": "v2026.8.18.01",
     "changes": [
       "🗺️ Zwiększono intensywność kolorów radaru pogodowego i odblokowano maksymalne oddalanie mapy.",

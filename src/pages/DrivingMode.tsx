@@ -26,7 +26,8 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 function MapCenter({ position }: { position: [number, number] }) {
   const map = useMap();
   useEffect(() => {
-    map.setView(position, 14, { animate: true });
+    // Zachowujemy obecny poziom zoomu użytkownika, centrujemy tylko pozycję
+    map.setView(position, map.getZoom(), { animate: true });
   }, [map, position]);
   return null;
 }
