@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.18.01",
+    "changes": [
+      "🗺️ Zwiększono intensywność kolorów radaru pogodowego i odblokowano maksymalne oddalanie mapy.",
+      "🛠️ Kolejna optymalizacja silnika aktualizacji PWA (rozwiązanie konfliktów wersji z pamięci podręcznej przeglądarki)."
+    ]
+  },
+  {
     "version": "v2026.8.17.05",
     "changes": [
       "☁️ Gorąca poprawka: Synchronizacja modułu Moje Trasy z nowym silnikiem RainViewer API."

@@ -191,11 +191,19 @@
                             const localVersion = window.__APP_VERSION__ || document.querySelector('meta[name="app-version"]')?.content || '1.0.0';
                             
                             // Normalizacja wersji (usuwamy "v" i zera wiodące) do porównania
-                            const normalize = (v) => v.replace(/^v/, '').split('.').map(n => parseInt(n, 10)).join('.');
+                            const normalize = (v) => v.replace(/^v/, '').split('.').map(n => parseInt(n, 10));
                             const normServer = normalize(serverVersion);
                             const normLocal = normalize(localVersion);
                             
-                            if (normLocal && normServer !== normLocal) {
+                            let isNewer = false;
+                            for (let i = 0; i < Math.max(normServer.length, normLocal.length); i++) {
+                                const sv = normServer[i] || 0;
+                                const lv = normLocal[i] || 0;
+                                if (sv > lv) { isNewer = true; break; }
+                                if (sv < lv) { isNewer = false; break; }
+                            }
+                            
+                            if (localVersion && isNewer) {
                                 window.PWAUpdateUI.showUpdateBanner(registration.waiting); 
                                 registration.update();
                             }

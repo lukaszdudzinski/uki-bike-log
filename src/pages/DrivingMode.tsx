@@ -404,7 +404,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
               <MapContainer 
                 center={userLoc ? [userLoc.lat, userLoc.lng] : [52.069, 19.480]} 
                 zoom={13} 
-                minZoom={4}
+                minZoom={2}
                 maxZoom={18}
                 style={{ height: '100%', width: '100%', zIndex: 0 }}
                 zoomControl={true}
@@ -415,7 +415,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
                 {radarUrl && (
                   <TileLayer
                     url={radarUrl}
-                    opacity={0.6}
+                    opacity={0.8}
                     maxNativeZoom={12}
                   />
                 )}
