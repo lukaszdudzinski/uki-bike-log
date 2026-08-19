@@ -1,5 +1,11 @@
 [
   {
+    "version": "v2026.8.19.01",
+    "changes": [
+      "🛠️ Rozwiązano problem z czarnymi kwadratami 'Zoom Level Not Supported' na radarze pogodowym - chmury opadowe są teraz widoczne nawet przy maksymalnym przybliżeniu mapy."
+    ]
+  },
+  {
     "version": "v2026.8.18.02",
     "changes": [
       "🗺️ Usunięto błąd odświeżania GPS, który uniemożliwiał swobodne oddalanie mapy (efekt przyciągania do określonego przybliżenia)."

@@ -417,7 +417,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
                   <TileLayer
                     url={radarUrl}
                     opacity={0.8}
-                    maxNativeZoom={12}
+                    maxNativeZoom={7}
                   />
                 )}
 
