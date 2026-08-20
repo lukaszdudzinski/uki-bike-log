@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.20.1",
+    "changes": [
+      "✨ Profil Użytkownika: dodano możliwość ustawienia globalnego awatara i nicku (wspólne dla wszystkich motocykli).",
+      "✨ Personalizacja Garażu: dodano opcję wgrywania własnego tła (Cover Photo) dla każdego motocykla z poziomu Opcji, które staje się wizytówką pojazdu na pulpicie."
+    ]
+  },
+  {
     "version": "v2026.8.19.01",
     "changes": [
       "🛠️ Rozwiązano problem z czarnymi kwadratami 'Zoom Level Not Supported' na radarze pogodowym - chmury opadowe są teraz widoczne nawet przy maksymalnym przybliżeniu mapy."

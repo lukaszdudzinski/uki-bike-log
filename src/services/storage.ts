@@ -41,6 +41,13 @@ export interface BikeSettings {
   lastChainOdo: number;
   valveClearanceIntervalKm: number;
   lastValveClearanceOdo: number;
+  avatar?: string; // deprecated, moved to UserProfile
+  nickname?: string; // deprecated
+  liquidGlassEnabled?: boolean; // deprecated
+  rainWarningRadius?: number; // deprecated
+}
+
+export interface UserProfile {
   avatar?: string;
   nickname?: string;
   liquidGlassEnabled?: boolean;
@@ -51,11 +58,13 @@ export interface BikeProfile {
   id: string;
   name: string;
   createdAt: number;
+  coverPhoto?: string;
 }
 
 const GLOBAL_KEYS = {
   BIKES: 'uki_bikes_list',
-  ACTIVE_BIKE: 'uki_active_bike_id'
+  ACTIVE_BIKE: 'uki_active_bike_id',
+  USER_PROFILE: 'uki_user_profile'
 };
 
 const getStorageKeys = (bikeId: string) => {
@@ -82,6 +91,7 @@ let cache = {
   service: [] as ServiceEntry[],
   routes: [] as RouteEntry[],
   settings: null as BikeSettings | null,
+  userProfile: null as UserProfile | null,
 };
 
 export const storage = {
@@ -89,6 +99,7 @@ export const storage = {
   initDB: async () => {
     const savedBikes = await localforage.getItem<BikeProfile[]>(GLOBAL_KEYS.BIKES);
     const savedActive = await localforage.getItem<string>(GLOBAL_KEYS.ACTIVE_BIKE);
+    let savedProfile = await localforage.getItem<UserProfile>(GLOBAL_KEYS.USER_PROFILE);
 
     if (!savedBikes || savedBikes.length === 0) {
       const defaultBike = { id: 'default', name: 'Royal Enfield Bullet 350', createdAt: Date.now() };
@@ -101,7 +112,32 @@ export const storage = {
       cache.activeBikeId = savedActive || savedBikes[0].id;
     }
 
+    if (!savedProfile) {
+      savedProfile = {
+        liquidGlassEnabled: true,
+        rainWarningRadius: 10
+      };
+      await localforage.setItem(GLOBAL_KEYS.USER_PROFILE, savedProfile);
+    }
+    cache.userProfile = savedProfile;
+
     await storage.loadBikeData(cache.activeBikeId);
+    
+    // Migration: if profile has no avatar/nickname but settings do, move them
+    if (cache.settings) {
+      let needsProfileUpdate = false;
+      if (cache.settings.avatar && !cache.userProfile.avatar) {
+        cache.userProfile.avatar = cache.settings.avatar;
+        needsProfileUpdate = true;
+      }
+      if (cache.settings.nickname && !cache.userProfile.nickname) {
+        cache.userProfile.nickname = cache.settings.nickname;
+        needsProfileUpdate = true;
+      }
+      if (needsProfileUpdate) {
+        await localforage.setItem(GLOBAL_KEYS.USER_PROFILE, cache.userProfile);
+      }
+    }
   },
 
   loadBikeData: async (bikeId: string) => {
@@ -182,6 +218,20 @@ export const storage = {
       bike.name = newName;
       await localforage.setItem(GLOBAL_KEYS.BIKES, cache.bikes);
     }
+  },
+
+  updateBikeCoverPhoto: async (id: string, base64Image: string | null) => {
+    const bike = cache.bikes.find(b => b.id === id);
+    if (bike) {
+      bike.coverPhoto = base64Image || undefined;
+      await localforage.setItem(GLOBAL_KEYS.BIKES, cache.bikes);
+    }
+  },
+
+  getUserProfile: (): UserProfile => cache.userProfile || { liquidGlassEnabled: true, rainWarningRadius: 10 },
+  saveUserProfile: async (profile: UserProfile) => {
+    cache.userProfile = profile;
+    await localforage.setItem(GLOBAL_KEYS.USER_PROFILE, profile);
   },
 
   switchBike: async (id: string): Promise<boolean> => {

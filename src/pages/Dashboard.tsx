@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { storage, type BikeSettings } from '../services/storage';
+import { useGarage } from '../contexts/GarageContext';
 import AlertsList from '../components/AlertsList';
 import QuickActions from '../components/QuickActions';
 import WeatherWidget from '../components/WeatherWidget';
@@ -10,6 +11,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardProps) {
+  const { activeBike } = useGarage();
   const [odo, setOdo] = useState<number>(0);
   const [settings, setSettings] = useState<BikeSettings | null>(null);
   const [avgConsumption, setAvgConsumption] = useState<number | null>(null);
@@ -20,24 +22,30 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
     setAvgConsumption(storage.getAverageConsumption());
   }, []);
 
-  if (!settings) return null;
+  if (!settings || !activeBike) return null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
       {/* ODO & Main Stats Card */}
       <div className="glass-panel" style={{ 
+        position: 'relative',
         display: 'flex', 
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'linear-gradient(135deg, var(--color-glass-bg) 0%, rgba(212, 175, 55, 0.05) 100%)',
-        borderLeft: '4px solid var(--color-primary)'
+        background: activeBike.coverPhoto 
+          ? `linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.4)), url(${activeBike.coverPhoto}) center/cover`
+          : 'linear-gradient(135deg, var(--color-glass-bg) 0%, rgba(212, 175, 55, 0.05) 100%)',
+        borderLeft: '4px solid var(--color-primary)',
+        overflow: 'hidden',
+        color: '#fff',
+        textShadow: activeBike.coverPhoto ? '1px 1px 4px rgba(0,0,0,0.8)' : 'none'
       }}>
-        <div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
           <p className="input-label" style={{ marginBottom: '4px' }}>Całkowity przebieg</p>
           <h2 style={{ fontSize: '2.5rem', margin: 0, fontFamily: 'monospace' }}>{odo.toLocaleString()} <span style={{ fontSize: '1rem', color: 'var(--color-primary)' }}>km</span></h2>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'right', position: 'relative', zIndex: 1 }}>
           <p className="input-label" style={{ marginBottom: '4px' }}>Śr. spalanie</p>
           <h3 style={{ margin: 0 }}>{avgConsumption ? `${avgConsumption.toFixed(2)} l/100` : '-- l/100'}</h3>
         </div>

@@ -11,6 +11,7 @@ interface GarageContextType {
   addBike: (name: string) => Promise<void>;
   editBike: (id: string, name: string) => Promise<void>;
   deleteBike: (id: string) => Promise<void>;
+  updateBikeCoverPhoto: (id: string, base64Image: string | null) => Promise<void>;
 }
 
 const GarageContext = createContext<GarageContextType | undefined>(undefined);
@@ -59,8 +60,14 @@ export function GarageProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   };
 
+  const updateBikeCoverPhoto = async (id: string, base64Image: string | null) => {
+    await storage.updateBikeCoverPhoto(id, base64Image);
+    setBikes([...storage.getBikes()]);
+    setActiveBike(storage.getActiveBike());
+  };
+
   return (
-    <GarageContext.Provider value={{ bikes, activeBike, isLoading, switchBike, addBike, editBike, deleteBike }}>
+    <GarageContext.Provider value={{ bikes, activeBike, isLoading, switchBike, addBike, editBike, deleteBike, updateBikeCoverPhoto }}>
       {children}
     </GarageContext.Provider>
   );

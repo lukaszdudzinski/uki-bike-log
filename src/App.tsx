@@ -11,7 +11,7 @@ import { storage } from './services/storage';
 import { useGarage } from './contexts/GarageContext';
 
 function App() {
-  const { bikes, activeBike, isLoading, switchBike, addBike, editBike, deleteBike } = useGarage();
+  const { bikes, activeBike, isLoading, switchBike, addBike, editBike, deleteBike, updateBikeCoverPhoto } = useGarage();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDark, setIsDark] = useState(true);
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
@@ -47,10 +47,11 @@ function App() {
     
     if (!isLoading && activeBike) {
       const settings = storage.getSettings();
-      setAvatar(settings.avatar || null);
-      setNickname(settings.nickname || '');
-      setLiquidGlass(settings.liquidGlassEnabled !== false);
-      setRainWarningRadius(settings.rainWarningRadius || 10);
+      const profile = storage.getUserProfile();
+      setAvatar(profile.avatar || null);
+      setNickname(profile.nickname || '');
+      setLiquidGlass(profile.liquidGlassEnabled !== false);
+      setRainWarningRadius(profile.rainWarningRadius || 10);
 
       // Check for notifications for the active bike
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -83,8 +84,8 @@ function App() {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setAvatar(base64String);
-        const settings = storage.getSettings();
-        storage.saveSettings({ ...settings, avatar: base64String });
+        const profile = storage.getUserProfile();
+        storage.saveUserProfile({ ...profile, avatar: base64String });
       };
       reader.readAsDataURL(file);
     }
@@ -92,21 +93,33 @@ function App() {
 
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNickname(e.target.value);
-    const settings = storage.getSettings();
-    storage.saveSettings({ ...settings, nickname: e.target.value });
+    const profile = storage.getUserProfile();
+    storage.saveUserProfile({ ...profile, nickname: e.target.value });
   };
 
   const handleLiquidGlassChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLiquidGlass(e.target.checked);
-    const settings = storage.getSettings();
-    storage.saveSettings({ ...settings, liquidGlassEnabled: e.target.checked });
+    const profile = storage.getUserProfile();
+    storage.saveUserProfile({ ...profile, liquidGlassEnabled: e.target.checked });
   };
 
   const handleRainWarningRadiusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = parseInt(e.target.value, 10);
     setRainWarningRadius(val);
-    const settings = storage.getSettings();
-    storage.saveSettings({ ...settings, rainWarningRadius: val });
+    const profile = storage.getUserProfile();
+    storage.saveUserProfile({ ...profile, rainWarningRadius: val });
+  };
+
+  const handleCoverPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && activeBike) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        updateBikeCoverPhoto(activeBike.id, base64String);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   if (isLoading || !activeBike) {
@@ -249,6 +262,39 @@ function App() {
                 >
                   <Trash2 size={18} />
                 </button>
+              </div>
+
+              {/* Cover Photo UI */}
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                height: '120px',
+                borderRadius: '12px',
+                background: activeBike.coverPhoto ? `url(${activeBike.coverPhoto}) center/cover` : 'rgba(0,0,0,0.3)',
+                border: '1px dashed var(--color-glass-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  background: activeBike.coverPhoto ? 'rgba(0,0,0,0.5)' : 'transparent',
+                  pointerEvents: 'none'
+                }}></div>
+                <label className="btn-outline" style={{ position: 'relative', zIndex: 1, cursor: 'pointer', padding: '8px 16px', background: 'var(--color-glass-bg)', backdropFilter: 'blur(10px)' }}>
+                  {activeBike.coverPhoto ? 'Zmień Tapetę (Cover)' : 'Dodaj Tapetę Motocykla'}
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverPhotoUpload} />
+                </label>
+                {activeBike.coverPhoto && (
+                  <button 
+                    onClick={() => updateBikeCoverPhoto(activeBike.id, null)} 
+                    style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(255,0,0,0.7)', border: 'none', color: '#fff', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', zIndex: 2 }}
+                    title="Usuń tapetę"
+                  >
+                    &times;
+                  </button>
+                )}
               </div>
             </div>
 
