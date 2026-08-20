@@ -3,6 +3,7 @@ import { Fuel, Save, Camera, Loader2, Edit2, Trash2, X } from 'lucide-react';
 import { storage, type FuelEntry } from '../services/storage';
 import Tesseract from 'tesseract.js';
 import { parseReceiptText } from '../utils/ocrParser';
+import { calculateEntryConsumption } from '../utils/fuelCalculator';
 
 export default function FuelLog() {
   const [logs, setLogs] = useState<FuelEntry[]>([]);
@@ -282,6 +283,8 @@ export default function FuelLog() {
             {logs.map((log) => {
               const dateObj = new Date(log.date);
               const pricePerL = (log.price / log.liters).toFixed(2);
+              const consumption = calculateEntryConsumption(logs, log.id);
+              
               return (
                 <div key={log.id} className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px' }}>
                   <div>
@@ -289,6 +292,11 @@ export default function FuelLog() {
                     <p style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
                       {dateObj.toLocaleDateString()} {dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </p>
+                    {consumption !== null && (
+                      <p style={{ margin: '4px 0', fontSize: '0.9rem', color: 'var(--color-primary)', fontWeight: 'bold' }}>
+                        Spalanie: {consumption.toFixed(2)} l/100km
+                      </p>
+                    )}
                     <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
                       <button className="btn-outline" style={{ padding: '4px 8px', fontSize: '0.8rem', display: 'flex', alignItems: 'center' }} onClick={() => handleEdit(log)}>
                         <Edit2 size={14} style={{ marginRight: '4px' }} /> Edytuj

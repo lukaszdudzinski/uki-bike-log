@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.20.3",
+    "changes": [
+      "✨ Automatyczny Kalkulator Spalania: Aplikacja wylicza teraz średnie spalanie l/100km pomiędzy tankowaniami do pełna (widoczne w Historii Tankowań).",
+      "✨ Prognoza Zasięgu: Na pulpicie głównym, obok średniego spalania, pojawiła się predykcja - na ile kilometrów wystarczy Ci pełen bak."
+    ]
+  },
+  {
     "version": "v2026.8.20.2",
     "changes": [
       "✨ Nowy Moduł: Menedżer Opon (Tire Tracker)! Dodaj informacje o oponach w Opcjach, a na pulpicie pojawi się pasek postępu zużycia bieżnika wraz z przypomnieniami."

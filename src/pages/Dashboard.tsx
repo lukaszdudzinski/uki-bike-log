@@ -48,8 +48,13 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
           <h2 style={{ fontSize: '2.5rem', margin: 0, fontFamily: 'monospace' }}>{odo.toLocaleString()} <span style={{ fontSize: '1rem', color: 'var(--color-primary)' }}>km</span></h2>
         </div>
         <div style={{ textAlign: 'right', position: 'relative', zIndex: 1 }}>
-          <p className="input-label" style={{ marginBottom: '4px' }}>Śr. spalanie</p>
-          <h3 style={{ margin: 0 }}>{avgConsumption ? `${avgConsumption.toFixed(2)} l/100` : '-- l/100'}</h3>
+          <p className="input-label" style={{ marginBottom: '4px' }}>Śr. spalanie | Zasięg</p>
+          <h3 style={{ margin: 0 }}>
+            {avgConsumption ? `${avgConsumption.toFixed(2)} l/100km` : '--'}
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-primary)', fontWeight: 'bold' }}>
+            {avgConsumption && settings.tankCapacity ? `~${Math.round((settings.tankCapacity / avgConsumption) * 100)} km na baku` : 'Brak danych'}
+          </p>
         </div>
       </div>
 
