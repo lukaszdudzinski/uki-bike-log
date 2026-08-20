@@ -375,6 +375,29 @@ function App() {
               </div>
             </div>
 
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '8px 0' }} />
+            <h3 style={{ margin: '0', fontSize: '1.1rem' }}>Menedżer Opon (Tire Tracker)</h3>
+
+            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
+              <h4 style={{ margin: '0 0 8px 0', color: 'var(--color-primary)' }}>Opona Przednia</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <input type="text" className="input-field" id="settings-tire-front-model" placeholder="Model (np. Michelin Road 6)" defaultValue={storage.getSettings().frontTire?.model || ''} />
+                <input type="text" className="input-field" id="settings-tire-front-dot" placeholder="DOT (np. 1224)" defaultValue={storage.getSettings().frontTire?.dot || ''} />
+                <input type="number" className="input-field" id="settings-tire-front-odo" placeholder="Założona przy (km)" defaultValue={storage.getSettings().frontTire?.installedOdo || ''} />
+                <input type="number" className="input-field" id="settings-tire-front-life" placeholder="Szac. żywotność (km)" defaultValue={storage.getSettings().frontTire?.expectedLifespanKm || 15000} />
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', marginTop: '8px' }}>
+              <h4 style={{ margin: '0 0 8px 0', color: 'var(--color-primary)' }}>Opona Tylna</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <input type="text" className="input-field" id="settings-tire-rear-model" placeholder="Model (np. Michelin Road 6)" defaultValue={storage.getSettings().rearTire?.model || ''} />
+                <input type="text" className="input-field" id="settings-tire-rear-dot" placeholder="DOT (np. 1224)" defaultValue={storage.getSettings().rearTire?.dot || ''} />
+                <input type="number" className="input-field" id="settings-tire-rear-odo" placeholder="Założona przy (km)" defaultValue={storage.getSettings().rearTire?.installedOdo || ''} />
+                <input type="number" className="input-field" id="settings-tire-rear-life" placeholder="Szac. żywotność (km)" defaultValue={storage.getSettings().rearTire?.expectedLifespanKm || 15000} />
+              </div>
+            </div>
+
             <button 
               className="btn-primary" 
               style={{ marginTop: '10px' }}
@@ -397,6 +420,20 @@ function App() {
                 const valveOdo = Number((document.getElementById('settings-valve-odo') as HTMLInputElement).value);
                 const chainOdo = Number((document.getElementById('settings-chain-odo') as HTMLInputElement).value);
 
+                // Tires
+                const fModel = (document.getElementById('settings-tire-front-model') as HTMLInputElement).value;
+                const fDot = (document.getElementById('settings-tire-front-dot') as HTMLInputElement).value;
+                const fOdo = Number((document.getElementById('settings-tire-front-odo') as HTMLInputElement).value);
+                const fLife = Number((document.getElementById('settings-tire-front-life') as HTMLInputElement).value);
+
+                const rModel = (document.getElementById('settings-tire-rear-model') as HTMLInputElement).value;
+                const rDot = (document.getElementById('settings-tire-rear-dot') as HTMLInputElement).value;
+                const rOdo = Number((document.getElementById('settings-tire-rear-odo') as HTMLInputElement).value);
+                const rLife = Number((document.getElementById('settings-tire-rear-life') as HTMLInputElement).value);
+
+                const frontTire = (fModel && fDot && !isNaN(fOdo) && !isNaN(fLife)) ? { model: fModel, dot: fDot, installedOdo: fOdo, expectedLifespanKm: fLife } : undefined;
+                const rearTire = (rModel && rDot && !isNaN(rOdo) && !isNaN(rLife)) ? { model: rModel, dot: rDot, installedOdo: rOdo, expectedLifespanKm: rLife } : undefined;
+
                 if (!isNaN(odoVal) && !isNaN(tankCapVal) && ocVal && acVal && inspVal && !isNaN(oilOdo) && oilDate && !isNaN(valveOdo) && !isNaN(chainOdo)) {
                   const currentSettings = storage.getSettings();
                   storage.saveSettings({ 
@@ -413,7 +450,9 @@ function App() {
                     lastServiceOdo: oilOdo,
                     lastServiceDate: oilDate,
                     lastValveClearanceOdo: valveOdo,
-                    lastChainOdo: chainOdo
+                    lastChainOdo: chainOdo,
+                    frontTire,
+                    rearTire
                   });
                   alert('Zaktualizowano ustawienia i terminy dla tego pojazdu.');
                 } else {

@@ -24,6 +24,13 @@ export interface RouteEntry {
   address: string;
 }
 
+export interface TireData {
+  model: string;
+  dot: string;
+  installedOdo: number;
+  expectedLifespanKm: number;
+}
+
 export interface BikeSettings {
   initialOdo: number;
   tankCapacity: number;
@@ -41,6 +48,8 @@ export interface BikeSettings {
   lastChainOdo: number;
   valveClearanceIntervalKm: number;
   lastValveClearanceOdo: number;
+  frontTire?: TireData;
+  rearTire?: TireData;
   avatar?: string; // deprecated, moved to UserProfile
   nickname?: string; // deprecated
   liquidGlassEnabled?: boolean; // deprecated

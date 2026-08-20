@@ -5,6 +5,8 @@ import AlertsList from '../components/AlertsList';
 import QuickActions from '../components/QuickActions';
 import WeatherWidget from '../components/WeatherWidget';
 
+import TireWidget from '../components/TireWidget';
+
 interface DashboardProps {
   setActiveTab: (tab: string) => void;
   setIsDrivingMode: (val: boolean) => void;
@@ -62,6 +64,8 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
       <WeatherWidget />
 
       <QuickActions setActiveTab={setActiveTab} />
+
+      <TireWidget settings={settings} odo={odo} setActiveTab={setActiveTab} />
 
       <AlertsList settings={settings} odo={odo} setSettings={setSettings} />
 

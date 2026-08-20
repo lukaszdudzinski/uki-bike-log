@@ -1,5 +1,11 @@
 [
   {
+    "version": "v2026.8.20.2",
+    "changes": [
+      "✨ Nowy Moduł: Menedżer Opon (Tire Tracker)! Dodaj informacje o oponach w Opcjach, a na pulpicie pojawi się pasek postępu zużycia bieżnika wraz z przypomnieniami."
+    ]
+  },
+  {
     "version": "v2026.8.20.1",
     "changes": [
       "✨ Profil Użytkownika: dodano możliwość ustawienia globalnego awatara i nicku (wspólne dla wszystkich motocykli).",
