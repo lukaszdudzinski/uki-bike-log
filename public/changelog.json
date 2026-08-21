@@ -1,5 +1,14 @@
 [
   {
+    "version": "v2026.8.21.1",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 Wizualne: Zastąpiono emotikony motocykla ikoną z podkładką z prawdziwego pojazdu.",
+      "📱 Usprawniono UX Trybu Jazdy: Ostrzeżenie o burzy nie miga już całym ekranem na czerwono, lecz w elegancki, mniej rozpraszający sposób pulsuje ikoną z zaprogramowanym dystansem ostrzegania.",
+      "✨ Nowa funkcja: W Historii Serwisowej można od teraz dołączać zdjęcia paragonów lub użytych części z możliwością ich powiększenia (zapisywane bezpiecznie na urządzeniu)."
+    ]
+  },
+  {
     "version": "v2026.8.20.3",
     "changes": [
       "✨ Automatyczny Kalkulator Spalania: Aplikacja wylicza teraz średnie spalanie l/100km pomiędzy tankowaniami do pełna (widoczne w Historii Tankowań).",

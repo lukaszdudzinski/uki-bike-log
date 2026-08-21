@@ -8,8 +8,21 @@ export default function ServiceLog() {
   const [type, setType] = useState<'service' | 'repair' | 'accessory' | 'other'>('service');
   const [description, setDescription] = useState('');
   const [cost, setCost] = useState<number | ''>('');
+  const [photo, setPhoto] = useState<string | undefined>(undefined);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   
   const currentOdo = storage.getCurrentOdo();
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhoto(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     setLogs(storage.getServiceLogs());
@@ -25,6 +38,7 @@ export default function ServiceLog() {
       type,
       description,
       cost: Number(cost),
+      photoBase64: photo,
     });
 
     // If it's a service, update lastServiceOdo in settings
@@ -39,6 +53,7 @@ export default function ServiceLog() {
     setOdo('');
     setDescription('');
     setCost('');
+    setPhoto(undefined);
     
     alert('Zapisano pomyślnie!');
   };
@@ -124,6 +139,24 @@ export default function ServiceLog() {
             </div>
           </div>
 
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label className="input-label">Zdjęcie paragonu / części (opcjonalnie)</label>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handlePhotoUpload}
+                style={{ fontSize: '0.9rem', width: '100%' }}
+              />
+              {photo && (
+                <div style={{ position: 'relative' }}>
+                  <img src={photo} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                  <button type="button" onClick={() => setPhoto(undefined)} style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', cursor: 'pointer' }}>x</button>
+                </div>
+              )}
+            </div>
+          </div>
+
           <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '8px' }}>
             <Save size={20} /> Zapisz wpis
           </button>
@@ -155,9 +188,19 @@ export default function ServiceLog() {
                       {log.odo.toLocaleString()} km • {dateObj.toLocaleDateString()}
                     </p>
                   </div>
-                  <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <h4 style={{ margin: 0, color: 'var(--color-text)' }}>{log.cost.toFixed(2)}</h4>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>PLN</span>
+                  <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <h4 style={{ margin: 0, color: 'var(--color-text)' }}>{log.cost.toFixed(2)}</h4>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>PLN</span>
+                    </div>
+                    {log.photoBase64 && (
+                      <img 
+                        src={log.photoBase64} 
+                        alt="Złącznik" 
+                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--color-glass-border)', cursor: 'pointer' }}
+                        onClick={() => setFullscreenImage(log.photoBase64!)}
+                      />
+                    )}
                   </div>
                 </div>
               );
@@ -165,6 +208,20 @@ export default function ServiceLog() {
           </div>
         )}
       </div>
+
+      {fullscreenImage && (
+        <div 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}
+          onClick={() => setFullscreenImage(null)}
+        >
+          <img src={fullscreenImage} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px' }} alt="Powiększenie" />
+          <button 
+            style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: 'white', fontSize: '2rem', cursor: 'pointer' }}
+          >
+            ×
+          </button>
+        </div>
+      )}
 
     </div>
   );

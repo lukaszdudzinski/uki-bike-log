@@ -16,6 +16,7 @@ export interface ServiceEntry {
   type: 'service' | 'repair' | 'accessory' | 'other';
   description: string;
   cost: number;
+  photoBase64?: string;
 }
 
 export interface RouteEntry {

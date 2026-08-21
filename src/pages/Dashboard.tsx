@@ -63,7 +63,7 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
         style={{ padding: '16px', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', justifyContent: 'center', gap: '8px', alignItems: 'center' }}
         onClick={() => setIsDrivingMode(true)}
       >
-        <span style={{ fontSize: '1.5rem' }}>🏍️</span> Uruchom Tryb Jazdy
+        <img src={`${import.meta.env.BASE_URL}bike-icon.jpg`} alt="Bike" style={{ width: '32px', height: '32px', objectFit: 'contain', filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.5))' }} /> Uruchom Tryb Jazdy
       </button>
 
       <WeatherWidget />

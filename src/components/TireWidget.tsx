@@ -11,7 +11,7 @@ export default function TireWidget({ settings, odo, setActiveTab }: TireWidgetPr
     return (
       <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'center' }}>
         <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          <span>🏍️</span> Menedżer Opon
+          <img src={`${import.meta.env.BASE_URL}bike-icon.jpg`} alt="Bike" style={{ width: '28px', height: '28px', objectFit: 'contain', filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }} /> Menedżer Opon
         </h3>
         <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
           Nie masz jeszcze dodanych opon. Śledź zużycie bieżnika i roczniki DOT!
@@ -76,7 +76,7 @@ export default function TireWidget({ settings, odo, setActiveTab }: TireWidgetPr
   return (
     <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span>🏍️</span> Stan Opon
+        <img src={`${import.meta.env.BASE_URL}bike-icon.jpg`} alt="Bike" style={{ width: '28px', height: '28px', objectFit: 'contain', filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }} /> Stan Opon
       </h3>
       {renderTire('Przód', settings.frontTire)}
       {renderTire('Tył', settings.rearTire)}

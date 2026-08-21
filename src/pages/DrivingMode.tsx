@@ -309,7 +309,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
   }
 
   return (
-    <div className={`dm-container ${rainWarning ? 'dm-rain-warning' : ''}`}>
+    <div className="dm-container">
       {/* Header */}
       <div className="dm-header">
         <div className="dm-header-time">{time}</div>
@@ -392,8 +392,13 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
             </button>
 
             {rainWarning && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff3333', fontWeight: 'bold', animation: 'pulse 1s infinite' }}>
-                <CloudRain size={24} /> BURZA / DESZCZ!
+              <div className="dm-rain-warning-icon" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <CloudRain size={36} />
+                  <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '0.7rem', color: '#fff', fontWeight: '900', textShadow: '0 0 2px black' }}>
+                    {weatherRadius.current}
+                  </span>
+                </div>
               </div>
             )}
           </div>

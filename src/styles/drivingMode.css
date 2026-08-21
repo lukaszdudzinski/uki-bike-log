@@ -15,14 +15,14 @@
 }
 
 /* Rain Warning Animation */
-.dm-rain-warning {
-  animation: dm-flash 2s infinite;
+.dm-rain-warning-icon {
+  animation: dm-flash-icon 1s infinite;
 }
 
-@keyframes dm-flash {
-  0% { background-color: #8b0000; }
-  50% { background-color: #ff0000; }
-  100% { background-color: #8b0000; }
+@keyframes dm-flash-icon {
+  0% { color: #ff3333; transform: scale(1); }
+  50% { color: #ff0000; transform: scale(1.1); filter: drop-shadow(0 0 10px red); }
+  100% { color: #ff3333; transform: scale(1); }
 }
 
 .dm-header {
