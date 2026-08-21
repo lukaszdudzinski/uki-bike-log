@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.21.3",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Przywrócono systemową emotikonę motocykla 🏍️ na prośbę użytkownika."
+    ]
+  },
+  {
     "version": "v2026.8.21.2",
     "date": "2026-08-21",
     "changes": [

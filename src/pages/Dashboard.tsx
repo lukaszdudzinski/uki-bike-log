@@ -60,11 +60,10 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
 
       <button 
         className="btn-primary" 
-        style={{ padding: '16px', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px', alignItems: 'center', minHeight: '140px', position: 'relative', overflow: 'hidden' }}
+        style={{ padding: '16px', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', justifyContent: 'center', gap: '8px', alignItems: 'center' }}
         onClick={() => setIsDrivingMode(true)}
       >
-        <img src={`${import.meta.env.BASE_URL}bike-icon.jpg`} alt="Bike" style={{ width: '180px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))', zIndex: 1 }} />
-        <span style={{ zIndex: 1, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Uruchom Tryb Jazdy</span>
+        <span style={{ fontSize: '1.5rem' }}>🏍️</span> Uruchom Tryb Jazdy
       </button>
 
       <WeatherWidget />
