@@ -11,7 +11,7 @@ export default function TireWidget({ settings, odo, setActiveTab }: TireWidgetPr
     return (
       <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'center' }}>
         <h3 style={{ margin: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-          <img src={`${import.meta.env.BASE_URL}bike-icon.png`} alt="Bike" style={{ width: '120px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }} /> 
+          <img src={`${import.meta.env.BASE_URL}bike-icon.png`} alt="Bike" style={{ width: '90px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }} /> 
           <span>Menedżer Opon</span>
         </h3>
         <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
@@ -77,7 +77,7 @@ export default function TireWidget({ settings, odo, setActiveTab }: TireWidgetPr
   return (
     <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <h3 style={{ margin: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-        <img src={`${import.meta.env.BASE_URL}bike-icon.png`} alt="Bike" style={{ width: '120px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }} /> 
+        <img src={`${import.meta.env.BASE_URL}bike-icon.png`} alt="Bike" style={{ width: '90px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }} /> 
         <span>Stan Opon</span>
       </h3>
       {renderTire('Przód', settings.frontTire)}

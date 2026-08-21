@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.21.5",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Dopasowano proporcje przycisku Trybu Jazdy oraz rozmiar grafiki motocykla do bardziej ergonomicznych wymiarów."
+    ]
+  },
+  {
     "version": "v2026.8.21.4",
     "date": "2026-08-21",
     "changes": [
