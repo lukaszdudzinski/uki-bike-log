@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.21.4",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Wstawiono wycięty motocykl użytkownika (PNG bez tła) na główne ekrany aplikacji."
+    ]
+  },
+  {
     "version": "v2026.8.21.3",
     "date": "2026-08-21",
     "changes": [
