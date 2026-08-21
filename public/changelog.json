@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.21.6",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Zachowano dużą grafikę motocykla wykraczającą poza obrys, przy jednoczesnym zmniejszeniu wysokości przycisku 'Trybu Jazdy' (w stylu 3D)."
+    ]
+  },
+  {
     "version": "v2026.8.21.5",
     "date": "2026-08-21",
     "changes": [

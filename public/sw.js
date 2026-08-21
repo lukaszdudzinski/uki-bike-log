@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ukis-bikelog-v2026.8.21.5';
+const CACHE_NAME = 'ukis-bikelog-v2026.8.21.6';
 
 // Core assets to pre-cache
 const CORE_ASSETS = [
