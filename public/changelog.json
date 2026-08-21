@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.21.2",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Powiększono ikonę motocykla w panelach trybu jazdy i opon na prośbę użytkownika."
+    ]
+  },
+  {
     "version": "v2026.8.21.1",
     "date": "2026-08-21",
     "changes": [
