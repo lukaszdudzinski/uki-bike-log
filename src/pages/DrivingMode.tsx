@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, CloudRain, AlertTriangle, Navigation, Map as MapIcon, Fuel, Clock, Activity, Target } from 'lucide-react';
+import { X, CloudRain, AlertTriangle, Navigation, Map as MapIcon, Fuel, Clock, Activity, Target, Camera } from 'lucide-react';
 import { storage } from '../services/storage';
 import { MapContainer, TileLayer, CircleMarker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -35,6 +35,7 @@ function MapCenter({ position }: { position: [number, number] }) {
 export default function DrivingMode({ onExit }: DrivingModeProps) {
   const [speed, setSpeed] = useState<number | null>(null);
   const [time, setTime] = useState<string>('');
+  const [isMinimized, setIsMinimized] = useState<boolean>(false);
   
   // Trip data
   const [tripDistance, setTripDistance] = useState<number>(0);
@@ -46,6 +47,8 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
   const [rainWarning, setRainWarning] = useState<boolean>(false);
   const [nearestGasDist, setNearestGasDist] = useState<number | null>(null);
   const [nearestGasCoords, setNearestGasCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [speedCameras, setSpeedCameras] = useState<{lat: number, lng: number}[]>([]);
+  const [cameraWarning, setCameraWarning] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
   const [radarUrl, setRadarUrl] = useState<string | null>(null);
@@ -57,6 +60,9 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
   const wakeLock = useRef<WakeLockSentinel | null>(null);
   const lastWeatherCheck = useRef<number>(0);
   const lastGasCheck = useRef<number>(0);
+  const lastCameraCheck = useRef<number>(0);
+  const cameraWarningRef = useRef<boolean>(false);
+  const camerasCacheRef = useRef<{lat: number, lng: number}[]>([]);
   const lastCoord = useRef<{lat: number, lng: number} | null>(null);
   const weatherRadius = useRef<number>(10);
 
@@ -216,6 +222,38 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
           checkGasStations(currentLat, currentLng);
           lastGasCheck.current = now;
         }
+
+        // Speed cameras cache every 15 mins
+        if (now - lastCameraCheck.current > 900000) {
+          checkCameras(currentLat, currentLng);
+          lastCameraCheck.current = now;
+        }
+
+        // Real-time camera proximity check
+        if (camerasCacheRef.current.length > 0) {
+          let minD = 9999;
+          for (const cam of camerasCacheRef.current) {
+            const d = getDistanceFromLatLonInKm(currentLat, currentLng, cam.lat, cam.lng);
+            if (d < minD) minD = d;
+          }
+          if (minD < 0.8 && !cameraWarningRef.current) {
+            cameraWarningRef.current = true;
+            setCameraWarning(true);
+            try {
+              // Beep sound
+              const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+              const osc = audioContext.createOscillator();
+              osc.type = 'square';
+              osc.frequency.setValueAtTime(800, audioContext.currentTime);
+              osc.connect(audioContext.destination);
+              osc.start();
+              osc.stop(audioContext.currentTime + 0.5);
+            } catch (e) {}
+          } else if (minD >= 0.8 && cameraWarningRef.current) {
+            cameraWarningRef.current = false;
+            setCameraWarning(false);
+          }
+        }
       },
       () => {
         setErrorMsg('Brak sygnału GPS');
@@ -227,6 +265,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     navigator.geolocation.getCurrentPosition(pos => {
       checkWeather(pos.coords.latitude, pos.coords.longitude);
       checkGasStations(pos.coords.latitude, pos.coords.longitude);
+      checkCameras(pos.coords.latitude, pos.coords.longitude);
     }, () => {}, { enableHighAccuracy: true });
 
     return () => {
@@ -235,6 +274,23 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
       }
     };
   }, []);
+
+  const checkCameras = async (lat: number, lng: number) => {
+    try {
+      const query = `[out:json];node(around:20000,${lat},${lng})["highway"="speed_camera"];out;`;
+      const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.elements && data.elements.length > 0) {
+          const cameras = data.elements.map((el: any) => ({ lat: el.lat, lng: el.lon }));
+          camerasCacheRef.current = cameras;
+          setSpeedCameras(cameras);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch speed cameras:', e);
+    }
+  };
 
   const checkWeather = async (lat: number, lng: number) => {
     try {
@@ -308,18 +364,49 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     else if (speed >= 90) speedColor = '#ffcc00';
   }
 
+  if (isMinimized) {
+    return (
+      <div 
+        onClick={() => setIsMinimized(false)}
+        style={{
+          position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.8)', border: '2px solid var(--color-primary)',
+          backdropFilter: 'blur(10px)', padding: '12px 24px', borderRadius: '30px',
+          display: 'flex', alignItems: 'center', gap: '12px', zIndex: 10000,
+          color: 'var(--color-primary)', fontWeight: 'bold', cursor: 'pointer',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+        }}
+      >
+        <Navigation size={20} className="spin" />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '1rem', lineHeight: '1' }}>Wróć do jazdy</span>
+          <span style={{ fontSize: '0.7rem', color: '#fff', opacity: 0.8 }}>Trip: {tripDistance.toFixed(1)} km</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dm-container">
       {/* Header */}
       <div className="dm-header">
         <div className="dm-header-time">{time}</div>
-        <button 
-          onClick={onExit}
-          aria-label="Zamknij tryb jazdy"
-          className="dm-close-btn"
-        >
-          <X size={24} />
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button 
+            onClick={() => setIsMinimized(true)}
+            className="dm-close-btn"
+            style={{ fontSize: '1.2rem', fontWeight: 'bold' }}
+          >
+            _
+          </button>
+          <button 
+            onClick={onExit}
+            aria-label="Zamknij tryb jazdy"
+            className="dm-close-btn"
+          >
+            <X size={24} />
+          </button>
+        </div>
       </div>
 
       <div className="dm-layout">
@@ -401,6 +488,16 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
                 </div>
               </div>
             )}
+            
+            {cameraWarning && (
+              <div style={{
+                background: 'var(--color-warning)', padding: '10px', borderRadius: '50%',
+                display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#000',
+                animation: 'pulse 1s infinite alternate', boxShadow: '0 0 15px var(--color-warning)'
+              }}>
+                <Camera size={30} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -425,6 +522,10 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
                     maxNativeZoom={7}
                   />
                 )}
+
+                {speedCameras.map((cam, i) => (
+                  <CircleMarker key={i} center={[cam.lat, cam.lng]} radius={6} color="var(--color-warning)" fillColor="var(--color-warning)" fillOpacity={0.8} />
+                ))}
 
                 {userLoc && (
                   <>

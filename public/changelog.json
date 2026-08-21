@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.21.7",
+    "date": "2026-08-21",
+    "changes": [
+      "🚀 Usprawniono Tryb Jazdy: Dodano przycisk minimalizacji ('_'), pozwalający na używanie reszty aplikacji (np. kalkulatora spalania) podczas gdy Tryb Jazdy działa i liczy dystans w tle."
+    ]
+  },
+  {
     "version": "v2026.8.21.6",
     "date": "2026-08-21",
     "changes": [

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee, Home } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee, Home, Bell, Calendar } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
@@ -9,6 +9,7 @@ import DrivingMode from './pages/DrivingMode';
 import Diagnostics from './pages/Diagnostics';
 import { storage } from './services/storage';
 import { useGarage } from './contexts/GarageContext';
+import { checkAndFireNotifications, requestNotificationPermission, generateCalendarICS } from './utils/notifications';
 
 function App() {
   const { bikes, activeBike, isLoading, switchBike, addBike, editBike, deleteBike, updateBikeCoverPhoto } = useGarage();
@@ -46,34 +47,14 @@ function App() {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     
     if (!isLoading && activeBike) {
-      const settings = storage.getSettings();
       const profile = storage.getUserProfile();
       setAvatar(profile.avatar || null);
       setNickname(profile.nickname || '');
       setLiquidGlass(profile.liquidGlassEnabled !== false);
       setRainWarningRadius(profile.rainWarningRadius || 10);
 
-      // Check for notifications for the active bike
-      if ('Notification' in window && Notification.permission === 'granted') {
-        const odo = storage.getCurrentOdo();
-        const chainTraveled = odo - settings.lastChainOdo;
-        
-        const lastNotified = localStorage.getItem(`uki_last_notified_${activeBike.id}`);
-        const todayStr = new Date().toISOString().split('T')[0];
-        
-        if (lastNotified !== todayStr) {
-          if (chainTraveled >= 700) {
-            new Notification(`${activeBike.name} - Łańcuch (RED ALERT)`, { body: `Krytyczny przebieg! Przejechano ${chainTraveled} km bez smarowania!`, icon: '/logo.png' });
-            localStorage.setItem(`uki_last_notified_${activeBike.id}`, todayStr);
-          } else if (chainTraveled >= 600) {
-            new Notification(`${activeBike.name} - Łańcuch (Ostrzeżenie)`, { body: `Uwaga! Przejechano ${chainTraveled} km bez smarowania.`, icon: '/logo.png' });
-            localStorage.setItem(`uki_last_notified_${activeBike.id}`, todayStr);
-          } else if (chainTraveled >= 500) {
-            new Notification(`${activeBike.name} - Łańcuch`, { body: `Czas nasmarować łańcuch. Przejechano ${chainTraveled} km.`, icon: '/logo.png' });
-            localStorage.setItem(`uki_last_notified_${activeBike.id}`, todayStr);
-          }
-        }
-      }
+      // Global notifications check
+      checkAndFireNotifications();
     }
   }, [isDark, isLoading, activeBike]);
 
@@ -133,9 +114,6 @@ function App() {
   }
 
   const renderContent = () => {
-    if (isDrivingMode) {
-      return <DrivingMode onExit={() => setIsDrivingMode(false)} />;
-    }
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard setActiveTab={setActiveTab} setIsDrivingMode={setIsDrivingMode} />;
@@ -200,6 +178,43 @@ function App() {
                   Promień ostrzegania przed burzą
                 </label>
               </div>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '8px 0' }} />
+            
+            {/* Notifications & Reminders Section */}
+            <h2 style={{ margin: 0, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Bell size={24} /> Powiadomienia 
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button 
+                className="btn-primary" 
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}
+                onClick={async () => {
+                  const granted = await requestNotificationPermission();
+                  if (granted) {
+                    alert('Uprawnienia przyznane! Aplikacja przypomni Ci o opłatach i serwisie przy starcie.');
+                    checkAndFireNotifications();
+                  } else {
+                    alert('Uprawnienia odrzucone lub zablokowane w przeglądarce.');
+                  }
+                }}
+              >
+                <Bell size={18} /> Aktywuj powiadomienia w aplikacji
+              </button>
+              
+              <button 
+                className="btn-outline" 
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}
+                onClick={() => {
+                  generateCalendarICS();
+                }}
+              >
+                <Calendar size={18} /> Zapisz przypomnienia (OC/Przegląd) do Kalendarza
+              </button>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)', lineHeight: '1.4' }}>
+                Aby powiadomienia dzwoniły w tle przy wyłączonej aplikacji, użyj przycisku Kalendarza, który wygeneruje plik do Google/Apple Calendar (Niezawodna metoda).
+              </p>
             </div>
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '8px 0' }} />
@@ -595,10 +610,12 @@ function App() {
         <audio id="global-radio-player" src="https://stream.rcs.revma.com/ye5kghkgcm0uv" preload="none"></audio>
 
         {/* Use key to force unmount/remount of children when active bike changes, to reset internal component states if needed */}
-        <div key={activeBike.id}>
+        <div key={activeBike.id} style={{ paddingBottom: isDrivingMode ? '140px' : '0' }}>
           {renderContent()}
         </div>
       </main>
+
+      {isDrivingMode && <DrivingMode onExit={() => setIsDrivingMode(false)} />}
 
       {/* Bottom Navigation */}
       <nav style={{
