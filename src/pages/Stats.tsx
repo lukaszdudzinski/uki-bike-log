@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { storage, type FuelEntry, type ServiceEntry } from '../services/storage';
 import { Calculator, TrendingUp, CalendarDays, Wallet } from 'lucide-react';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
 } from 'recharts';
 
 export default function Stats() {
@@ -113,15 +114,32 @@ export default function Stats() {
     const serviceCost = serviceLogs.reduce((sum, s) => sum + (s.cost || 0), 0);
     const insuranceCost = settings.insuranceCost || 0;
     
+    // Calculate total distance for cost per km
+    let distance = 0;
+    if (logs.length > 0) {
+      const maxOdo = Math.max(...logs.map(l => l.odo), ...serviceLogs.map(s => s.odo), settings.initialOdo);
+      distance = maxOdo - settings.initialOdo;
+    }
+    
+    const total = fuelCost + serviceCost + insuranceCost;
+    
     return {
       fuel: fuelCost,
       service: serviceCost,
       insurance: insuranceCost,
-      total: fuelCost + serviceCost + insuranceCost
+      total: total,
+      costPerKm: distance > 0 ? (total / distance) : 0,
+      distance: distance
     };
   };
 
   const tco = getTCO();
+  
+  const pieData = [
+    { name: 'Paliwo', value: tco.fuel, color: '#D4AF37' },
+    { name: 'Serwis', value: tco.service, color: '#ff4444' },
+    { name: 'Ubezpieczenie', value: tco.insurance, color: '#4444ff' }
+  ].filter(item => item.value > 0);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -132,6 +150,39 @@ export default function Stats() {
           <Wallet color="var(--color-primary)" /> Całkowity Koszt Utrzymania (TCO)
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          
+          {tco.distance > 0 && (
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '8px', textAlign: 'center', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '8px' }}>Prawdziwy koszt przejechania 1 km:</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>{tco.costPerKm.toFixed(2)} PLN</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>Dystans brany pod uwagę: {tco.distance} km</div>
+            </div>
+          )}
+
+          {pieData.length > 0 && (
+            <div style={{ height: '200px', width: '100%', marginBottom: '16px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip formatter={(value: any) => `${Number(value).toFixed(2)} PLN`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--color-text-muted)' }}>Paliwo:</span>
             <strong>{tco.fuel.toFixed(2)} PLN</strong>

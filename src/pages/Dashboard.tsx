@@ -4,6 +4,7 @@ import { useGarage } from '../contexts/GarageContext';
 import AlertsList from '../components/AlertsList';
 import QuickActions from '../components/QuickActions';
 import WeatherWidget from '../components/WeatherWidget';
+import SeasonWrapped from '../components/SeasonWrapped';
 
 import TireWidget from '../components/TireWidget';
 
@@ -17,6 +18,7 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
   const [odo, setOdo] = useState<number>(0);
   const [settings, setSettings] = useState<BikeSettings | null>(null);
   const [avgConsumption, setAvgConsumption] = useState<number | null>(null);
+  const [showWrapped, setShowWrapped] = useState(false);
 
   useEffect(() => {
     setOdo(storage.getCurrentOdo());
@@ -132,10 +134,19 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
         )}
       </div>
 
+      <button 
+        className="btn-outline" 
+        style={{ marginTop: '20px', padding: '12px', width: '100%', borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+        onClick={() => setShowWrapped(true)}
+      >
+        🏆 Podsumowanie Sezonu (Wrapped)
+      </button>
+
       <p style={{ textAlign: 'center', marginTop: '20px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
         Uki's Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} (Radar & Garaż)
       </p>
-
+      
+      {showWrapped && <SeasonWrapped onClose={() => setShowWrapped(false)} />}
     </div>
   );
 }

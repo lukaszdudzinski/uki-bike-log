@@ -1,5 +1,15 @@
 [
   {
+    "version": "v2026.8.24.1",
+    "date": "2026-08-24",
+    "changes": [
+      "✨ Finanse i TCO: Dodano zaawansowany kalkulator kosztów, który potrafi wyliczyć kwotę, jaką wydajesz na każdy przejechany kilometr wraz z wykresem wydatków.",
+      "✨ Podsumowanie Sezonu (Wrapped): Ekran podsumowujący przejechane kilometry i koszty na wzór Spotify Wrapped z neonową grafiką do pochwalenia się w mediach społecznościowych.",
+      "✨ Zapis Trasy (GPX): W Trybie Jazdy aplikacja śledzi teraz Twoją drogę. Po zakończeniu wyprawy możesz zapisać plik GPX z przebytą trasą do udostępnienia lub nawigacji.",
+      "✨ Części i Płyny: Cyfrowy garaż został wyposażony w notatnik, gdzie łatwo zapiszesz modele filtrów, akumulatora czy świec dla danego motocykla - koniec ze żmudnym szukaniem po instrukcjach!"
+    ]
+  },
+  {
     "version": "v2026.8.21.7",
     "date": "2026-08-21",
     "changes": [

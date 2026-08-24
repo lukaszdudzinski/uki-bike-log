@@ -413,6 +413,33 @@ function App() {
               </div>
             </div>
 
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '8px 0' }} />
+            <h3 style={{ margin: '0', fontSize: '1.1rem' }}>Części i Płyny (Ściągawka)</h3>
+            <p style={{ margin: '4px 0 12px 0', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Miej zawsze pod ręką numery części do szybkiego zamawiania.</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Filtr Oleju</label>
+                <input type="text" className="input-field" id="settings-part-oil-filter" placeholder="np. KN-204" defaultValue={storage.getSettings().oilFilterModel || ''} />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Typ Akumulatora</label>
+                <input type="text" className="input-field" id="settings-part-battery" placeholder="np. YTX9-BS" defaultValue={storage.getSettings().batteryModel || ''} />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Świece Zapłonowe</label>
+                <input type="text" className="input-field" id="settings-part-spark" placeholder="np. CR9EK" defaultValue={storage.getSettings().sparkPlugModel || ''} />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label className="input-label">Łańcuch (Rozmiar/Ogniwa)</label>
+                <input type="text" className="input-field" id="settings-part-chain" placeholder="np. 525 114" defaultValue={storage.getSettings().chainModel || ''} />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
+                <label className="input-label">Olej Silnikowy (Rodzaj / Ilość)</label>
+                <input type="text" className="input-field" id="settings-part-oil" placeholder="np. 10W40 Motul 7100 (2.8L)" defaultValue={storage.getSettings().engineOilType || ''} />
+              </div>
+            </div>
+
             <button 
               className="btn-primary" 
               style={{ marginTop: '10px' }}
@@ -449,6 +476,13 @@ function App() {
                 const frontTire = (fModel && fDot && !isNaN(fOdo) && !isNaN(fLife)) ? { model: fModel, dot: fDot, installedOdo: fOdo, expectedLifespanKm: fLife } : undefined;
                 const rearTire = (rModel && rDot && !isNaN(rOdo) && !isNaN(rLife)) ? { model: rModel, dot: rDot, installedOdo: rOdo, expectedLifespanKm: rLife } : undefined;
 
+                // Parts
+                const oilFilterModel = (document.getElementById('settings-part-oil-filter') as HTMLInputElement).value;
+                const batteryModel = (document.getElementById('settings-part-battery') as HTMLInputElement).value;
+                const sparkPlugModel = (document.getElementById('settings-part-spark') as HTMLInputElement).value;
+                const chainModel = (document.getElementById('settings-part-chain') as HTMLInputElement).value;
+                const engineOilType = (document.getElementById('settings-part-oil') as HTMLInputElement).value;
+
                 if (!isNaN(odoVal) && !isNaN(tankCapVal) && ocVal && acVal && inspVal && !isNaN(oilOdo) && oilDate && !isNaN(valveOdo) && !isNaN(chainOdo)) {
                   const currentSettings = storage.getSettings();
                   storage.saveSettings({ 
@@ -467,7 +501,12 @@ function App() {
                     lastValveClearanceOdo: valveOdo,
                     lastChainOdo: chainOdo,
                     frontTire,
-                    rearTire
+                    rearTire,
+                    oilFilterModel,
+                    batteryModel,
+                    sparkPlugModel,
+                    chainModel,
+                    engineOilType
                   });
                   alert('Zaktualizowano ustawienia i terminy dla tego pojazdu.');
                 } else {

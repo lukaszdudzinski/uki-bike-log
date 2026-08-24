@@ -51,6 +51,11 @@ export interface BikeSettings {
   lastValveClearanceOdo: number;
   frontTire?: TireData;
   rearTire?: TireData;
+  oilFilterModel?: string;
+  batteryModel?: string;
+  sparkPlugModel?: string;
+  chainModel?: string;
+  engineOilType?: string;
   avatar?: string; // deprecated, moved to UserProfile
   nickname?: string; // deprecated
   liquidGlassEnabled?: boolean; // deprecated
