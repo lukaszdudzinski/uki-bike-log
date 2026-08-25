@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.25.2",
+    "date": "2026-08-25",
+    "changes": [
+      "🎨 UI: Dopasowano styl przycisku dodawania zdjęć do Historii Serwisowej do głównego motywu aplikacji (ikona aparatu i spójne tło)."
+    ]
+  },
+  {
     "version": "v2026.8.25.1",
     "date": "2026-08-25",
     "changes": [
