@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Coffee, Home, Bell, Calendar } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Plus, Trash2, Edit2, Home, Bell, Calendar } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import FuelLog from './pages/FuelLog';
 import ServiceLog from './pages/ServiceLog';
@@ -417,7 +417,7 @@ function App() {
             <h3 style={{ margin: '0', fontSize: '1.1rem' }}>Części i Płyny (Ściągawka)</h3>
             <p style={{ margin: '4px 0 12px 0', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Miej zawsze pod ręką numery części do szybkiego zamawiania.</p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
               <div className="input-group" style={{ marginBottom: 0 }}>
                 <label className="input-label">Filtr Oleju</label>
                 <input type="text" className="input-field" id="settings-part-oil-filter" placeholder="np. KN-204" defaultValue={storage.getSettings().oilFilterModel || ''} />
@@ -521,19 +521,6 @@ function App() {
               <button className="btn-outline" onClick={() => setIsDark(!isDark)}>
                 Zmień motyw na {isDark ? 'Jasny' : 'Ciemny'}
               </button>
-              
-              <button className="btn-outline" onClick={() => {
-                if ('Notification' in window) {
-                  Notification.requestPermission().then(perm => {
-                    if (perm === 'granted') alert('Powiadomienia włączone!');
-                    else alert('Powiadomienia zostały zablokowane.');
-                  });
-                } else {
-                  alert('Twoja przeglądarka nie obsługuje powiadomień.');
-                }
-              }}>
-                Włącz powiadomienia (przypomnienia)
-              </button>
             </div>
             
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-glass-border)', margin: '12px 0' }} />
@@ -548,16 +535,6 @@ function App() {
               >
                 Przejdź do Diagnostyki / Kopii zapasowej
               </button>
-              <a 
-                href="https://suppi.pl/ukidives" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none', display: 'block' }}
-              >
-                <button className="btn-outline" style={{ width: '100%', borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>
-                  <Coffee size={18} /> Postaw mi Kawę ☕
-                </button>
-              </a>
             </div>
             
             <p style={{ textAlign: 'center', margin: '30px 0', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>

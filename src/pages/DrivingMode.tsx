@@ -454,11 +454,10 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
           </button>
           <button 
             onClick={handleExit}
-            aria-label="Zakończ jazdę"
+            aria-label="Zamknij tryb jazdy"
             className="dm-close-btn"
-            style={{ background: 'var(--color-danger)', color: '#fff' }}
           >
-            <X size={24} /> Zakończ
+            <X size={24} />
           </button>
         </div>
       </div>

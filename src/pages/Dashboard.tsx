@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Coffee } from 'lucide-react';
 import { storage, type BikeSettings } from '../services/storage';
 import { useGarage } from '../contexts/GarageContext';
 import AlertsList from '../components/AlertsList';
@@ -141,6 +142,18 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
       >
         🏆 Podsumowanie Sezonu (Wrapped)
       </button>
+
+      <a 
+        href="https://suppi.pl/ukidives" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{ textDecoration: 'none', display: 'block', marginTop: '12px' }}
+      >
+        <button className="btn-outline" style={{ width: '100%', borderColor: '#f39c12', color: '#f39c12', background: 'rgba(243, 156, 18, 0.1)' }}>
+          <Coffee size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> 
+          <span style={{ verticalAlign: 'middle' }}>Postaw kawę ☕</span>
+        </button>
+      </a>
 
       <p style={{ textAlign: 'center', marginTop: '20px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
         Uki's Bike Log v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} (Radar & Garaż)

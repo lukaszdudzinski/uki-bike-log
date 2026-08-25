@@ -1,5 +1,14 @@
 [
   {
+    "version": "v2026.8.25.1",
+    "date": "2026-08-25",
+    "changes": [
+      "🎨 UI: Uporządkowano wyrównanie pól w ściągawce części, a baner 'Postaw kawę' przeniesiono w bardziej dostępne miejsce na pulpicie głównym.",
+      "🛠️ Safari Fix: Naprawiono problem z pobieraniem przypomnień .ics w przeglądarce Safari na iOS.",
+      "🎨 UI: Przywrócono minimalistyczny przycisk zamykania (X) w Trybie Jazdy, zachowując przy tym funkcjonalność zapisu plików GPX."
+    ]
+  },
+  {
     "version": "v2026.8.24.1",
     "date": "2026-08-24",
     "changes": [
