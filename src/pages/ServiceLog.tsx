@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wrench, Save } from 'lucide-react';
+import { Wrench, Save, Camera } from 'lucide-react';
 import { storage, type ServiceEntry } from '../services/storage';
 
 export default function ServiceLog() {
@@ -142,12 +142,23 @@ export default function ServiceLog() {
           <div className="input-group" style={{ marginBottom: 0 }}>
             <label className="input-label">Zdjęcie paragonu / części (opcjonalnie)</label>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handlePhotoUpload}
-                style={{ fontSize: '0.9rem', width: '100%' }}
-              />
+              <label 
+                className="input-field" 
+                style={{ 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', 
+                  cursor: 'pointer', flex: 1, padding: '12px', textAlign: 'center',
+                  background: 'rgba(255, 255, 255, 0.05)', color: 'var(--color-primary)'
+                }}
+              >
+                <Camera size={20} />
+                <span>{photo ? 'Zmień zdjęcie' : 'Dodaj zdjęcie'}</span>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handlePhotoUpload}
+                  style={{ display: 'none' }}
+                />
+              </label>
               {photo && (
                 <div style={{ position: 'relative' }}>
                   <img src={photo} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
