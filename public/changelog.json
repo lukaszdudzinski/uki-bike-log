@@ -1,5 +1,13 @@
 [
   {
+    "version": "v2026.8.26.4",
+    "date": "2026-08-26",
+    "changes": [
+      "🛠️ Naprawiono moduł Powiadomień i Kalendarza: powiadomienia i zapis do kalendarza ponownie mają prawidłowy dostęp do danych o pojazdach i nie kończą się pustym wynikiem.",
+      "✏️ Zmieniono niezrozumiałą etykietę 'Założona przy' na 'Przebieg przy montażu' w sekcji Menedżera Opon, aby ułatwić uzupełnianie danych."
+    ]
+  },
+  {
     "version": "v2026.8.26.3",
     "date": "2026-08-26",
     "changes": [

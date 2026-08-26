@@ -149,7 +149,7 @@ export function SettingsVehicle({ activeBikeId }: { activeBikeId: string }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           <input type="text" className="input-field" placeholder="Model (np. Michelin Road 6)" value={frontTire.model || ''} onChange={e => handleFrontTireChange('model', e.target.value)} />
           <input type="text" className="input-field" placeholder="DOT (np. 1224)" value={frontTire.dot || ''} onChange={e => handleFrontTireChange('dot', e.target.value)} />
-          <input type="number" className="input-field" placeholder="Założona przy (km)" value={frontTire.installedOdo || ''} onChange={e => handleFrontTireChange('installedOdo', e.target.value)} />
+          <input type="number" className="input-field" placeholder="Przebieg przy montażu (km)" value={frontTire.installedOdo || ''} onChange={e => handleFrontTireChange('installedOdo', e.target.value)} />
           <input type="number" className="input-field" placeholder="Szac. żywotność (km)" value={frontTire.expectedLifespanKm || ''} onChange={e => handleFrontTireChange('expectedLifespanKm', e.target.value)} />
         </div>
       </div>
@@ -159,7 +159,7 @@ export function SettingsVehicle({ activeBikeId }: { activeBikeId: string }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           <input type="text" className="input-field" placeholder="Model (np. Michelin Road 6)" value={rearTire.model || ''} onChange={e => handleRearTireChange('model', e.target.value)} />
           <input type="text" className="input-field" placeholder="DOT (np. 1224)" value={rearTire.dot || ''} onChange={e => handleRearTireChange('dot', e.target.value)} />
-          <input type="number" className="input-field" placeholder="Założona przy (km)" value={rearTire.installedOdo || ''} onChange={e => handleRearTireChange('installedOdo', e.target.value)} />
+          <input type="number" className="input-field" placeholder="Przebieg przy montażu (km)" value={rearTire.installedOdo || ''} onChange={e => handleRearTireChange('installedOdo', e.target.value)} />
           <input type="number" className="input-field" placeholder="Szac. żywotność (km)" value={rearTire.expectedLifespanKm || ''} onChange={e => handleRearTireChange('expectedLifespanKm', e.target.value)} />
         </div>
       </div>

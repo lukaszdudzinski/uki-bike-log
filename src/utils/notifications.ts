@@ -2,9 +2,13 @@ import localforage from 'localforage';
 import { storage } from '../services/storage';
 import type { BikeSettings } from '../services/storage';
 
-const getStorageKeys = (bikeId: string) => ({
-  SETTINGS: `uki_settings_${bikeId}`,
-});
+const getStorageKeys = (bikeId: string) => {
+  const prefix = bikeId === 'default' ? '' : `_${bikeId}`;
+  return {
+    SETTINGS: `uki_bike_settings${prefix}`,
+    FUEL: `uki_fuel_logs${prefix}`,
+  };
+};
 
 export const checkAndFireNotifications = async () => {
   const lastCheck = localStorage.getItem('lastNotificationCheck');
@@ -55,7 +59,7 @@ export const checkAndFireNotifications = async () => {
         // It's saved in the last fuel log or settings.initialOdo.
         // But storage.getCurrentOdo() only works for the ACTIVE bike.
         // Let's just rely on the active bike check for chain, or calculate it.
-        const fuelLogsKey = `uki_fuel_${bike.id}`;
+        const fuelLogsKey = keys.FUEL;
         const fuelLogs = await localforage.getItem(fuelLogsKey) as any[];
         let currentOdo = settings.initialOdo;
         if (fuelLogs && fuelLogs.length > 0) {
@@ -105,6 +109,7 @@ export const generateCalendarICS = async () => {
   let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Uki Bike Log//PL\nCALSCALE:GREGORIAN\n";
   const bikes = storage.getBikes();
 
+  let hasEvents = false;
   for (const bike of bikes) {
     const keys = getStorageKeys(bike.id);
     const settings: BikeSettings | null = await localforage.getItem(keys.SETTINGS);
@@ -113,12 +118,24 @@ export const generateCalendarICS = async () => {
       if (settings.insuranceExpiry) {
         const dt = settings.insuranceExpiry.replace(/-/g, '') + 'T120000Z';
         icsContent += `BEGIN:VEVENT\nSUMMARY:Koniec OC - ${bike.name}\nDTSTART:${dt}\nDTEND:${dt}\nDESCRIPTION:Ubezpieczenie OC wygasa.\nEND:VEVENT\n`;
+        hasEvents = true;
       }
       if (settings.lastInspectionDate) {
-        const dt = settings.lastInspectionDate.replace(/-/g, '') + 'T120000Z';
+        // Technically this should be next inspection date (+1 year). 
+        // Let's assume the user already expects it to be the last inspection date for now,
+        // or actually let's calculate +1 year!
+        const dateObj = new Date(settings.lastInspectionDate);
+        dateObj.setFullYear(dateObj.getFullYear() + 1);
+        const dt = dateObj.toISOString().split('T')[0].replace(/-/g, '') + 'T120000Z';
         icsContent += `BEGIN:VEVENT\nSUMMARY:Koniec Przeglądu - ${bike.name}\nDTSTART:${dt}\nDTEND:${dt}\nDESCRIPTION:Przegląd techniczny wygasa.\nEND:VEVENT\n`;
+        hasEvents = true;
       }
     }
+  }
+
+  if (!hasEvents) {
+    alert("Brak zapisanych dat ubezpieczenia OC lub przeglądu w ustawieniach pojazdu.");
+    return false;
   }
 
   icsContent += "END:VCALENDAR";
@@ -136,4 +153,6 @@ export const generateCalendarICS = async () => {
     link.click();
     document.body.removeChild(link);
   }
+  
+  return true;
 };

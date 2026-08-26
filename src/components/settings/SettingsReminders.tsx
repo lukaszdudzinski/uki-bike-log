@@ -27,8 +27,11 @@ export function SettingsReminders() {
         <button 
           className="btn-outline" 
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' }}
-          onClick={() => {
-            generateCalendarICS();
+          onClick={async () => {
+            const success = await generateCalendarICS();
+            if (success) {
+              alert('Plik kalendarza wygenerowany! Możesz go teraz zapisać/otworzyć w swoim kalendarzu.');
+            }
           }}
         >
           <Calendar size={18} /> Zapisz przypomnienia (OC/Przegląd) do Kalendarza
