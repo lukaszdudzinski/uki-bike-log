@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.26.7",
+    "date": "2026-08-26",
+    "changes": [
+      "🚀 Krytyczna naprawa pętli aktualizacji PWA i stabilności"
+    ]
+  },
+  {
     "version": "v2026.8.26.6",
     "date": "2026-08-26",
     "changes": [

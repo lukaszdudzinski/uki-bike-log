@@ -7,8 +7,8 @@ const packagePath = path.resolve(process.cwd(), 'package.json');
 // Get current date
 const now = new Date();
 const year = now.getFullYear();
-const month = String(now.getMonth() + 1).padStart(2, '0');
-const day = String(now.getDate()).padStart(2, '0');
+const month = String(now.getMonth() + 1);
+const day = String(now.getDate());
 
 const prefix = `${year}.${month}.${day}`;
 
@@ -20,9 +20,9 @@ let newVersion;
 if (currentVersion.startsWith(prefix)) {
   const parts = currentVersion.split('.');
   const rev = parseInt(parts[3] || '0', 10);
-  newVersion = `${prefix}.${String(rev + 1).padStart(2, '0')}`;
+  newVersion = `${prefix}.${rev + 1}`;
 } else {
-  newVersion = `${prefix}.01`;
+  newVersion = `${prefix}.1`;
 }
 
 packageJson.version = newVersion;
@@ -45,3 +45,24 @@ if (fs.existsSync(indexPath)) {
 }
 
 console.log(`Version bumped to ${newVersion} in package.json, sw.js and index.html`);
+
+// Zaktualizuj changelog.json jeśli podano opis
+const description = process.argv[2];
+if (description) {
+  const changelogPath = path.resolve(process.cwd(), 'public/changelog.json');
+  if (fs.existsSync(changelogPath)) {
+    const changelog = JSON.parse(fs.readFileSync(changelogPath, 'utf8'));
+    
+    // YYYY-MM-DD
+    const isoDate = `${year}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    
+    changelog.unshift({
+      version: `v${newVersion}`,
+      date: isoDate,
+      changes: [description]
+    });
+    
+    fs.writeFileSync(changelogPath, JSON.stringify(changelog, null, 2) + '\n');
+    console.log(`Dodano wpis do changelog.json: "${description}"`);
+  }
+}
