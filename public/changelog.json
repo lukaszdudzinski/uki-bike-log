@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.26.6",
+    "date": "2026-08-26",
+    "changes": [
+      "🛠️ Krytyczna poprawka PWA: Rozwiązano błąd mechanizmu instalacji aktualizacji polegający na niepotrzebnym usuwaniu świeżego cache'u przed zrestartowaniem aplikacji (co skutkowało pobieraniem starej wersji z CDN)."
+    ]
+  },
+  {
     "version": "v2026.8.26.5",
     "date": "2026-08-26",
     "changes": [

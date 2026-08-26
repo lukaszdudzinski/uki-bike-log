@@ -56,13 +56,9 @@
         doPwaUpdate: async () => {
             if (window.PWAUpdateUI.pwaWorker) {
                 window.PWAUpdateUI.pwaWorker.postMessage('SKIP_WAITING');
-                setTimeout(async () => {
-                    try {
-                        const keys = await caches.keys();
-                        await Promise.all(keys.map(k => caches.delete(k)));
-                    } catch(e) { console.error('Cache clear error:', e); }
+                setTimeout(() => {
                     window.location.reload(true);
-                }, 1000);
+                }, 500);
             } else {
                 // Twarde czyszczenie jeśli nie złapaliśmy nowego workera
                 try {
@@ -204,7 +200,6 @@
                             }
                             
                             if (localVersion && isNewer) {
-                                window.PWAUpdateUI.showUpdateBanner(registration.waiting); 
                                 registration.update();
                             }
                         } catch(e) {}
