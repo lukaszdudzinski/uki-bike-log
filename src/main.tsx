@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { HashRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { GarageProvider } from './contexts/GarageContext.tsx'
@@ -33,8 +34,10 @@ window.addEventListener('unhandledrejection', function(event) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <GarageProvider>
-      <App />
-    </GarageProvider>
+    <HashRouter>
+      <GarageProvider>
+        <App />
+      </GarageProvider>
+    </HashRouter>
   </StrictMode>,
 )

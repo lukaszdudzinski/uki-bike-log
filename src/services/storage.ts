@@ -352,9 +352,24 @@ export const storage = {
   getServiceLogs: (): ServiceEntry[] => cache.service,
   addServiceLog: (entry: Omit<ServiceEntry, 'id'>) => {
     const newEntry = { ...entry, id: Date.now().toString() + Math.random().toString(36).substring(2, 9) };
+    // DO NOT mutate the cache directly, create a new array or just push to it. 
+    // Wait, the Fuel logs also do cache.fuel.push(newEntry), let's keep consistency.
     cache.service.push(newEntry);
+    cache.service.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     localforage.setItem(getStorageKeys(cache.activeBikeId).SERVICE, cache.service);
     return newEntry;
+  },
+  editServiceLog: (id: string, updatedEntry: Omit<ServiceEntry, 'id'>) => {
+    const index = cache.service.findIndex(s => s.id === id);
+    if (index !== -1) {
+      cache.service[index] = { ...updatedEntry, id };
+      cache.service.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      localforage.setItem(getStorageKeys(cache.activeBikeId).SERVICE, cache.service);
+    }
+  },
+  deleteServiceLog: (id: string) => {
+    cache.service = cache.service.filter(s => s.id !== id);
+    localforage.setItem(getStorageKeys(cache.activeBikeId).SERVICE, cache.service);
   },
 
   // --- Routes ---

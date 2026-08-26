@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wrench, Save, Camera } from 'lucide-react';
+import { Wrench, Save, Camera, Trash2, Edit2, X } from 'lucide-react';
 import { storage, type ServiceEntry } from '../services/storage';
 
 export default function ServiceLog() {
@@ -10,6 +10,8 @@ export default function ServiceLog() {
   const [cost, setCost] = useState<number | ''>('');
   const [photo, setPhoto] = useState<string | undefined>(undefined);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  
+  const [editingId, setEditingId] = useState<string | null>(null);
   
   const currentOdo = storage.getCurrentOdo();
 
@@ -24,38 +26,79 @@ export default function ServiceLog() {
     }
   };
 
+  const refreshLogs = () => {
+    setLogs([...storage.getServiceLogs()]);
+  };
+
   useEffect(() => {
-    setLogs(storage.getServiceLogs());
+    refreshLogs();
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!odo || !description || !cost) return;
 
-    const newEntry = storage.addServiceLog({
-      date: new Date().toISOString(),
-      odo: Number(odo),
-      type,
-      description,
-      cost: Number(cost),
-      photoBase64: photo,
-    });
+    if (editingId) {
+      const existingLog = logs.find(l => l.id === editingId);
+      if (existingLog) {
+        storage.editServiceLog(editingId, {
+          date: existingLog.date,
+          odo: Number(odo),
+          type,
+          description,
+          cost: Number(cost),
+          photoBase64: photo,
+        });
+      }
+    } else {
+      storage.addServiceLog({
+        date: new Date().toISOString(),
+        odo: Number(odo),
+        type,
+        description,
+        cost: Number(cost),
+        photoBase64: photo,
+      });
 
-    // If it's a service, update lastServiceOdo in settings
-    if (type === 'service') {
-      const settings = storage.getSettings();
-      storage.saveSettings({ ...settings, lastServiceOdo: Number(odo) });
+      // If it's a service, update lastServiceOdo in settings
+      if (type === 'service') {
+        const settings = storage.getSettings();
+        storage.saveSettings({ ...settings, lastServiceOdo: Number(odo) });
+      }
     }
 
-    setLogs([newEntry, ...logs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    
-    // Reset form
+    refreshLogs();
+    resetForm();
+    alert(editingId ? 'Zaktualizowano pomyślnie!' : 'Zapisano pomyślnie!');
+  };
+
+  const resetForm = () => {
     setOdo('');
     setDescription('');
     setCost('');
     setPhoto(undefined);
-    
-    alert('Zapisano pomyślnie!');
+    setType('service');
+    setEditingId(null);
+  };
+
+  const handleEdit = (log: ServiceEntry) => {
+    setEditingId(log.id);
+    setOdo(log.odo);
+    setType(log.type);
+    setDescription(log.description);
+    setCost(log.cost);
+    setPhoto(log.photoBase64);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Czy na pewno chcesz usunąć ten wpis?')) {
+      storage.deleteServiceLog(id);
+      refreshLogs();
+      if (editingId === id) {
+        resetForm();
+      }
+    }
   };
 
   const getTypeLabel = (t: string) => {
@@ -82,7 +125,8 @@ export default function ServiceLog() {
       {/* Add Service/Expense Form */}
       <div className="glass-panel">
         <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: 0, marginBottom: '20px' }}>
-          <Wrench color="var(--color-primary)" /> Nowy wpis / Wydatek
+          {editingId ? <Edit2 color="var(--color-primary)" /> : <Wrench color="var(--color-primary)" />}
+          {editingId ? 'Edytuj wpis' : 'Nowy wpis / Wydatek'}
         </h2>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -168,9 +212,16 @@ export default function ServiceLog() {
             </div>
           </div>
 
-          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '8px' }}>
-            <Save size={20} /> Zapisz wpis
-          </button>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+            <button type="submit" className="btn-primary" style={{ flex: 1 }}>
+              <Save size={20} /> {editingId ? 'Aktualizuj' : 'Zapisz wpis'}
+            </button>
+            {editingId && (
+              <button type="button" onClick={resetForm} className="btn-secondary" style={{ padding: '0 16px' }}>
+                <X size={20} /> Anuluj
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -198,6 +249,20 @@ export default function ServiceLog() {
                     <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
                       {log.odo.toLocaleString()} km • {dateObj.toLocaleDateString()}
                     </p>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                      <button 
+                        onClick={() => handleEdit(log)}
+                        style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', padding: 0 }}
+                      >
+                        <Edit2 size={14} /> Edytuj
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(log.id)}
+                        style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', padding: 0 }}
+                      >
+                        <Trash2 size={14} /> Usuń
+                      </button>
+                    </div>
                   </div>
                   <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -207,7 +272,7 @@ export default function ServiceLog() {
                     {log.photoBase64 && (
                       <img 
                         src={log.photoBase64} 
-                        alt="Złącznik" 
+                        alt="Załącznik" 
                         style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--color-glass-border)', cursor: 'pointer' }}
                         onClick={() => setFullscreenImage(log.photoBase64!)}
                       />

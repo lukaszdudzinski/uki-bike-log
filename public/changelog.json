@@ -1,5 +1,30 @@
 [
   {
+    "version": "v2026.8.26.3",
+    "date": "2026-08-26",
+    "changes": [
+      "✨ Edycja w Historii Serwisowej: Zyskujesz pełną kontrolę! Możesz teraz edytować i usuwać wpisy kosztów serwisowych oraz akcesoriów, co pozwala błyskawicznie korygować pomyłki.",
+      "🛠️ Naprawiono błąd duplikowania rekordów: Od teraz każde zapisane zdarzenie z garażu lub warsztatu dodaje się bezszelestnie, dokładnie jeden raz, wprost do bezpiecznej, wewnętrznej bazy PWA."
+    ]
+  },
+  {
+    "version": "v2026.8.26.2",
+    "date": "2026-08-26",
+    "changes": [
+      "⚡ Optymalizacja Startu (Code Splitting): Wdrożono mechanizm leniwego ładowania (lazy loading) modułów aplikacji. Pulpit ładuje się teraz błyskawicznie, pobierając z sieci ułamek dawnej wielkości danych!",
+      "🛠️ Architektura (Settings): Potężna struktura Ustawień została rozbita na mniejsze moduły z profesjonalnym zarządzaniem stanem, by uniknąć problemów z nadpisywaniem formularzy (usunięto anty-wzorce manipulacji DOM)."
+    ]
+  },
+  {
+    "version": "v2026.8.26.1",
+    "date": "2026-08-26",
+    "changes": [
+      "✨ Refaktoryzacja (Faza 1 i 2): Wdrożono nowy, profesjonalny silnik nawigacyjny React Router. Rozwiązuje to problem z zapamiętywaniem otwartej zakładki po odświeżeniu.",
+      "🛠️ Architektura: Potężna zakładka Opcje (Settings) została przeniesiona do osobnego pliku, co znacznie odciążyło główny silnik aplikacji.",
+      "🛠️ Diagnostyka: Zmodernizowano moduł diagnostyczny – działa teraz jako w pełni natywny, czysty komponent bez ingerencji w strukturę przeglądarki."
+    ]
+  },
+  {
     "version": "v2026.8.25.2",
     "date": "2026-08-25",
     "changes": [
