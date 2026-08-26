@@ -79,5 +79,44 @@ export const weatherService = {
       console.error('Rainviewer API error', e);
       return null;
     }
+  },
+
+  // 5. Check if it's raining in radius
+  checkRainWarning: async (lat: number, lng: number, radiusKm: number): Promise<boolean> => {
+    try {
+      // Calculate 4 points around the user (N, S, E, W) at given radius
+      // 1 degree lat = ~111km
+      const latOffset = radiusKm / 111;
+      // 1 degree lng = ~111km * cos(lat)
+      const lngOffset = radiusKm / (111 * Math.cos(lat * (Math.PI / 180)));
+      
+      const points = [
+        { lat, lng }, // Center
+        { lat: lat + latOffset, lng }, // North
+        { lat: lat - latOffset, lng }, // South
+        { lat, lng: lng + lngOffset }, // East
+        { lat, lng: lng - lngOffset }, // West
+      ];
+      
+      const lats = points.map(p => p.lat.toFixed(4)).join(',');
+      const lngs = points.map(p => p.lng.toFixed(4)).join(',');
+      
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lngs}&current=precipitation`);
+      const data = await res.json();
+      
+      let isRaining = false;
+      // Open-Meteo returns array when multiple coordinates are requested
+      if (Array.isArray(data)) {
+        isRaining = data.some(d => d.current?.precipitation > 0);
+      } else if (data?.current?.precipitation !== undefined) {
+        // Fallback if only one coordinate was somehow processed
+        isRaining = data.current.precipitation > 0;
+      }
+      
+      return isRaining;
+    } catch (e) {
+      console.error('Weather API error', e);
+      return false;
+    }
   }
 };

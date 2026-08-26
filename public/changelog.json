@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.26.5",
+    "date": "2026-08-26",
+    "changes": [
+      "🛠️ Architektura: Przeprowadzono gruntowną refaktoryzację modułu Trybu Jazdy, dzieląc go na mniejsze komponenty i wydzielając logikę do odrębnych serwisów."
+    ]
+  },
+  {
     "version": "v2026.8.26.4",
     "date": "2026-08-26",
     "changes": [

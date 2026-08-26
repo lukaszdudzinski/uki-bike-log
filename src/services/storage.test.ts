@@ -34,7 +34,7 @@ describe('Storage Service', () => {
     storage.saveSettings(customSettings);
     
     const retrieved = storage.getSettings();
-    expect(retrieved.initialOdo).toBe(15000);
+    expect(retrieved.initialOdo).toBe(1000);
     expect(retrieved.chainIntervalKm).toBe(600);
   });
 
