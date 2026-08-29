@@ -12,7 +12,8 @@ export default function WeatherWidget() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
+  const loadWeather = () => {
+    setLoading(true);
     if (!navigator.geolocation) {
       setError('Brak geolokalizacji');
       setLoading(false);
@@ -22,6 +23,7 @@ export default function WeatherWidget() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
+          localStorage.setItem('weatherLocationGranted', 'true');
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
           const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`);
@@ -41,6 +43,7 @@ export default function WeatherWidget() {
             description: desc,
             code: code
           });
+          setError(null);
         } catch (err) {
           setError('Błąd API');
         } finally {
@@ -49,9 +52,18 @@ export default function WeatherWidget() {
       },
       () => {
         setError('Odmowa lokalizacji');
+        localStorage.removeItem('weatherLocationGranted');
         setLoading(false);
       }
     );
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem('weatherLocationGranted') === 'true') {
+      loadWeather();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const getWeatherIcon = (code: number) => {
@@ -73,13 +85,22 @@ export default function WeatherWidget() {
 
   if (error) {
     return (
-      <div className="glass-panel" style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-        Pogoda niedostępna ({error})
+      <div className="glass-panel" style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--color-text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>Pogoda: {error}</span>
+        <button onClick={loadWeather} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontWeight: 'bold' }}>Odśwież</button>
       </div>
     );
   }
 
-  if (!weather) return null;
+  if (!weather) {
+    return (
+      <div className="glass-panel" style={{ padding: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <button onClick={loadWeather} className="btn-primary" style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '8px 16px', fontSize: '0.9rem' }}>
+          <Sun size={18} /> Sprawdź pogodę
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px' }}>

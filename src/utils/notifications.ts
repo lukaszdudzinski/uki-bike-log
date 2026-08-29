@@ -110,24 +110,25 @@ export const generateCalendarICS = async () => {
   const bikes = storage.getBikes();
 
   let hasEvents = false;
+  const nowStr = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
   for (const bike of bikes) {
     const keys = getStorageKeys(bike.id);
     const settings: BikeSettings | null = await localforage.getItem(keys.SETTINGS);
     
     if (settings) {
       if (settings.insuranceExpiry) {
-        const dt = settings.insuranceExpiry.replace(/-/g, '') + 'T120000Z';
-        icsContent += `BEGIN:VEVENT\nSUMMARY:Koniec OC - ${bike.name}\nDTSTART:${dt}\nDTEND:${dt}\nDESCRIPTION:Ubezpieczenie OC wygasa.\nEND:VEVENT\n`;
+        const dt = settings.insuranceExpiry.replace(/-/g, '') + 'T090000Z'; // 9:00 AM UTC
+        const uid = `oc-${bike.id}-${dt}@ukisbikelog`;
+        icsContent += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${nowStr}\nSUMMARY:Koniec OC - ${bike.name}\nDTSTART:${dt}\nDTEND:${dt}\nDESCRIPTION:Ubezpieczenie OC wygasa.\nEND:VEVENT\n`;
         hasEvents = true;
       }
       if (settings.lastInspectionDate) {
-        // Technically this should be next inspection date (+1 year). 
-        // Let's assume the user already expects it to be the last inspection date for now,
-        // or actually let's calculate +1 year!
         const dateObj = new Date(settings.lastInspectionDate);
         dateObj.setFullYear(dateObj.getFullYear() + 1);
-        const dt = dateObj.toISOString().split('T')[0].replace(/-/g, '') + 'T120000Z';
-        icsContent += `BEGIN:VEVENT\nSUMMARY:Koniec Przeglądu - ${bike.name}\nDTSTART:${dt}\nDTEND:${dt}\nDESCRIPTION:Przegląd techniczny wygasa.\nEND:VEVENT\n`;
+        const dt = dateObj.toISOString().split('T')[0].replace(/-/g, '') + 'T090000Z';
+        const uid = `przeglad-${bike.id}-${dt}@ukisbikelog`;
+        icsContent += `BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${nowStr}\nSUMMARY:Koniec Przeglądu - ${bike.name}\nDTSTART:${dt}\nDTEND:${dt}\nDESCRIPTION:Przegląd techniczny wygasa.\nEND:VEVENT\n`;
         hasEvents = true;
       }
     }
@@ -140,19 +141,21 @@ export const generateCalendarICS = async () => {
 
   icsContent += "END:VCALENDAR";
   
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-  if (isIOS) {
-    window.location.assign(`data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`);
-  } else {
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'uki-bike-log-przypomnienia.ics';
-    document.body.appendChild(link);
-    link.click();
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'uki-bike-log-przypomnienia.ics';
+  
+  // Wymagane dla iOS PWA do poprawnego otwarcia kalendarza
+  link.target = '_blank';
+  
+  document.body.appendChild(link);
+  link.click();
+  
+  setTimeout(() => {
     document.body.removeChild(link);
-  }
+    URL.revokeObjectURL(link.href);
+  }, 100);
   
   return true;
 };

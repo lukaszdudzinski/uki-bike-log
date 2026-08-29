@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.29.1",
+    "date": "2026-08-29",
+    "changes": [
+      "🛠️ Poprawki powiadomień: Zlikwidowano uciążliwe pytania o lokalizację na starcie i naprawiono eksport terminów OC/Przeglądu do kalendarza na iOS"
+    ]
+  },
+  {
     "version": "v2026.8.26.7",
     "date": "2026-08-26",
     "changes": [
