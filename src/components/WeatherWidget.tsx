@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CloudRain, Sun, Cloud, Loader2, CloudLightning, Snowflake } from 'lucide-react';
+import { CloudRain, Sun, Cloud, Loader2, CloudLightning, Snowflake, RefreshCw } from 'lucide-react';
 
 interface WeatherData {
   temp: number;
@@ -12,7 +12,34 @@ export default function WeatherWidget() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const loadWeather = () => {
+  const fetchWeatherApi = async (lat: number, lon: number) => {
+    try {
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`);
+      const data = await res.json();
+      
+      let desc = 'Nieznana';
+      const code = data.current.weather_code;
+      
+      if (code === 0) desc = 'Bezchmurnie';
+      else if (code >= 1 && code <= 3) desc = 'Zachmurzenie';
+      else if (code >= 51 && code <= 67) desc = 'Deszcz';
+      else if (code >= 71 && code <= 77) desc = 'Śnieg';
+      else if (code >= 95) desc = 'Burza';
+
+      setWeather({
+        temp: data.current.temperature_2m,
+        description: desc,
+        code: code
+      });
+      setError(null);
+    } catch (err) {
+      setError('Błąd API');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadWeatherFromGPS = () => {
     setLoading(true);
     if (!navigator.geolocation) {
       setError('Brak geolokalizacji');
@@ -21,46 +48,27 @@ export default function WeatherWidget() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          localStorage.setItem('weatherLocationGranted', 'true');
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`);
-          const data = await res.json();
-          
-          let desc = 'Nieznana';
-          const code = data.current.weather_code;
-          
-          if (code === 0) desc = 'Bezchmurnie';
-          else if (code >= 1 && code <= 3) desc = 'Zachmurzenie';
-          else if (code >= 51 && code <= 67) desc = 'Deszcz';
-          else if (code >= 71 && code <= 77) desc = 'Śnieg';
-          else if (code >= 95) desc = 'Burza';
-
-          setWeather({
-            temp: data.current.temperature_2m,
-            description: desc,
-            code: code
-          });
-          setError(null);
-        } catch (err) {
-          setError('Błąd API');
-        } finally {
-          setLoading(false);
-        }
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        localStorage.setItem('weatherLastLat', lat.toString());
+        localStorage.setItem('weatherLastLon', lon.toString());
+        fetchWeatherApi(lat, lon);
       },
       () => {
         setError('Odmowa lokalizacji');
-        localStorage.removeItem('weatherLocationGranted');
         setLoading(false);
       }
     );
   };
 
   useEffect(() => {
-    if (localStorage.getItem('weatherLocationGranted') === 'true') {
-      loadWeather();
+    const lat = localStorage.getItem('weatherLastLat');
+    const lon = localStorage.getItem('weatherLastLon');
+    
+    if (lat && lon) {
+      // Fetch weather from cached coordinates to avoid iOS Safari permission prompt on startup
+      fetchWeatherApi(parseFloat(lat), parseFloat(lon));
     } else {
       setLoading(false);
     }
@@ -87,7 +95,7 @@ export default function WeatherWidget() {
     return (
       <div className="glass-panel" style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--color-text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>Pogoda: {error}</span>
-        <button onClick={loadWeather} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontWeight: 'bold' }}>Odśwież</button>
+        <button onClick={loadWeatherFromGPS} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontWeight: 'bold' }}>Aktualizuj pozycję</button>
       </div>
     );
   }
@@ -95,7 +103,7 @@ export default function WeatherWidget() {
   if (!weather) {
     return (
       <div className="glass-panel" style={{ padding: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <button onClick={loadWeather} className="btn-primary" style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '8px 16px', fontSize: '0.9rem' }}>
+        <button onClick={loadWeatherFromGPS} className="btn-primary" style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '8px 16px', fontSize: '0.9rem' }}>
           <Sun size={18} /> Sprawdź pogodę
         </button>
       </div>
@@ -103,7 +111,14 @@ export default function WeatherWidget() {
   }
 
   return (
-    <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px' }}>
+    <div className="glass-panel" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px' }}>
+      <button 
+        onClick={loadWeatherFromGPS}
+        style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', padding: '4px' }}
+        title="Aktualizuj lokalizację (GPS)"
+      >
+        <RefreshCw size={14} />
+      </button>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {getWeatherIcon(weather.code)}
         <div>

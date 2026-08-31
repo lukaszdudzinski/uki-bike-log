@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.8.31.1",
+    "date": "2026-08-31",
+    "changes": [
+      "🛠️ Naprawiono problem z powracającym pytaniem o lokalizację na iOS (PWA), poprzez buforowanie ostatnich współrzędnych i odpytywanie GPS wyłącznie na żądanie (ręczne odświeżenie)."
+    ]
+  },
+  {
     "version": "v2026.8.29.1",
     "date": "2026-08-29",
     "changes": [
