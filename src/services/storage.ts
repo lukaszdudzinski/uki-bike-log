@@ -41,6 +41,7 @@ export interface BikeSettings {
   insurerName?: string;
   policyNumber?: string;
   insuranceHotline?: string;
+  licensePlate?: string; // Numer rejestracyjny
   lastInspectionDate: string;
   serviceIntervalKm: number;
   lastServiceOdo: number;

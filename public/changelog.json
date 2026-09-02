@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.2.1",
+    "date": "2026-09-02",
+    "changes": [
+      "📱 Poprawiono widoczność rozwijanej listy garażu, pozycję przycisku lokalizacji, uczytelniono treść powiadomień na iOS oraz dodano pole Numer Rejestracyjny."
+    ]
+  },
+  {
     "version": "v2026.8.31.1",
     "date": "2026-08-31",
     "changes": [

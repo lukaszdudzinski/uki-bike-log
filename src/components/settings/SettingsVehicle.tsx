@@ -80,6 +80,11 @@ export function SettingsVehicle({ activeBikeId }: { activeBikeId: string }) {
       </div>
 
       <div className="input-group" style={{ marginBottom: 0 }}>
+        <label className="input-label">Numer rejestracyjny</label>
+        <input type="text" className="input-field" placeholder="np. WX 1234" value={formData.licensePlate || ''} onChange={e => handleChange('licensePlate', e.target.value)} />
+      </div>
+
+      <div className="input-group" style={{ marginBottom: 0 }}>
         <label className="input-label">Wygasa ubezpieczenie OC</label>
         <input type="date" className="input-field" value={formData.insuranceExpiry || ''} onChange={e => handleChange('insuranceExpiry', e.target.value)} />
       </div>

@@ -77,17 +77,20 @@ export const checkAndFireNotifications = async () => {
   }
 
   if (alerts.length > 0) {
+    const title = alerts.length === 1 ? 'Uki\'s Bike Log' : `Uki's Bike Log (${alerts.length} przypomnienia)`;
+    const body = alerts.join(', ');
+    
     // Fire local push notification
     try {
       const registration = await navigator.serviceWorker.ready;
-      registration.showNotification('Uki\'s Bike Log - Przypomnienie', {
-        body: alerts.join('\n'),
+      registration.showNotification(title, {
+        body: body,
         icon: '/uki-bike-log/icon-192x192.png',
         badge: '/uki-bike-log/icon-192x192.png'
       } as any);
     } catch (e) {
-      new Notification('Uki\'s Bike Log - Przypomnienie', {
-        body: alerts.join('\n'),
+      new Notification(title, {
+        body: body,
         icon: '/uki-bike-log/icon-192x192.png'
       });
     }

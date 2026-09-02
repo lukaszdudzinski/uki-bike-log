@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Home } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Home, ChevronDown } from 'lucide-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useGarage } from './contexts/GarageContext';
 import { checkAndFireNotifications } from './utils/notifications';
@@ -67,32 +67,42 @@ function App() {
               <h1 style={{ margin: 0, fontSize: '1.6rem' }}>Uki's <span style={{ color: 'var(--color-primary)' }}>Bike Log</span></h1>
               
               {/* Garage Dropdown Header */}
-              <select 
-                value={activeBike.id}
-                onChange={(e) => {
-                  e.stopPropagation();
-                  switchBike(e.target.value);
-                }}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--color-text-muted)',
-                  fontSize: '0.9rem',
-                  fontWeight: 'bold',
-                  padding: '2px 0',
-                  marginTop: '2px',
-                  cursor: 'pointer',
-                  outline: 'none',
-                  width: '90%',
-                  textOverflow: 'ellipsis'
-                }}
-              >
-                {bikes.map(bike => (
-                  <option key={bike.id} value={bike.id} style={{ color: '#000' }}>
-                    {bike.name}
-                  </option>
-                ))}
-              </select>
+              <div style={{ position: 'relative', width: 'fit-content' }}>
+                <select 
+                  value={activeBike.id}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    switchBike(e.target.value);
+                  }}
+                  style={{
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--color-glass-border)',
+                    borderRadius: '8px',
+                    color: 'var(--color-text-muted)',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    padding: '4px 28px 4px 8px',
+                    marginTop: '4px',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '200px'
+                  }}
+                >
+                  {bikes.map(bike => (
+                    <option key={bike.id} value={bike.id} style={{ color: '#000' }}>
+                      {bike.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown 
+                  size={14} 
+                  color="var(--color-text-muted)" 
+                  style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', marginTop: '2px' }} 
+                />
+              </div>
             </div>
           </div>
           <div style={{ position: 'relative' }}>
