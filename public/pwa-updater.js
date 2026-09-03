@@ -91,11 +91,16 @@
                 } else {
                     if (!document.getElementById('pwa-changelog-modal-standalone')) {
                         const modalHtml = `
-                        <div id="pwa-changelog-modal-standalone" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100000; justify-content: center; align-items: center;">
-                            <div style="background: #222; color: #fff; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
-                                <h3 style="margin-top: 0; color: #FF9800;">Co nowego?</h3>
-                                <div id="pwa-changelog-body-standalone">Ładowanie...</div>
-                                <button id="pwa-changelog-close-btn" style="margin-top: 20px; padding: 10px; width: 100%; background: #444; color: #fff; border: 1px solid #555; border-radius: 4px; cursor: pointer;">Zamknij</button>
+                        <div id="pwa-changelog-modal-standalone" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 100000; justify-content: center; align-items: center; padding: 20px;">
+                            <div style="background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 12px; max-width: 500px; width: 100%; max-height: 80vh; display: flex; flexDirection: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                                <div style="padding: 16px 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="margin: 0; color: #00C3FF; font-size: 1.2rem;">Co nowego? 🚀</h3>
+                                    <button id="pwa-changelog-close-btn-top" style="background: transparent; border: none; color: #888; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+                                </div>
+                                <div id="pwa-changelog-body-standalone" style="padding: 20px; overflow-y: auto; flex: 1;">Ładowanie...</div>
+                                <div style="padding: 16px 20px; border-top: 1px solid #333; background: #1a1a1a;">
+                                    <button id="pwa-changelog-close-btn" style="width: 100%; padding: 14px; font-size: 1.1rem; font-weight: bold; background: #FF9800; color: #000; border: none; border-radius: 8px; cursor: pointer;">Zaktualizuj</button>
+                                </div>
                             </div>
                         </div>`;
                         document.body.insertAdjacentHTML('beforeend', modalHtml);
@@ -103,23 +108,28 @@
                         document.getElementById('pwa-changelog-close-btn').addEventListener('click', () => {
                             document.getElementById('pwa-changelog-modal-standalone').style.display = 'none';
                         });
+                        document.getElementById('pwa-changelog-close-btn-top').addEventListener('click', () => {
+                            document.getElementById('pwa-changelog-modal-standalone').style.display = 'none';
+                        });
                     }
                     
                     document.getElementById('pwa-changelog-modal-standalone').style.display = 'flex';
                     const body = document.getElementById('pwa-changelog-body-standalone');
-                    body.innerHTML = '<p>Ładowanie zmian...</p>';
+                    body.innerHTML = '<p style="color: #aaa;">Ładowanie zmian...</p>';
                     
                     fetch('changelog.json?t=' + Date.now())
                         .then(res => res.json())
                         .then(data => {
-                            body.innerHTML = data.map(v => `
-                                <div style="margin-bottom: 20px;">
-                                    <h4 style="margin: 0 0 10px 0; color: #FF9800;">Wersja ${v.version}</h4>
-                                    <ul style="margin: 0; padding-left: 20px; color: #ccc;">
-                                        ${v.changes.map(c => `<li style="margin-bottom: 6px;">${c}</li>`).join('')}
+                            body.innerHTML = '<div style="display: flex; flex-direction: column; gap: 24px;">' + data.map(v => `
+                                <div>
+                                    <h4 style="margin: 0 0 12px 0; color: #fff; font-size: 1.05rem;">
+                                        Wersja ${v.version} <span style="color: #888; font-weight: normal; font-size: 0.85em;">(${v.date})</span>
+                                    </h4>
+                                    <ul style="margin: 0; padding-left: 20px; color: #aaa; font-size: 0.95rem;">
+                                        ${v.changes.map(c => `<li style="margin-bottom: 10px; line-height: 1.4;">${c}</li>`).join('')}
                                     </ul>
                                 </div>
-                            `).join('');
+                            `).join('') + '</div>';
                         })
                         .catch(e => {
                             body.innerHTML = '<p>Błąd ładowania changeloga.</p>';
