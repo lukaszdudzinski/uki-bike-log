@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.3.1",
+    "date": "2026-09-03",
+    "changes": [
+      "🩹 Naprawiono krytyczny błąd (czarny ekran) po aktualizacji, dodając mechanizm samo-naprawy (ErrorBoundary), który automatycznie odświeża moduły przy błędzie wczytywania."
+    ]
+  },
+  {
     "version": "v2026.9.2.1",
     "date": "2026-09-02",
     "changes": [

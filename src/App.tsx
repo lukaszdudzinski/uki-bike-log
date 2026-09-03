@@ -3,6 +3,7 @@ import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Home, Che
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useGarage } from './contexts/GarageContext';
 import { checkAndFireNotifications } from './utils/notifications';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy loading pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -142,18 +143,20 @@ function App() {
 
         {/* Use key to force unmount/remount of children when active bike changes, to reset internal component states if needed */}
         <div key={activeBike.id} style={{ paddingBottom: isDrivingMode ? '140px' : '0' }}>
-          <Suspense fallback={<div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-primary)' }}>Ładowanie modułu...</div>}>
-            <Routes>
-              <Route path="/" element={<Dashboard setActiveTab={handleTabChange} setIsDrivingMode={setIsDrivingMode} />} />
-              <Route path="/fuel" element={<FuelLog />} />
-              <Route path="/service" element={<ServiceLog />} />
-              <Route path="/stats" element={<Stats />} />
-              <Route path="/routes" element={<RoutesPage />} />
-              <Route path="/diagnostics" element={<Diagnostics />} />
-              <Route path="/settings" element={<SettingsPage isDark={isDark} setIsDark={setIsDark} />} />
-              <Route path="*" element={<Dashboard setActiveTab={handleTabChange} setIsDrivingMode={setIsDrivingMode} />} />
-            </Routes>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-primary)' }}>Ładowanie modułu...</div>}>
+              <Routes>
+                <Route path="/" element={<Dashboard setActiveTab={handleTabChange} setIsDrivingMode={setIsDrivingMode} />} />
+                <Route path="/fuel" element={<FuelLog />} />
+                <Route path="/service" element={<ServiceLog />} />
+                <Route path="/stats" element={<Stats />} />
+                <Route path="/routes" element={<RoutesPage />} />
+                <Route path="/diagnostics" element={<Diagnostics />} />
+                <Route path="/settings" element={<SettingsPage isDark={isDark} setIsDark={setIsDark} />} />
+                <Route path="*" element={<Dashboard setActiveTab={handleTabChange} setIsDrivingMode={setIsDrivingMode} />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </main>
 
