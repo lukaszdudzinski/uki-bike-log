@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.3.2",
+    "date": "2026-09-03",
+    "changes": [
+      "🔧 Poprawka techniczna: usunięto błąd budowania zapobiegający publikacji poprzedniej wersji (ErrorBoundary)."
+    ]
+  },
+  {
     "version": "v2026.9.3.1",
     "date": "2026-09-03",
     "changes": [
