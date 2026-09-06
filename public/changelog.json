@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.6.1",
+    "date": "2026-09-06",
+    "changes": [
+      "🛠️ Wdrożono niezależny, stabilny mechanizm ChangelogUI, idealnie odwzorowujący logikę aktualizacji z Uki's BodyBuild."
+    ]
+  },
+  {
     "version": "v2026.9.3.3",
     "date": "2026-09-03",
     "changes": [

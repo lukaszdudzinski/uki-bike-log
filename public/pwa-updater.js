@@ -1,8 +1,4 @@
 // pwa-updater.js (Independent PWA Updater)
-// This script runs entirely isolated from the main application modules.
-// If the main application crashes due to a SyntaxError, this script will still execute
-// and provide users with a PWA update banner.
-
 (function() {
     window.PWAUpdateUI = {
         pwaWorker: null,
@@ -26,7 +22,7 @@
                     setTimeout(() => window.location.reload(true), 500);
                 }
             }).catch(e => {
-                console.warn("getRegistrations failed (often due to testing in file://):", e);
+                console.warn("getRegistrations failed:", e);
             });
 
             window.PWAUpdateUI.injectBannerHTML();
@@ -56,9 +52,11 @@
         doPwaUpdate: async () => {
             if (window.PWAUpdateUI.pwaWorker) {
                 window.PWAUpdateUI.pwaWorker.postMessage('SKIP_WAITING');
-                setTimeout(() => {
+                setTimeout(async () => {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
                     window.location.reload(true);
-                }, 500);
+                }, 1000);
             } else {
                 // Twarde czyszczenie jeśli nie złapaliśmy nowego workera
                 try {
@@ -79,61 +77,11 @@
             document.getElementById('pwa-update-btn-refresh').addEventListener('click', window.PWAUpdateUI.doPwaUpdate);
             
             document.getElementById('pwa-update-btn-changelog').addEventListener('click', () => {
-                const btn = document.getElementById('changelog-update-now-btn');
+                const btn = document.getElementById('changelog-update-now-container');
                 if (btn) btn.style.display = 'block';
-                // Trigger react changelog modal instead if we can
-                const reactChangelogBtn = document.getElementById('trigger-changelog-modal');
-                if (reactChangelogBtn) {
-                   reactChangelogBtn.click();
-                } else if (window.showChangelogModal) {
+                if (window.showChangelogModal) {
                     const metaVersion = document.querySelector('meta[name="app-version"]')?.content || 'v.0.0.0';
                     window.showChangelogModal(metaVersion);
-                } else {
-                    if (!document.getElementById('pwa-changelog-modal-standalone')) {
-                        const modalHtml = `
-                        <div id="pwa-changelog-modal-standalone" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 100000; justify-content: center; align-items: center; padding: 20px;">
-                            <div style="background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 12px; max-width: 500px; width: 100%; max-height: 80vh; display: flex; flexDirection: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                                <div style="padding: 16px 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
-                                    <h3 style="margin: 0; color: #00C3FF; font-size: 1.2rem;">Co nowego? 🚀</h3>
-                                    <button id="pwa-changelog-close-btn-top" style="background: transparent; border: none; color: #888; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
-                                </div>
-                                <div id="pwa-changelog-body-standalone" style="padding: 20px; overflow-y: auto; flex: 1;">Ładowanie...</div>
-                                <div style="padding: 16px 20px; border-top: 1px solid #333; background: #1a1a1a;">
-                                    <button id="pwa-changelog-close-btn" style="width: 100%; padding: 14px; font-size: 1.1rem; font-weight: bold; background: #FF9800; color: #000; border: none; border-radius: 8px; cursor: pointer;">Zaktualizuj</button>
-                                </div>
-                            </div>
-                        </div>`;
-                        document.body.insertAdjacentHTML('beforeend', modalHtml);
-                        
-                        document.getElementById('pwa-changelog-close-btn').addEventListener('click', () => {
-                            document.getElementById('pwa-changelog-modal-standalone').style.display = 'none';
-                        });
-                        document.getElementById('pwa-changelog-close-btn-top').addEventListener('click', () => {
-                            document.getElementById('pwa-changelog-modal-standalone').style.display = 'none';
-                        });
-                    }
-                    
-                    document.getElementById('pwa-changelog-modal-standalone').style.display = 'flex';
-                    const body = document.getElementById('pwa-changelog-body-standalone');
-                    body.innerHTML = '<p style="color: #aaa;">Ładowanie zmian...</p>';
-                    
-                    fetch('changelog.json?t=' + Date.now())
-                        .then(res => res.json())
-                        .then(data => {
-                            body.innerHTML = '<div style="display: flex; flex-direction: column; gap: 24px;">' + data.map(v => `
-                                <div>
-                                    <h4 style="margin: 0 0 12px 0; color: #fff; font-size: 1.05rem;">
-                                        Wersja ${v.version} <span style="color: #888; font-weight: normal; font-size: 0.85em;">(${v.date})</span>
-                                    </h4>
-                                    <ul style="margin: 0; padding-left: 20px; color: #aaa; font-size: 0.95rem;">
-                                        ${v.changes.map(c => `<li style="margin-bottom: 10px; line-height: 1.4;">${c}</li>`).join('')}
-                                    </ul>
-                                </div>
-                            `).join('') + '</div>';
-                        })
-                        .catch(e => {
-                            body.innerHTML = '<p>Błąd ładowania changeloga.</p>';
-                        });
                 }
             });
 
@@ -190,26 +138,17 @@
                     // Agresywny Fallback niezależny od JS modules
                     setInterval(async () => {
                         try {
-                            const res = await fetch(`/uki-bike-log/changelog.json?_t=${Date.now()}`);
+                            const res = await fetch(\`/uki-bike-log/changelog.json?_t=\${Date.now()}\`);
                             const data = await res.json();
                             const serverVersion = data[0].version;
-                            // W React app używamy zmiennej ze skryptu, albo parsujemy headera
                             const localVersion = window.__APP_VERSION__ || document.querySelector('meta[name="app-version"]')?.content || '1.0.0';
                             
-                            // Normalizacja wersji (usuwamy "v" i zera wiodące) do porównania
-                            const normalize = (v) => v.replace(/^v/, '').split('.').map(n => parseInt(n, 10));
-                            const normServer = normalize(serverVersion);
-                            const normLocal = normalize(localVersion);
+                            const parseVersion = (v) => {
+                                const parts = v.replace(/^v\.?/, '').split('.').map(n => parseInt(n, 10) || 0);
+                                return (parts[0] * 10000000000) + (parts[1] * 100000000) + (parts[2] * 1000000) + (parts[3] || 0);
+                            };
                             
-                            let isNewer = false;
-                            for (let i = 0; i < Math.max(normServer.length, normLocal.length); i++) {
-                                const sv = normServer[i] || 0;
-                                const lv = normLocal[i] || 0;
-                                if (sv > lv) { isNewer = true; break; }
-                                if (sv < lv) { isNewer = false; break; }
-                            }
-                            
-                            if (localVersion && isNewer) {
+                            if (localVersion && parseVersion(serverVersion) > parseVersion(localVersion)) {
                                 registration.update();
                             }
                         } catch(e) {}
