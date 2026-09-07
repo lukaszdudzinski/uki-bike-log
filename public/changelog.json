@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.7.1",
+    "date": "2026-09-07",
+    "changes": [
+      "🩹 Poprawka krytyczna CSS: Naprawiono literówkę flex-direction, która psuła wyświetlanie modalu aktualizacji na urządzeniach mobilnych."
+    ]
+  },
+  {
     "version": "v2026.9.6.1",
     "date": "2026-09-06",
     "changes": [
