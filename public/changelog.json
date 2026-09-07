@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.7.6",
+    "date": "2026-09-07",
+    "changes": [
+      "🛠️ Naprawiono mechanizm aktualizacji PWA: aktualizacje pobierają się w tle, ale instalowane są wyłącznie po jawnym kliknięciu przycisku Zaktualizuj przez użytkownika."
+    ]
+  },
+  {
     "version": "v2026.9.7.5",
     "date": "2026-09-07",
     "changes": [

@@ -50,22 +50,29 @@
         },
 
         doPwaUpdate: async () => {
+            // Flaga: to jest reload ŚWIADOMY - inicjowany przez użytkownika
+            window.PWAUpdateUI._userInitiatedUpdate = true;
+
+            const banner = document.getElementById('pwa-update-banner');
+            if (banner) {
+                banner.innerHTML = '<div style="font-weight: bold; padding: 5px;">⏳ Trwa aktualizacja...</div>';
+            }
+
             if (window.PWAUpdateUI.pwaWorker) {
                 window.PWAUpdateUI.pwaWorker.postMessage('SKIP_WAITING');
+                // Daj SW chwilę na przełączenie, potem wyczyść cache i przeładuj
                 setTimeout(async () => {
-                    const keys = await caches.keys();
-                    await Promise.all(keys.map(k => caches.delete(k)));
+                    try {
+                        const keys = await caches.keys();
+                        await Promise.all(keys.map(k => caches.delete(k)));
+                    } catch(e) {}
                     window.location.reload(true);
-                }, 1000);
+                }, 800);
             } else {
-                // Twarde czyszczenie jeśli nie złapaliśmy nowego workera
+                // Twarde czyszczenie jeśli nie złapaliśmy referencji do workera
                 try {
-                    if ('serviceWorker' in navigator) {
-                        const regs = await navigator.serviceWorker.getRegistrations();
-                        for (let reg of regs) {
-                            await reg.unregister();
-                        }
-                    }
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    for (let reg of regs) { await reg.unregister(); }
                     const keys = await caches.keys();
                     await Promise.all(keys.map(k => caches.delete(k)));
                 } catch(e) { console.error('Hard reset error:', e); }
@@ -77,21 +84,22 @@
             document.getElementById('pwa-update-btn-refresh').addEventListener('click', window.PWAUpdateUI.doPwaUpdate);
             
             document.getElementById('pwa-update-btn-changelog').addEventListener('click', () => {
-                const btn = document.getElementById('changelog-update-now-container');
-                if (btn) btn.style.display = 'block';
+                // Pokaż przycisk Zaktualizuj w okienku changeloga
+                const updateContainer = document.getElementById('changelog-update-now-container');
+                if (updateContainer) updateContainer.style.display = 'block';
                 if (window.showChangelogModal) {
                     const metaVersion = document.querySelector('meta[name="app-version"]')?.content || 'v.0.0.0';
                     window.showChangelogModal(metaVersion);
                 }
             });
 
-            // Kiedy nowy SW przejmuje kontrole - restart
-            let refreshing = false;
+            // Reload TYLKO gdy użytkownik sam kliknął przycisk aktualizacji
+            // NIGDY nie robimy auto-reload bez wiedzy użytkownika!
             navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    refreshing = true;
+                if (window.PWAUpdateUI._userInitiatedUpdate) {
                     window.location.reload(true);
                 }
+                // Jeśli flaga nie ustawiona = SW zmienił się sam w tle = ignorujemy
             });
         },
 

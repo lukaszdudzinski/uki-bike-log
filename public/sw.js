@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ukis-bikelog-v2026.9.7.5';
+const CACHE_NAME = 'ukis-bikelog-v2026.9.7.6';
 
 // Core assets to pre-cache
 const CORE_ASSETS = [
@@ -27,7 +27,8 @@ self.addEventListener('activate', (e) => {
             }));
         })
     );
-    return self.clients.claim(); // Take control of all clients immediately
+    // NIE wywołujemy self.clients.claim() - nowy SW ma czekać na sygnał
+    // od użytkownika (przycisk Zaktualizuj), a nie przejmować kontrolę samoczynnie!
 });
 
 self.addEventListener('fetch', (e) => {
