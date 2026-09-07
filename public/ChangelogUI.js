@@ -1,4 +1,4 @@
-export const ChangelogUI = {
+const ChangelogUI = {
     init: () => {
         ChangelogUI.injectModalHTML();
         ChangelogUI.bindEvents();
