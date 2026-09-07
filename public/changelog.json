@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.7.3",
+    "date": "2026-09-07",
+    "changes": [
+      "🩹 Poprawka krytyczna: Naprawiono błąd w pliku pwa-updater.js, który uniemożliwiał wyświetlanie się banera na ekranie!"
+    ]
+  },
+  {
     "version": "v2026.9.7.2",
     "date": "2026-09-07",
     "changes": [

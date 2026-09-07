@@ -138,7 +138,7 @@
                     // Agresywny Fallback niezależny od JS modules
                     setInterval(async () => {
                         try {
-                            const res = await fetch(\`/uki-bike-log/changelog.json?_t=\${Date.now()}\`);
+                            const res = await fetch(`/uki-bike-log/changelog.json?_t=${Date.now()}`);
                             const data = await res.json();
                             const serverVersion = data[0].version;
                             const localVersion = window.__APP_VERSION__ || document.querySelector('meta[name="app-version"]')?.content || '1.0.0';
