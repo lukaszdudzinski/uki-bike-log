@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.7.8",
+    "date": "2026-09-07",
+    "changes": [
+      "🛠️ Przepisano silnik aktualizacji PWA: Scalono logikę banera i okna Changelog w jeden, niezawodny plik bez zewnętrznych zależności. Naprawiono przyciski 'Co nowego?' i 'Zaktualizuj' na banerze."
+    ]
+  },
+  {
     "version": "v2026.9.7.7",
     "date": "2026-09-07",
     "changes": [
