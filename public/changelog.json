@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.7.2",
+    "date": "2026-09-07",
+    "changes": [
+      "🔧 Test systemu aktualizacji: Wymuszenie paczki, aby przetestować działanie pomarańczowego banera PWA i upewnić się, że wszystko ładuje się poprawnie!"
+    ]
+  },
+  {
     "version": "v2026.9.7.1",
     "date": "2026-09-07",
     "changes": [
