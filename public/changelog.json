@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.7.5",
+    "date": "2026-09-07",
+    "changes": [
+      "🔧 Test banera nr 2: Upewniamy się, że wszystko działa w 100% poprawnie!"
+    ]
+  },
+  {
     "version": "v2026.9.7.4",
     "date": "2026-09-07",
     "changes": [
