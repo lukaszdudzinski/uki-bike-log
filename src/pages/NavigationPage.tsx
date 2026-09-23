@@ -3,7 +3,7 @@
 // Wzorzec: identyczny jak DrivingMode (position: fixed, z-index: 9999)
 
 import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../styles/navigation.css';
 import { useNavigation } from '../hooks/useNavigation';
@@ -226,11 +226,11 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
               />
               {/* Halo dokładności GPS */}
               {gpsAccuracy && gpsAccuracy < 100 && (
-                <CircleMarker
+                <Circle
                   center={[userPosition.lat, userPosition.lng]}
-                  radius={Math.min(gpsAccuracy / 3, 40)}
+                  radius={gpsAccuracy}
                   fillColor="#00aaff"
-                  fillOpacity={0.12}
+                  fillOpacity={0.1}
                   color="#00aaff"
                   weight={1}
                   opacity={0.3}
