@@ -14,6 +14,7 @@ const RoutesPage = lazy(() => import('./pages/Routes'));
 const Diagnostics = lazy(() => import('./pages/Diagnostics'));
 const SettingsPage = lazy(() => import('./pages/Settings'));
 const DrivingMode = lazy(() => import('./pages/DrivingMode'));
+const NavigationPage = lazy(() => import('./pages/NavigationPage'));
 
 function App() {
   const { bikes, activeBike, isLoading, switchBike } = useGarage();
@@ -23,6 +24,8 @@ function App() {
   const [isDark, setIsDark] = useState(true);
   const [isPlayingRadio, setIsPlayingRadio] = useState(false);
   const [isDrivingMode, setIsDrivingMode] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navDestination, setNavDestination] = useState('');
 
   // Set initial theme and handle notifications
   useEffect(() => {
@@ -150,7 +153,7 @@ function App() {
                 <Route path="/fuel" element={<FuelLog />} />
                 <Route path="/service" element={<ServiceLog />} />
                 <Route path="/stats" element={<Stats />} />
-                <Route path="/routes" element={<RoutesPage />} />
+                <Route path="/routes" element={<RoutesPage onStartNavigation={(addr) => { setNavDestination(addr); setIsNavigating(true); }} />} />
                 <Route path="/diagnostics" element={<Diagnostics />} />
                 <Route path="/settings" element={<SettingsPage isDark={isDark} setIsDark={setIsDark} />} />
                 <Route path="*" element={<Dashboard setActiveTab={handleTabChange} setIsDrivingMode={setIsDrivingMode} />} />
@@ -163,6 +166,15 @@ function App() {
       {isDrivingMode && (
         <Suspense fallback={null}>
           <DrivingMode onExit={() => setIsDrivingMode(false)} />
+        </Suspense>
+      )}
+
+      {isNavigating && (
+        <Suspense fallback={null}>
+          <NavigationPage
+            initialDestination={navDestination}
+            onExit={() => { setIsNavigating(false); setNavDestination(''); }}
+          />
         </Suspense>
       )}
 

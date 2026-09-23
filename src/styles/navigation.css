@@ -1,0 +1,291 @@
+/* src/styles/navigation.css */
+
+/* ─── Kontener pełnoekranowy (wzorowany na drivingMode.css) ─────────────────── */
+.nav-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: var(--color-bg, #0d0d0d);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* iOS safe areas */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ─── Nagłówek ────────────────────────────────────────────────────────────────── */
+.nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.nav-header-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #aaa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+.nav-header-gps {
+  font-size: 0.75rem;
+  color: #4caf50;
+}
+
+.nav-header-gps.weak {
+  color: #ff9800;
+}
+
+/* ─── Baner manewru ───────────────────────────────────────────────────────────── */
+.nav-maneuver-banner {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  min-height: 130px;
+  background: var(--color-primary, #c9a84c);
+}
+
+.nav-maneuver-banner.rerouting {
+  background: #ff9800;
+}
+
+.nav-maneuver-banner.arrived {
+  background: #4caf50;
+}
+
+.nav-maneuver-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.nav-maneuver-text-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-maneuver-distance {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #000;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.nav-maneuver-instruction {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.2;
+}
+
+.nav-maneuver-street {
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.65);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Mapa ─────────────────────────────────────────────────────────────────────── */
+.nav-map-wrapper {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.nav-map-wrapper .leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #1a1a2e;
+}
+
+/* ─── Dolny pasek ─────────────────────────────────────────────────────────────── */
+.nav-footer {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-footer-stat {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.nav-footer-stat-label {
+  font-size: 0.65rem;
+  color: var(--color-text-muted, #aaa);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-next-step {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #aaa);
+}
+
+.nav-next-step strong {
+  color: var(--color-primary, #c9a84c);
+}
+
+/* ─── Przyciski kontrolne ─────────────────────────────────────────────────────── */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+}
+
+.nav-btn-close {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-btn-close:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.nav-btn-mute {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.nav-btn-mute.muted {
+  background: rgba(255, 100, 100, 0.2);
+  border-color: rgba(255, 100, 100, 0.4);
+  color: #ff6464;
+}
+
+/* ─── Ekran ładowania ─────────────────────────────────────────────────────────── */
+.nav-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--color-text-muted, #aaa);
+}
+
+.nav-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--color-primary, #c9a84c);
+  border-radius: 50%;
+  animation: navSpin 0.8s linear infinite;
+}
+
+@keyframes navSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Formularz wpisania celu ─────────────────────────────────────────────────── */
+.nav-input-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 16px;
+}
+
+.nav-input-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+
+.nav-input-field {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.nav-input-field:focus {
+  border-color: var(--color-primary, #c9a84c);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-input-field::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.nav-start-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: var(--color-primary, #c9a84c);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.nav-start-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav-start-btn:active {
+  opacity: 0.8;
+}
+
+.nav-error {
+  color: #ff6464;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.nav-audio-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #aaa);
+  text-align: center;
+}

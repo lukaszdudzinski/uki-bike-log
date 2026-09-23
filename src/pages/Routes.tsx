@@ -37,7 +37,11 @@ function MapCenter({ center }: { center: Coordinates | null }) {
   return null;
 }
 
-export default function Routes() {
+interface RoutesProps {
+  onStartNavigation?: (address: string) => void;
+}
+
+export default function Routes({ onStartNavigation }: RoutesProps) {
   const [routes, setRoutes] = useState<RouteEntry[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
@@ -257,12 +261,19 @@ export default function Routes() {
                   >
                     1. Uruchom Yanosika w tle
                   </button>
+                  <button
+                    className="btn-primary"
+                    onClick={() => onStartNavigation?.(route.address)}
+                    style={{ padding: '12px', fontSize: '1rem', fontWeight: 'bold', background: 'var(--color-primary)', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                  >
+                    🧭 Nawiguj w aplikacji
+                  </button>
                   <button 
                     className="btn-outline" 
                     onClick={() => navigateTo(route.address)}
                     style={{ padding: '12px', fontSize: '1rem' }}
                   >
-                    2. Nawiguj (Mapy Google)
+                    Nawiguj (Mapy Google)
                   </button>
                 </div>
               )}
