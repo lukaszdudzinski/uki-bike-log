@@ -111,14 +111,7 @@ export default function WeatherWidget() {
   }
 
   return (
-    <div className="glass-panel" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px' }}>
-      <button 
-        onClick={loadWeatherFromGPS}
-        style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', padding: '4px' }}
-        title="Aktualizuj lokalizację (GPS)"
-      >
-        <RefreshCw size={14} />
-      </button>
+    <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', minHeight: '68px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {getWeatherIcon(weather.code)}
         <div>
@@ -126,9 +119,16 @@ export default function WeatherWidget() {
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{weather.description}</p>
         </div>
       </div>
-      <div style={{ textAlign: 'right' }}>
+      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
         <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Lokalna pogoda</p>
         <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-primary)' }}>Warunki do jazdy: {weather.code < 50 ? 'Dobre' : 'Złe'}</p>
+        <button
+          onClick={loadWeatherFromGPS}
+          style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}
+          title="Odśwież pogodę (GPS)"
+        >
+          <RefreshCw size={12} /> Odśwież
+        </button>
       </div>
     </div>
   );

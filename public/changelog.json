@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.24.2",
+    "date": "2026-09-24",
+    "changes": [
+      "📱 Nawigacja w Szybkich akcjach: przycisk 🧭 dostępny bezpośrednio z ekranu głównego zamiast na dolnym pasku. 🛠️ Poprawiono panel pogody – ikonka odświeżania nie nachodzi na napisy."
+    ]
+  },
+  {
     "version": "v2026.9.24.1",
     "date": "2026-09-24",
     "changes": [

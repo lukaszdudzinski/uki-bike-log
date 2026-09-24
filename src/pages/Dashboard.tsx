@@ -12,9 +12,10 @@ import TireWidget from '../components/TireWidget';
 interface DashboardProps {
   setActiveTab: (tab: string) => void;
   setIsDrivingMode: (val: boolean) => void;
+  onStartNavigation: () => void;
 }
 
-export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardProps) {
+export default function Dashboard({ setActiveTab, setIsDrivingMode, onStartNavigation }: DashboardProps) {
   const { activeBike } = useGarage();
   const [odo, setOdo] = useState<number>(0);
   const [settings, setSettings] = useState<BikeSettings | null>(null);
@@ -72,7 +73,7 @@ export default function Dashboard({ setActiveTab, setIsDrivingMode }: DashboardP
 
       <WeatherWidget />
 
-      <QuickActions setActiveTab={setActiveTab} />
+      <QuickActions setActiveTab={setActiveTab} onStartNavigation={onStartNavigation} />
 
       <TireWidget settings={settings} odo={odo} setActiveTab={setActiveTab} />
 
