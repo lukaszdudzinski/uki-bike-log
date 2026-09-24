@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
-import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Home, ChevronDown } from 'lucide-react';
+import { Settings, Fuel, Wrench, BarChart2, Radio as RadioIcon, Pause, Home, ChevronDown, Navigation } from 'lucide-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useGarage } from './contexts/GarageContext';
 import { checkAndFireNotifications } from './utils/notifications';
@@ -213,6 +213,12 @@ function App() {
           label="Statystyki" 
           isActive={activeTab === 'stats'} 
           onClick={() => handleTabChange('stats')} 
+        />
+        <NavItem
+          icon={<Navigation size={24} />}
+          label="Nawigacja"
+          isActive={isNavigating}
+          onClick={() => { setNavDestination(''); setIsNavigating(true); }}
         />
         <NavItem 
           icon={<Settings size={24} />} 
