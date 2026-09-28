@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.28.3",
+    "date": "2026-09-28",
+    "changes": [
+      "🛠️ Stabilność i Testy: Zaktualizowano testy automatyczne dla historii tras i retencji danych, zweryfikowano pełny build i poprawność działania."
+    ]
+  },
+  {
     "version": "v2026.9.28.2",
     "date": "2026-09-28",
     "changes": [

@@ -467,11 +467,11 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
             <h4 style={{ margin: 0 }}>Nowa trasa</h4>
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label">Nazwa</label>
-              <input type="text" className="input-field" value={newName} onChange={e => setNewName(e.target.value)} placeholder="np. Kumpel Jarek, Baza wypadowa" />
+              <input type="text" className="input-field" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Wpisz nazwę" />
             </div>
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label">Adres docelowy</label>
-              <input type="text" className="input-field" value={newAddress} onChange={e => setNewAddress(e.target.value)} placeholder="Miasto, ulica lub koordynaty GPS" />
+              <input type="text" className="input-field" value={newAddress} onChange={e => setNewAddress(e.target.value)} placeholder="Miasto, ulica lub GPS" />
             </div>
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label">Kategoria</label>

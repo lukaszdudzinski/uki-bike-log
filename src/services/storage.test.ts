@@ -98,4 +98,47 @@ describe('Storage Service', () => {
     // Avg = (12 / 300) * 100 = 4.0 L/100km
     expect(storage.getAverageConsumption()).toBeCloseTo(4.0);
   });
+
+  it('should manage route history and apply retention policy', () => {
+    expect(storage.getRouteHistory().length).toBe(0);
+
+    // Add a route history item
+    const added = storage.addRouteHistory({
+      destinationAddress: 'Zakopane, Krupówki',
+      date: new Date().toISOString(),
+      distanceKm: 110.5,
+      durationMinutes: 95,
+      completed: true,
+    });
+
+    expect(storage.getRouteHistory().length).toBe(1);
+    expect(storage.getRouteHistory()[0].destinationAddress).toBe('Zakopane, Krupówki');
+
+    // Set retention to 60 days so 40-day old item is initially accepted
+    storage.setHistoryRetentionDays(60);
+
+    // Add an older route history item (40 days ago)
+    const fortyDaysAgo = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString();
+    storage.addRouteHistory({
+      destinationAddress: 'Stary cel',
+      date: fortyDaysAgo,
+      distanceKm: 50,
+      durationMinutes: 40,
+      completed: true,
+    });
+
+    expect(storage.getRouteHistory().length).toBe(2);
+
+    // Now set retention to 30 days and apply
+    storage.setHistoryRetentionDays(30);
+    storage.applyHistoryRetention();
+
+    // The 40-day old item should be pruned, only the recent one remains
+    expect(storage.getRouteHistory().length).toBe(1);
+    expect(storage.getRouteHistory()[0].destinationAddress).toBe('Zakopane, Krupówki');
+
+    // Delete history item
+    storage.deleteRouteHistory(added.id);
+    expect(storage.getRouteHistory().length).toBe(0);
+  });
 });
