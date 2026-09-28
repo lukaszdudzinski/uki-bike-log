@@ -16,6 +16,8 @@ import type { NavStep, NavRoute } from '../services/navigationService';
 import { getRouteWithSteps, geocodeAddress } from '../services/navigationService';
 import { haversineMeters, distanceFromPolylineMeters } from '../utils/geo';
 import type { Coordinates } from '../utils/geo';
+import { storage } from '../services/storage';
+import { findNearbyCamera, type CameraAlert } from '../services/speedCameraService';
 
 const GEOFENCE_THRESHOLD_SLOW = 30;
 const GEOFENCE_THRESHOLD_FAST = 70;
@@ -35,6 +37,8 @@ export interface NavigationState {
   totalRemainingDuration: number;
   userPosition: Coordinates | null;
   gpsAccuracy: number | null;
+  currentSpeedKmh: number;
+  cameraAlert: CameraAlert | null;
   status: 'idle' | 'loading' | 'navigating' | 'rerouting' | 'arrived' | 'error';
   errorMessage: string | null;
   isMuted: boolean;
@@ -51,8 +55,12 @@ export function useNavigation(): [NavigationState, NavigationControls] {
   const [state, setState] = useState<NavigationState>({
     route: null, currentStepIndex: 0, currentStep: null, nextStep: null,
     distanceToNextManeuver: 0, totalRemainingDistance: 0, totalRemainingDuration: 0,
-    userPosition: null, gpsAccuracy: null, status: 'idle', errorMessage: null, isMuted: false,
+    userPosition: null, gpsAccuracy: null, currentSpeedKmh: 0, cameraAlert: null,
+    status: 'idle', errorMessage: null, isMuted: false,
   });
+
+  const navStartTimeRef = useRef<number>(0);
+  const announcedCameraIdRef = useRef<string | null>(null);
 
   const watchIdRef = useRef<number | null>(null);
   const routeRef = useRef<NavRoute | null>(null);
@@ -178,8 +186,24 @@ export function useNavigation(): [NavigationState, NavigationControls] {
       status: nextStep?.isArrival ? 'arrived' : 'navigating',
     }));
 
-    if (nextStep?.isArrival) { speak('Dotarłeś do celu!'); stopWatching(); releaseWakeLock(); }
-    else if (nextStep) speak(nextStep.instruction);
+    if (nextStep?.isArrival) {
+      speak('Dotarłeś do celu!');
+      stopWatching();
+      releaseWakeLock();
+      if (route && destinationRef.current) {
+        const durationMin = Math.max(1, Math.round((Date.now() - navStartTimeRef.current) / 60000));
+        const distKm = Math.round((route.totalDistance / 1000) * 10) / 10;
+        storage.addRouteHistory({
+          destinationAddress: destinationRef.current,
+          date: new Date().toISOString(),
+          distanceKm: distKm,
+          durationMinutes: durationMin,
+          completed: true,
+        });
+      }
+    } else if (nextStep) {
+      speak(nextStep.instruction);
+    }
   }, [speak, stopWatching, releaseWakeLock]);
 
   // ─── Rerouting ────────────────────────────────────────────────────────────
@@ -239,9 +263,26 @@ export function useNavigation(): [NavigationState, NavigationControls] {
 
         const userPos: Coordinates = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         const speed = pos.coords.speed ?? 0;
+        const speedKmh = Math.round(speed * 3.6);
+
+        // Wykrywanie fotoradaru w promieniu 800m
+        const cameraAlert = findNearbyCamera(userPos, 800);
+        if (cameraAlert && cameraAlert.distanceMeters <= 600 && announcedCameraIdRef.current !== cameraAlert.camera.id) {
+          announcedCameraIdRef.current = cameraAlert.camera.id;
+          const distRounded = Math.round(cameraAlert.distanceMeters / 50) * 50;
+          speak(`Uwaga, fotoradar za ${distRounded} metrów, ograniczenie ${cameraAlert.camera.speedLimit}`);
+        } else if (!cameraAlert) {
+          announcedCameraIdRef.current = null;
+        }
 
         // Aktualizuj pozycję zawsze (lekkie setState)
-        setState(prev => ({ ...prev, userPosition: userPos, gpsAccuracy: pos.coords.accuracy }));
+        setState(prev => ({
+          ...prev,
+          userPosition: userPos,
+          gpsAccuracy: pos.coords.accuracy,
+          currentSpeedKmh: speedKmh,
+          cameraAlert,
+        }));
 
         const stepIdx = currentStepRef.current;
         const step = route.steps[stepIdx];
@@ -320,6 +361,8 @@ export function useNavigation(): [NavigationState, NavigationControls] {
     abortControllerRef.current?.abort();
     destinationRef.current = destination;
     polylineHintRef.current = 0;
+    navStartTimeRef.current = Date.now();
+    announcedCameraIdRef.current = null;
 
     setState(prev => ({ ...prev, status: 'loading', errorMessage: null, currentStepIndex: 0 }));
 
@@ -370,15 +413,33 @@ export function useNavigation(): [NavigationState, NavigationControls] {
     abortControllerRef.current?.abort();
     window.speechSynthesis?.cancel();
     releaseWakeLock();
+
+    // Zapisz do historii jeśli nawigacja trwała co najmniej 1 minutę
+    if (routeRef.current && destinationRef.current && navStartTimeRef.current > 0) {
+      const elapsedMin = Math.round((Date.now() - navStartTimeRef.current) / 60000);
+      if (elapsedMin >= 1 && state.status === 'navigating') {
+        const distKm = Math.round((routeRef.current.totalDistance / 1000) * 10) / 10;
+        storage.addRouteHistory({
+          destinationAddress: destinationRef.current,
+          date: new Date().toISOString(),
+          distanceKm: distKm,
+          durationMinutes: elapsedMin,
+          completed: false,
+        });
+      }
+    }
+
+    navStartTimeRef.current = 0;
     routeRef.current = null;
     currentStepRef.current = 0;
     setState(prev => ({
       route: null, currentStepIndex: 0, currentStep: null, nextStep: null,
       distanceToNextManeuver: 0, totalRemainingDistance: 0, totalRemainingDuration: 0,
-      userPosition: null, gpsAccuracy: null, status: 'idle', errorMessage: null,
+      userPosition: null, gpsAccuracy: null, currentSpeedKmh: 0, cameraAlert: null,
+      status: 'idle', errorMessage: null,
       isMuted: prev.isMuted, // FIX #23: zachowaj wyciszenie
     }));
-  }, [stopWatching, releaseWakeLock]);
+  }, [stopWatching, releaseWakeLock, state.status]);
 
   const toggleMute = useCallback(() => {
     isMutedRef.current = !isMutedRef.current;

@@ -2,7 +2,7 @@ import { Fuel, AlertTriangle, Navigation } from 'lucide-react';
 
 interface QuickActionsProps {
   setActiveTab: (tab: string) => void;
-  onStartNavigation: () => void;
+  onStartNavigation?: () => void;
 }
 
 const btnStyle: React.CSSProperties = {
@@ -17,7 +17,7 @@ const btnStyle: React.CSSProperties = {
   padding: '16px 8px',
 };
 
-export default function QuickActions({ setActiveTab, onStartNavigation }: QuickActionsProps) {
+export default function QuickActions({ setActiveTab }: QuickActionsProps) {
   return (
     <div>
       <h3 style={{ marginBottom: '12px', fontSize: '1.2rem' }}>Szybkie akcje</h3>
@@ -37,16 +37,16 @@ export default function QuickActions({ setActiveTab, onStartNavigation }: QuickA
           <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>Zgłoś usterkę</span>
         </button>
 
-        {/* Nawigacja – otwiera ekran nawigacji bez wychodzenia z Dashboardu */}
+        {/* Trasy i Nawigacja */}
         <button
           className="glass-panel"
           style={{ ...btnStyle, borderColor: 'rgba(201,168,76,0.4)', background: 'rgba(201,168,76,0.06)' }}
-          onClick={onStartNavigation}
+          onClick={() => setActiveTab('routes')}
         >
           <div style={{ background: 'var(--color-primary-light)', padding: '12px', borderRadius: '50%' }}>
             <Navigation size={24} color="var(--color-primary)" />
           </div>
-          <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>Nawigacja</span>
+          <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>Trasy i Cele</span>
         </button>
 
       </div>

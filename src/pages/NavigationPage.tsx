@@ -9,6 +9,7 @@ import '../styles/navigation.css';
 import { useNavigation } from '../hooks/useNavigation';
 import { formatDistance, formatDuration } from '../utils/geo';
 import type { Coordinates } from '../utils/geo';
+import { storage } from '../services/storage';
 
 // ─── Subkomponent: auto-centrowanie mapy na pozycji użytkownika ───────────────
 
@@ -73,6 +74,18 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
 
   // ─── Widok: formularz wpisania celu ─────────────────────────────────────────
   if (!isNavigating && !isLoading) {
+    const allRoutes = storage.getRoutes();
+    const homeRoute = allRoutes.find(r => r.category === 'home');
+    const workRoute = allRoutes.find(r => r.category === 'work');
+    const favorites = allRoutes.filter(r => r.category === 'favorite');
+    const history = storage.getRouteHistory().slice(0, 3);
+
+    const handleSelectDestination = (dest: string) => {
+      setInputValue(dest);
+      handleInitAudio();
+      navControls.startNavigation(dest);
+    };
+
     return (
       <div className="nav-container">
         <div className="nav-header">
@@ -80,7 +93,7 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
           <button className="nav-btn nav-btn-close" onClick={handleExit}>✕</button>
         </div>
 
-        <div className="nav-input-screen">
+        <div className="nav-input-screen" style={{ overflowY: 'auto', justifyContent: 'flex-start', paddingTop: '20px' }}>
           <div className="nav-input-label">Dokąd jedziemy? 🏍️</div>
 
           <input
@@ -108,6 +121,79 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
           {!audioInitialized && (
             <div className="nav-audio-hint">
               💡 Dotknij „Wyznacz trasę", aby odblokować komunikaty głosowe na iOS
+            </div>
+          )}
+
+          {/* Szybki wybór: Dom, Praca, Ulubione */}
+          {(homeRoute || workRoute || favorites.length > 0) && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Szybkie cele
+              </span>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {homeRoute && (
+                  <button
+                    onClick={() => handleSelectDestination(homeRoute.address)}
+                    style={{
+                      padding: '8px 12px', background: 'rgba(76,175,80,0.15)', border: '1px solid #4caf50',
+                      borderRadius: '8px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                    }}
+                  >
+                    <span>🏠</span> <strong>Dom</strong>
+                  </button>
+                )}
+                {workRoute && (
+                  <button
+                    onClick={() => handleSelectDestination(workRoute.address)}
+                    style={{
+                      padding: '8px 12px', background: 'rgba(33,150,243,0.15)', border: '1px solid #2196f3',
+                      borderRadius: '8px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                    }}
+                  >
+                    <span>💼</span> <strong>Praca</strong>
+                  </button>
+                )}
+                {favorites.map(fav => (
+                  <button
+                    key={fav.id}
+                    onClick={() => handleSelectDestination(fav.address)}
+                    style={{
+                      padding: '8px 12px', background: 'rgba(255,152,0,0.15)', border: '1px solid #ff9800',
+                      borderRadius: '8px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                    }}
+                  >
+                    <span>⭐</span> <strong>{fav.name}</strong>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Ostatnie przejazdy */}
+          {history.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Ostatnie z historii
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {history.map(h => (
+                  <div
+                    key={h.id}
+                    onClick={() => handleSelectDestination(h.destinationAddress)}
+                    style={{
+                      padding: '10px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '10px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                    }}
+                  >
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                      🕒 {h.destinationAddress}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600, flexShrink: 0, marginLeft: '10px' }}>
+                      {h.distanceKm} km
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -188,8 +274,76 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
         </div>
       </div>
 
+      {/* Baner ostrzeżenia o fotoradarze */}
+      {navState.cameraAlert && (
+        <div style={{
+          background: 'linear-gradient(90deg, #d32f2f, #b71c1c)',
+          color: '#fff',
+          padding: '10px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontWeight: 'bold',
+          zIndex: 10,
+          boxShadow: '0 4px 12px rgba(211,47,47,0.4)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.4rem' }}>📸</span>
+            <div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800 }}>
+                FOTORADAR za {navState.cameraAlert.distanceMeters} m
+              </div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                {navState.cameraAlert.camera.name}
+              </div>
+            </div>
+          </div>
+          <div style={{
+            background: '#fff',
+            color: '#d32f2f',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.1rem',
+            fontWeight: 900,
+            border: '3px solid #d32f2f',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+            flexShrink: 0,
+          }}>
+            {navState.cameraAlert.camera.speedLimit}
+          </div>
+        </div>
+      )}
+
       {/* Mapa Leaflet */}
       <div className="nav-map-wrapper">
+        {/* Prędkościomierz GPS */}
+        <div style={{
+          position: 'absolute',
+          bottom: '16px',
+          left: '16px',
+          background: 'rgba(0,0,0,0.85)',
+          border: '2px solid rgba(255,255,255,0.2)',
+          borderRadius: '14px',
+          padding: '8px 12px',
+          zIndex: 1000,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          minWidth: '55px',
+          backdropFilter: 'blur(8px)',
+        }}>
+          <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+            {navState.currentSpeedKmh}
+          </span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)', textTransform: 'uppercase', marginTop: '2px', fontWeight: 700 }}>
+            km/h
+          </span>
+        </div>
+
         <MapContainer
           center={defaultCenter}
           zoom={16}

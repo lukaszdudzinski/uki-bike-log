@@ -26,6 +26,16 @@ export interface RouteEntry {
   category?: 'home' | 'work' | 'favorite' | 'custom';
 }
 
+export interface RouteHistoryEntry {
+  id: string;
+  destinationAddress: string;
+  destinationName?: string;
+  date: string;
+  distanceKm: number;
+  durationMinutes: number;
+  completed: boolean;
+}
+
 export interface TireData {
   model: string;
   dot: string;
@@ -81,7 +91,9 @@ export interface BikeProfile {
 const GLOBAL_KEYS = {
   BIKES: 'uki_bikes_list',
   ACTIVE_BIKE: 'uki_active_bike_id',
-  USER_PROFILE: 'uki_user_profile'
+  USER_PROFILE: 'uki_user_profile',
+  ROUTE_HISTORY: 'uki_route_history',
+  HISTORY_RETENTION_DAYS: 'uki_history_retention_days',
 };
 
 const getStorageKeys = (bikeId: string) => {
@@ -107,6 +119,8 @@ let cache = {
   fuel: [] as FuelEntry[],
   service: [] as ServiceEntry[],
   routes: [] as RouteEntry[],
+  routeHistory: [] as RouteHistoryEntry[],
+  historyRetentionDays: 30,
   settings: null as BikeSettings | null,
   userProfile: null as UserProfile | null,
 };
@@ -180,6 +194,9 @@ export const storage = {
       { id: '1', name: 'Serwis Janusz (Przykładowy)', address: 'Warszawa, Złote Tarasy' },
       { id: '2', name: 'Bieszczady - Baza', address: 'Wetlina' },
     ];
+    cache.routeHistory = (await localforage.getItem<RouteHistoryEntry[]>(GLOBAL_KEYS.ROUTE_HISTORY)) || [];
+    cache.historyRetentionDays = (await localforage.getItem<number>(GLOBAL_KEYS.HISTORY_RETENTION_DAYS)) ?? 30;
+    storage.applyHistoryRetention();
     cache.settings = (await localforage.getItem<BikeSettings>(keys.SETTINGS)) || {
       initialOdo: 12000,
       tankCapacity: 13.5, // Default for Bullet 350
@@ -391,6 +408,42 @@ export const storage = {
     if (index !== -1) {
       cache.routes[index] = { ...cache.routes[index], ...updated };
       localforage.setItem(getStorageKeys(cache.activeBikeId).ROUTES, cache.routes);
+    }
+  },
+  // --- Route History & Retention ---
+  getRouteHistory: (): RouteHistoryEntry[] => cache.routeHistory,
+  addRouteHistory: (entry: Omit<RouteHistoryEntry, 'id'>) => {
+    const newEntry: RouteHistoryEntry = {
+      ...entry,
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
+    };
+    cache.routeHistory.unshift(newEntry);
+    storage.applyHistoryRetention();
+    localforage.setItem(GLOBAL_KEYS.ROUTE_HISTORY, cache.routeHistory);
+    return newEntry;
+  },
+  deleteRouteHistory: (id: string) => {
+    cache.routeHistory = cache.routeHistory.filter(h => h.id !== id);
+    localforage.setItem(GLOBAL_KEYS.ROUTE_HISTORY, cache.routeHistory);
+  },
+  clearRouteHistory: () => {
+    cache.routeHistory = [];
+    localforage.setItem(GLOBAL_KEYS.ROUTE_HISTORY, cache.routeHistory);
+  },
+  getHistoryRetentionDays: (): number => cache.historyRetentionDays,
+  setHistoryRetentionDays: (days: number) => {
+    cache.historyRetentionDays = days;
+    localforage.setItem(GLOBAL_KEYS.HISTORY_RETENTION_DAYS, days);
+    storage.applyHistoryRetention();
+  },
+  applyHistoryRetention: () => {
+    if (cache.historyRetentionDays > 0) {
+      const cutoff = Date.now() - cache.historyRetentionDays * 24 * 60 * 60 * 1000;
+      const initialCount = cache.routeHistory.length;
+      cache.routeHistory = cache.routeHistory.filter(h => new Date(h.date).getTime() >= cutoff);
+      if (cache.routeHistory.length !== initialCount) {
+        localforage.setItem(GLOBAL_KEYS.ROUTE_HISTORY, cache.routeHistory);
+      }
     }
   },
 
