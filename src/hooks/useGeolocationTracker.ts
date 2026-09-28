@@ -29,7 +29,6 @@ export function useGeolocationTracker() {
   
   const watchId = useRef<number | null>(null);
   const lastCoord = useRef<{lat: number, lng: number} | null>(null);
-  const lastTimestamp = useRef<number | null>(null);
   const gpsTrackRef = useRef<GpsTrackPoint[]>([]);
 
   // Ride Timer
@@ -55,28 +54,12 @@ export function useGeolocationTracker() {
         const currentLng = pos.coords.longitude;
         setUserLoc({ lat: currentLat, lng: currentLng });
 
-        const now = pos.timestamp || Date.now();
+        // Czysty odczyt sprzętowy z sensora GPS
         if (pos.coords.speed !== null && !isNaN(pos.coords.speed) && pos.coords.speed > 0) {
           setSpeed(Math.round(pos.coords.speed * 3.6));
-        } else if (lastCoord.current && lastTimestamp.current) {
-          const timeDiffSec = (now - lastTimestamp.current) / 1000;
-          if (timeDiffSec > 0.4 && timeDiffSec < 10) {
-            const distKm = getDistanceFromLatLonInKm(
-              lastCoord.current.lat, lastCoord.current.lng,
-              currentLat, currentLng
-            );
-            if (distKm * 1000 >= 2) {
-              setSpeed(Math.round(distKm / (timeDiffSec / 3600)));
-            } else {
-              setSpeed(0);
-            }
-          } else {
-            setSpeed(0);
-          }
         } else {
           setSpeed(0);
         }
-        lastTimestamp.current = now;
 
         if (lastCoord.current) {
           const dist = getDistanceFromLatLonInKm(

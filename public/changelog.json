@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.28.5",
+    "date": "2026-09-28",
+    "changes": [
+      "🛠️ Stabilność Prędkościomierza: Przywrócono bezpośredni odczyt ze sprzętowego sensora GPS, eliminując sztuczne pływanie prędkości na postoju."
+    ]
+  },
+  {
     "version": "v2026.9.28.4",
     "date": "2026-09-28",
     "changes": [

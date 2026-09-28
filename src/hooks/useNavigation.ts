@@ -61,7 +61,6 @@ export function useNavigation(): [NavigationState, NavigationControls] {
 
   const navStartTimeRef = useRef<number>(0);
   const announcedCameraIdRef = useRef<string | null>(null);
-  const lastFixRef = useRef<{ lat: number; lng: number; time: number } | null>(null);
 
   const watchIdRef = useRef<number | null>(null);
   const routeRef = useRef<NavRoute | null>(null);
@@ -264,22 +263,10 @@ export function useNavigation(): [NavigationState, NavigationControls] {
 
         const userPos: Coordinates = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         const now = pos.timestamp || Date.now();
-        let speedKmh = 0;
-
-        if (pos.coords.speed !== null && !isNaN(pos.coords.speed) && pos.coords.speed > 0) {
-          speedKmh = Math.round(pos.coords.speed * 3.6);
-        } else if (lastFixRef.current) {
-          // Fallback kalkulacji prędkości dla iOS Safari gdy coords.speed jest null
-          const timeDiffSec = (now - lastFixRef.current.time) / 1000;
-          if (timeDiffSec > 0.4 && timeDiffSec < 10) {
-            const distMeters = haversineMeters(lastFixRef.current, userPos);
-            // Ignoruj mikro-drgania poniżej 2m
-            if (distMeters >= 2) {
-              speedKmh = Math.round((distMeters / timeDiffSec) * 3.6);
-            }
-          }
-        }
-        lastFixRef.current = { lat: userPos.lat, lng: userPos.lng, time: now };
+        // Czysty odczyt sprzętowy z sensora GPS urządzenia (zapobiega pływaniu prędkości na postoju)
+        const speedKmh = (pos.coords.speed !== null && !isNaN(pos.coords.speed) && pos.coords.speed > 0)
+          ? Math.round(pos.coords.speed * 3.6)
+          : 0;
 
         // Wykrywanie fotoradaru w promieniu 800m
         const cameraAlert = findNearbyCamera(userPos, 800);
