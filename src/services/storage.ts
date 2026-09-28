@@ -23,6 +23,7 @@ export interface RouteEntry {
   id: string;
   name: string;
   address: string;
+  category?: 'home' | 'work' | 'favorite' | 'custom';
 }
 
 export interface TireData {
@@ -384,6 +385,13 @@ export const storage = {
   deleteRoute: (id: string) => {
     cache.routes = cache.routes.filter(r => r.id !== id);
     localforage.setItem(getStorageKeys(cache.activeBikeId).ROUTES, cache.routes);
+  },
+  updateRoute: (id: string, updated: Partial<Omit<RouteEntry, 'id'>>) => {
+    const index = cache.routes.findIndex(r => r.id === id);
+    if (index !== -1) {
+      cache.routes[index] = { ...cache.routes[index], ...updated };
+      localforage.setItem(getStorageKeys(cache.activeBikeId).ROUTES, cache.routes);
+    }
   },
 
   // --- Settings ---
