@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.9.28.4",
+    "date": "2026-09-28",
+    "changes": [
+      "⚡ Prędkościomierz GPS i Stabilność: Dodano hybrydową kalkulację prędkości (Haversine delta fallback dla iOS Safari) oraz czytelny licznik km/h na dolnym pasku nawigacji."
+    ]
+  },
+  {
     "version": "v2026.9.28.3",
     "date": "2026-09-28",
     "changes": [

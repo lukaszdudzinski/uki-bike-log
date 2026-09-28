@@ -61,6 +61,7 @@ export function useNavigation(): [NavigationState, NavigationControls] {
 
   const navStartTimeRef = useRef<number>(0);
   const announcedCameraIdRef = useRef<string | null>(null);
+  const lastFixRef = useRef<{ lat: number; lng: number; time: number } | null>(null);
 
   const watchIdRef = useRef<number | null>(null);
   const routeRef = useRef<NavRoute | null>(null);
@@ -262,8 +263,23 @@ export function useNavigation(): [NavigationState, NavigationControls] {
         if (!route || !mountedRef.current) return;
 
         const userPos: Coordinates = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const speed = pos.coords.speed ?? 0;
-        const speedKmh = Math.round(speed * 3.6);
+        const now = pos.timestamp || Date.now();
+        let speedKmh = 0;
+
+        if (pos.coords.speed !== null && !isNaN(pos.coords.speed) && pos.coords.speed > 0) {
+          speedKmh = Math.round(pos.coords.speed * 3.6);
+        } else if (lastFixRef.current) {
+          // Fallback kalkulacji prędkości dla iOS Safari gdy coords.speed jest null
+          const timeDiffSec = (now - lastFixRef.current.time) / 1000;
+          if (timeDiffSec > 0.4 && timeDiffSec < 10) {
+            const distMeters = haversineMeters(lastFixRef.current, userPos);
+            // Ignoruj mikro-drgania poniżej 2m
+            if (distMeters >= 2) {
+              speedKmh = Math.round((distMeters / timeDiffSec) * 3.6);
+            }
+          }
+        }
+        lastFixRef.current = { lat: userPos.lat, lng: userPos.lng, time: now };
 
         // Wykrywanie fotoradaru w promieniu 800m
         const cameraAlert = findNearbyCamera(userPos, 800);
@@ -319,7 +335,8 @@ export function useNavigation(): [NavigationState, NavigationControls] {
         }
 
         // FIX #7: geofencing z guard'em przed wielokrotnym wywołaniem
-        const threshold = speed > 13 ? GEOFENCE_THRESHOLD_FAST : GEOFENCE_THRESHOLD_SLOW;
+        const rawSpeed = (pos.coords.speed ?? 0) > 0 ? (pos.coords.speed ?? 0) : (speedKmh / 3.6);
+        const threshold = rawSpeed > 13 ? GEOFENCE_THRESHOLD_FAST : GEOFENCE_THRESHOLD_SLOW;
         if (distToManeuver <= threshold && !advancedGuardRef.current) {
           advancedGuardRef.current = true;
           advanceStep();
@@ -327,7 +344,6 @@ export function useNavigation(): [NavigationState, NavigationControls] {
         }
 
         // FIX #12: throttle setState dla statystyk (max raz na 500ms)
-        const now = Date.now();
         if (now - lastStateUpdateRef.current < STATE_THROTTLE_MS) return;
         lastStateUpdateRef.current = now;
 

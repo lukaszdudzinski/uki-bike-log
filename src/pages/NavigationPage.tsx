@@ -398,6 +398,12 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
       {/* Dolny pasek */}
       <div className="nav-footer">
         <div className="nav-footer-row">
+          <div style={{ textAlign: 'left', minWidth: '75px' }}>
+            <div className="nav-footer-stat" style={{ color: 'var(--color-primary)', fontSize: '1.25rem', fontFamily: 'monospace', fontWeight: 900 }}>
+              {navState.currentSpeedKmh} <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>km/h</span>
+            </div>
+            <div className="nav-footer-stat-label">Prędkość</div>
+          </div>
           <div>
             <div className="nav-footer-stat">{(totalRemainingDistance / 1000).toFixed(1).replace('.', ',')} km</div>
             <div className="nav-footer-stat-label">Pozostało</div>
