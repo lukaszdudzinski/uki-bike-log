@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.10.2.1",
+    "date": "2026-10-02",
+    "changes": [
+      "🎨 Ujednolicono styl wizualny interfejsu tras i nawigacji: Zastąpiono symbole znakowe i emotikony wektorowymi ikonami SVG (Lucide) dla spójnego wyglądu przycisków, kafelków i komunikatów."
+    ]
+  },
+  {
     "version": "v2026.9.28.5",
     "date": "2026-09-28",
     "changes": [

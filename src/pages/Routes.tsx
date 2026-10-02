@@ -3,7 +3,8 @@ import { storage, type RouteEntry, type RouteHistoryEntry } from '../services/st
 import { weatherService, type Coordinates } from '../services/weather';
 import {
   Map as MapIcon, MapPin, Trash2, Plus, Crosshair, CloudRain, Star,
-  Home, Briefcase, Navigation, Edit2, Check, X, History, RotateCcw
+  Home, Briefcase, Navigation, Edit2, Check, X, History, RotateCcw,
+  Calendar, Route as RouteIcon, Timer, Compass
 } from 'lucide-react';
 import { MapContainer, TileLayer, Polyline, useMap, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -38,11 +39,11 @@ interface RoutesProps {
 
 // ─── Kategorie i ich wizualne atrybuty ───────────────────────────────────────
 
-const CATEGORY_META: Record<string, { icon: typeof Home; label: string; emoji: string; color: string }> = {
-  home:     { icon: Home,       label: 'Dom',       emoji: '🏠', color: '#4caf50' },
-  work:     { icon: Briefcase,  label: 'Praca',     emoji: '💼', color: '#2196f3' },
-  favorite: { icon: Star,       label: 'Ulubione',  emoji: '⭐', color: '#ff9800' },
-  custom:   { icon: MapPin,     label: 'Trasa',     emoji: '📍', color: 'var(--color-primary)' },
+const CATEGORY_META: Record<string, { icon: typeof Home; label: string; color: string }> = {
+  home:     { icon: Home,       label: 'Dom',       color: '#4caf50' },
+  work:     { icon: Briefcase,  label: 'Praca',     color: '#2196f3' },
+  favorite: { icon: Star,       label: 'Ulubione',  color: '#ff9800' },
+  custom:   { icon: MapPin,     label: 'Trasa',     color: 'var(--color-primary)' },
 };
 
 export default function Routes({ onStartNavigation }: RoutesProps) {
@@ -147,7 +148,7 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
       category: 'favorite',
     });
     refreshRoutes();
-    alert(`Dodano "${h.destinationAddress}" do Ulubionych! ⭐`);
+    alert(`Dodano "${h.destinationAddress}" do Ulubionych!`);
   };
 
   const handleDeleteHistoryItem = (id: string) => {
@@ -235,7 +236,7 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '1.1rem' }}>{meta.emoji}</span>
+            <meta.icon size={18} color={meta.color} />
             <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{meta.label}</span>
           </div>
           <div style={{ display: 'flex', gap: '4px' }}>
@@ -265,10 +266,10 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
 
         <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
           <button
-            style={{ flex: 1, padding: '8px', background: meta.color, color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+            style={{ flex: 1, padding: '8px', background: meta.color, color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             onClick={() => onStartNavigation?.(route.address)}
           >
-            🧭 Nawiguj
+            <Navigation size={16} color="#fff" /> Nawiguj
           </button>
           <button
             style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', fontSize: '0.75rem', cursor: 'pointer' }}
@@ -303,7 +304,7 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
           ) : (
             <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setExpandedRouteId(isExpanded ? null : route.id)}>
               <h4 style={{ margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '1rem' }}>{meta.emoji}</span> {route.name}
+                <meta.icon size={16} color={meta.color} /> {route.name}
               </h4>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{route.address}</p>
             </div>
@@ -397,7 +398,7 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
             }}
             disabled={!quickNavInput.trim()}
           >
-            🧭 Jedź
+            <Compass size={16} /> Jedź
           </button>
         </div>
       </div>
@@ -405,7 +406,7 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
       {/* ── Szybkie skróty: Dom & Praca ──────────────────────────────────── */}
       <div>
         <h3 style={{ margin: '0 0 10px', fontSize: '1rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span>📍</span> Szybkie cele
+          <MapPin size={18} color="var(--color-primary)" /> Szybkie cele
         </h3>
         <div style={{ display: 'flex', gap: '12px' }}>
           {renderQuickTile(homeRoute, 'home', () => { setSetupCategory('home'); setSetupAddress(''); })}
@@ -417,7 +418,7 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
       {setupCategory && (
         <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderLeft: `3px solid ${CATEGORY_META[setupCategory].color}` }}>
           <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {CATEGORY_META[setupCategory].emoji} Ustaw adres: {CATEGORY_META[setupCategory].label}
+            {(() => { const SetupIcon = CATEGORY_META[setupCategory].icon; return <SetupIcon size={20} color={CATEGORY_META[setupCategory].color} />; })()} Ustaw adres: {CATEGORY_META[setupCategory].label}
           </h3>
           <input
             className="input-field"
@@ -484,12 +485,13 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
                       onClick={() => setNewCategory(cat)}
                       style={{
                         padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '4px',
                         background: newCategory === cat ? m.color : 'rgba(255,255,255,0.06)',
                         color: newCategory === cat ? '#000' : '#fff',
                         border: newCategory === cat ? 'none' : '1px solid rgba(255,255,255,0.15)',
                       }}
                     >
-                      {m.emoji} {m.label}
+                      <m.icon size={14} color={newCategory === cat ? '#000' : '#fff'} /> {m.label}
                     </button>
                   );
                 })}
@@ -542,10 +544,10 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
                   <div style={{ fontWeight: 600, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {item.destinationName || item.destinationAddress}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px', display: 'flex', gap: '10px' }}>
-                    <span>📅 {new Date(item.date).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-                    <span>🛣️ {item.distanceKm} km</span>
-                    <span>⏱️ {item.durationMinutes} min</span>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Calendar size={12} /> {new Date(item.date).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><RouteIcon size={12} /> {item.distanceKm} km</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Timer size={12} /> {item.durationMinutes} min</span>
                   </div>
                 </div>
 

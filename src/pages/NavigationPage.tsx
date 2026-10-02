@@ -10,6 +10,11 @@ import { useNavigation } from '../hooks/useNavigation';
 import { formatDistance, formatDuration } from '../utils/geo';
 import type { Coordinates } from '../utils/geo';
 import { storage } from '../services/storage';
+import {
+  Home, Briefcase, Star, Clock, Compass,
+  AlertTriangle, Lightbulb, Camera, Satellite, RotateCcw,
+  Trophy, Volume2, VolumeX, Bike, X
+} from 'lucide-react';
 
 // ─── Subkomponent: auto-centrowanie mapy na pozycji użytkownika ───────────────
 
@@ -89,12 +94,12 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
     return (
       <div className="nav-container">
         <div className="nav-header">
-          <span className="nav-header-title">🧭 Nawigacja</span>
-          <button className="nav-btn nav-btn-close" onClick={handleExit}>✕</button>
+          <span className="nav-header-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Compass size={18} /> Nawigacja</span>
+          <button className="nav-btn nav-btn-close" onClick={handleExit} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20} /></button>
         </div>
 
         <div className="nav-input-screen" style={{ overflowY: 'auto', justifyContent: 'flex-start', paddingTop: '20px' }}>
-          <div className="nav-input-label">Dokąd jedziemy? 🏍️</div>
+          <div className="nav-input-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>Dokąd jedziemy? <Bike size={20} /></div>
 
           <input
             className="nav-input-field"
@@ -107,7 +112,7 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
           />
 
           {navState.errorMessage && (
-            <div className="nav-error">⚠️ {navState.errorMessage}</div>
+            <div className="nav-error" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><AlertTriangle size={16} /> {navState.errorMessage}</div>
           )}
 
           <button
@@ -115,12 +120,12 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
             onClick={handleStart}
             disabled={!inputValue.trim()}
           >
-            🧭 Wyznacz trasę i nawiguj
+            <Compass size={18} /> Wyznacz trasę i nawiguj
           </button>
 
           {!audioInitialized && (
             <div className="nav-audio-hint">
-              💡 Dotknij „Wyznacz trasę", aby odblokować komunikaty głosowe na iOS
+              <Lightbulb size={14} style={{ flexShrink: 0 }} /> Dotknij „Wyznacz trasę", aby odblokować komunikaty głosowe na iOS
             </div>
           )}
 
@@ -139,7 +144,7 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
                       borderRadius: '8px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
                     }}
                   >
-                    <span>🏠</span> <strong>Dom</strong>
+                    <Home size={16} color="#4caf50" /> <strong>Dom</strong>
                   </button>
                 )}
                 {workRoute && (
@@ -150,7 +155,7 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
                       borderRadius: '8px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
                     }}
                   >
-                    <span>💼</span> <strong>Praca</strong>
+                    <Briefcase size={16} color="#2196f3" /> <strong>Praca</strong>
                   </button>
                 )}
                 {favorites.map(fav => (
@@ -162,7 +167,7 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
                       borderRadius: '8px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
                     }}
                   >
-                    <span>⭐</span> <strong>{fav.name}</strong>
+                    <Star size={16} color="#ff9800" /> <strong>{fav.name}</strong>
                   </button>
                 ))}
               </div>
@@ -185,8 +190,8 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
                       borderRadius: '10px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                     }}
                   >
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                      🕒 {h.destinationAddress}
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Clock size={14} style={{ flexShrink: 0 }} /> {h.destinationAddress}
                     </div>
                     <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600, flexShrink: 0, marginLeft: '10px' }}>
                       {h.distanceKm} km
@@ -207,7 +212,7 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
       <div className="nav-container">
         <div className="nav-header">
           <span className="nav-header-title">Wyznaczam trasę...</span>
-          <button className="nav-btn nav-btn-close" onClick={handleExit}>✕</button>
+          <button className="nav-btn nav-btn-close" onClick={handleExit} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20} /></button>
         </div>
         <div className="nav-loading">
           <div className="nav-spinner" />
@@ -235,23 +240,23 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
 
       {/* Nagłówek */}
       <div className="nav-header">
-        <span className="nav-header-title">
-          {status === 'rerouting' ? '🔄 Przeliczam trasę...' : `🧭 ${inputValue}`}
+        <span className="nav-header-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {status === 'rerouting' ? <><RotateCcw size={16} /> Przeliczam trasę...</> : <><Compass size={16} /> {inputValue}</>}
         </span>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {gpsAccuracy !== null && (
-            <span className={`nav-header-gps ${gpsAccuracy > 20 ? 'weak' : ''}`}>
-              📡 {Math.round(gpsAccuracy)}m
+            <span className={`nav-header-gps ${gpsAccuracy > 20 ? 'weak' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Satellite size={13} /> {Math.round(gpsAccuracy)}m
             </span>
           )}
-          <button className="nav-btn nav-btn-close" onClick={handleExit}>✕</button>
+          <button className="nav-btn nav-btn-close" onClick={handleExit} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={20} /></button>
         </div>
       </div>
 
       {/* Baner manewru */}
       <div className={bannerClass}>
         <div className="nav-maneuver-icon">
-          {status === 'arrived' ? '🏆' : status === 'rerouting' ? '🔄' : (currentStep?.icon ?? '↑')}
+          {status === 'arrived' ? <Trophy size={28} /> : status === 'rerouting' ? <RotateCcw size={28} /> : (currentStep?.icon ?? '↑')}
         </div>
         <div className="nav-maneuver-text-block">
           {status === 'arrived' ? (
@@ -288,7 +293,7 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
           boxShadow: '0 4px 12px rgba(211,47,47,0.4)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '1.4rem' }}>📸</span>
+            <Camera size={24} />
             <div>
               <div style={{ fontSize: '0.95rem', fontWeight: 800 }}>
                 FOTORADAR za {navState.cameraAlert.distanceMeters} m
@@ -416,8 +421,9 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
             className={`nav-btn nav-btn-mute ${isMuted ? 'muted' : ''}`}
             onClick={navControls.toggleMute}
             title={isMuted ? 'Włącz głos' : 'Wycisz'}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            {isMuted ? '🔇' : '🔊'}
+            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
         </div>
 
