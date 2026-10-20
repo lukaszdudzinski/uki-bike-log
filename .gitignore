@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Artefakty testów (Playwright)
+test-results/
+playwright-report/
+blob-report/
