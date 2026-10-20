@@ -7,6 +7,29 @@
     const BASE = '/uki-bike-log';
     const CHANGELOG_URL = BASE + '/changelog.json';
 
+    // ─── Izolacja UKIS (R2) ──────────────────────────────────────────────────────
+    // Domena lukaszdudzinski.github.io jest wspólna dla rodziny UKIS: dotykamy tylko
+    // własnego service workera i własnych cache Bike Log.
+    var OWN_SCOPE = new URL(BASE + '/', location.href).href;
+    var OWN_CACHE_PREFIX = 'ukis-bikelog-';
+
+    function isOwnCache(key) {
+        return key.indexOf(OWN_CACHE_PREFIX) === 0 ||
+            (key.indexOf('workbox-') === 0 && key.endsWith('-' + OWN_SCOPE));
+    }
+
+    function clearOwnCaches() {
+        return caches.keys().then(function (keys) {
+            return Promise.all(keys.filter(isOwnCache).map(function (k) { return caches.delete(k); }));
+        }).then(function () {});
+    }
+
+    function unregisterOwnServiceWorker() {
+        return navigator.serviceWorker.getRegistration(OWN_SCOPE).then(function (reg) {
+            return reg && reg.scope === OWN_SCOPE ? reg.unregister() : false;
+        });
+    }
+
     // ─── Changelog Modal ─────────────────────────────────────────────────────────
     const ChangelogModal = {
         _updateAvailable: false,
@@ -224,21 +247,26 @@
             if (PWAUpdater._pendingWorker) {
                 PWAUpdater._pendingWorker.postMessage('SKIP_WAITING');
                 setTimeout(function () {
-                    caches.keys().then(function (keys) {
-                        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
-                    }).then(function () {
+                    clearOwnCaches().then(function () {
                         window.location.reload(true);
                     });
                 }, 800);
             } else {
-                navigator.serviceWorker.getRegistrations()
-                    .then(function (regs) { return Promise.all(regs.map(function (r) { return r.unregister(); })); })
-                    .then(function () { return caches.keys(); })
-                    .then(function (keys) { return Promise.all(keys.map(function (k) { return caches.delete(k); })); })
+                unregisterOwnServiceWorker()
+                    .then(clearOwnCaches)
                     .then(function () { window.location.reload(true); })
                     .catch(function () { window.location.reload(true); });
             }
         }
+    };
+
+    // Tylko do testów; reguły izolacji UKIS (R2)
+    window.__ukisBikeLogPwa = {
+        OWN_SCOPE: OWN_SCOPE,
+        isOwnCache: isOwnCache,
+        clearOwnCaches: clearOwnCaches,
+        unregisterOwnServiceWorker: unregisterOwnServiceWorker,
+        PWAUpdater: PWAUpdater
     };
 
     // ─── Start ───────────────────────────────────────────────────────────────────
