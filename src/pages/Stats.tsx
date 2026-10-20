@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { storage, type FuelEntry, type ServiceEntry } from '../services/storage';
 import { Calculator, TrendingUp, CalendarDays, Wallet } from 'lucide-react';
 import { 
@@ -17,9 +17,9 @@ export default function Stats() {
   // Custom Date Range State
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  const [customRangeCost, setCustomRangeCost] = useState<number>(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
     setAvgConsumption(storage.getAverageConsumption());
     const allLogs = storage.getFuelLogs();
     setLogs(allLogs);
@@ -47,7 +47,7 @@ export default function Stats() {
     setEndDate(lastDay.toISOString().split('T')[0]);
   }, []);
 
-  useEffect(() => {
+  const customRangeCost = useMemo(() => {
     if (startDate && endDate) {
       const start = new Date(startDate).getTime();
       // add 1 day to include the entire end date
@@ -58,9 +58,9 @@ export default function Stats() {
         return t >= start && t < end;
       }).reduce((acc, curr) => acc + curr.price, 0);
       
-      setCustomRangeCost(sum);
+      return sum;
     } else {
-      setCustomRangeCost(0);
+      return 0;
     }
   }, [startDate, endDate, logs]);
 
@@ -176,7 +176,7 @@ export default function Stats() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <RechartsTooltip formatter={(value: any) => `${Number(value).toFixed(2)} PLN`} />
+                  <RechartsTooltip formatter={(value) => `${Number(value).toFixed(2)} PLN`} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>

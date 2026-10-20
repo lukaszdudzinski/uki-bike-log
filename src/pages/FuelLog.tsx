@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Fuel, Save, Camera, Loader2, Edit2, Trash2, X } from 'lucide-react';
 import { storage, type FuelEntry } from '../services/storage';
 import Tesseract from 'tesseract.js';
@@ -6,7 +6,7 @@ import { parseReceiptText } from '../utils/ocrParser';
 import { calculateEntryConsumption } from '../utils/fuelCalculator';
 
 export default function FuelLog() {
-  const [logs, setLogs] = useState<FuelEntry[]>([]);
+  const [logs, setLogs] = useState<FuelEntry[]>(() => storage.getFuelLogs());
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -19,10 +19,6 @@ export default function FuelLog() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const currentOdo = storage.getCurrentOdo();
-
-  useEffect(() => {
-    setLogs(storage.getFuelLogs());
-  }, []);
 
   const handleScanReceipt = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

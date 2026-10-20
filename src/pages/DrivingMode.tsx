@@ -50,12 +50,14 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
     speedCameras, 
     cameraWarning, 
     radarUrl 
+  // eslint-disable-next-line react-hooks/refs -- stabilizacja: refaktor w podprojekcie 4
   } = useDrivingPOIs(userLoc, weatherRadius.current);
 
   // Init settings
   useEffect(() => {
     const settings = storage.getSettings();
     if (settings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
       setTankCapacity(settings.tankCapacity || 13.5);
       setLiquidGlass(settings.liquidGlassEnabled !== false);
       weatherRadius.current = settings.rainWarningRadius || 10;
@@ -154,6 +156,7 @@ export default function DrivingMode({ onExit }: DrivingModeProps) {
                 <div style={{ position: 'relative', display: 'inline-block' }}>
                   <CloudRain size={36} />
                   <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '0.7rem', color: '#fff', fontWeight: '900', textShadow: '0 0 2px black' }}>
+                    {/* eslint-disable-next-line react-hooks/refs -- stabilizacja: refaktor w podprojekcie 4 */}
                     {weatherRadius.current}
                   </span>
                 </div>

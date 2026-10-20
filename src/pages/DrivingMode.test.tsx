@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import type { ReactNode } from 'react';
 import DrivingMode from './DrivingMode';
 
 // Mock storage
@@ -13,7 +14,7 @@ vi.mock('../services/storage', () => ({
 
 // Mock react-leaflet
 vi.mock('react-leaflet', () => ({
-  MapContainer: ({ children }: any) => <div data-testid="map-container">{children}</div>,
+  MapContainer: ({ children }: { children?: ReactNode }) => <div data-testid="map-container">{children}</div>,
   TileLayer: () => <div data-testid="tile-layer" />,
   CircleMarker: () => <div data-testid="circle-marker" />,
   useMap: () => ({ setView: vi.fn(), getZoom: vi.fn(() => 13) })

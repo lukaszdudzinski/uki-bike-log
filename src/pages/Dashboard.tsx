@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Coffee } from 'lucide-react';
 import { storage, type BikeSettings } from '../services/storage';
 import { useGarage } from '../contexts/GarageContext';
@@ -17,16 +17,10 @@ interface DashboardProps {
 
 export default function Dashboard({ setActiveTab, setIsDrivingMode, onStartNavigation }: DashboardProps) {
   const { activeBike } = useGarage();
-  const [odo, setOdo] = useState<number>(0);
-  const [settings, setSettings] = useState<BikeSettings | null>(null);
-  const [avgConsumption, setAvgConsumption] = useState<number | null>(null);
+  const [odo] = useState<number>(() => storage.getCurrentOdo());
+  const [settings, setSettings] = useState<BikeSettings | null>(() => storage.getSettings());
+  const [avgConsumption] = useState<number | null>(() => storage.getAverageConsumption());
   const [showWrapped, setShowWrapped] = useState(false);
-
-  useEffect(() => {
-    setOdo(storage.getCurrentOdo());
-    setSettings(storage.getSettings());
-    setAvgConsumption(storage.getAverageConsumption());
-  }, []);
 
   if (!settings || !activeBike) return null;
 
