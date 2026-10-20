@@ -11,10 +11,12 @@ test.describe('Settings & SOS Panel', () => {
     await page.click('nav >> text=Opcje');
 
     // Fill Insurance Details
-    await page.fill('input#settings-ins-cost', '450.50');
-    await page.fill('input#settings-ins-name', 'PZU E2E');
-    await page.fill('input#settings-ins-policy', 'POL-123456');
-    await page.fill('input#settings-ins-hotline', '112233445');
+    const field = (label: RegExp) =>
+      page.locator('.input-group', { has: page.locator('label', { hasText: label }) }).locator('input');
+    await field(/^Koszt ubezp\. \(PLN\)$/).fill('450.50');
+    await field(/^Ubezpieczyciel$/).fill('PZU E2E');
+    await field(/^Numer Polisy$/).fill('POL-123456');
+    await field(/^Infolinia \(Telefon\)$/).fill('112233445');
     
     // Save Settings
     page.once('dialog', dialog => dialog.accept());
