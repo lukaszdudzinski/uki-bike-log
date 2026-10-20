@@ -1,5 +1,14 @@
 [
   {
+    "version": "v2026.10.20.1",
+    "date": "2026-10-20",
+    "changes": [
+      "🔒 Lepsza izolacja danych: aktualizacja i narzędzia serwisowe Bike Log nie usuwają już pamięci offline ani ustawień innych aplikacji UKIS.",
+      "📱 Przywrócono instalację Bike Log na ekranie głównym telefonu (manifest PWA) oraz tytuł karty przeglądarki.",
+      "🛠️ Usprawniono stabilność wydań: każda wersja przechodzi automatyczne testy przed publikacją."
+    ]
+  },
+  {
     "version": "v2026.10.2.1",
     "date": "2026-10-02",
     "changes": [
