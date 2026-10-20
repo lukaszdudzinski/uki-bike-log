@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { storage } from '../services/storage';
+import { clearOwnCaches, unregisterOwnServiceWorker } from '../utils/appIsolation';
 
 export function DiagnosticsUI() {
     const [logsStr, setLogsStr] = useState<string | null>(null);
@@ -52,22 +53,16 @@ export function DiagnosticsUI() {
     };
 
     const handleHardReset = async () => {
-        const confirmed = window.confirm("Czy na pewno chcesz wykonać Twardy Reset?\\n\\nWyczyści to ukryty Cache aplikacji i zmusi ją do pobrania czystej wersji. Twoje dane pojazdów są bezpieczne.");
+        const confirmed = window.confirm("Czy na pewno chcesz wykonać Twardy Reset?\n\nWyczyści to ukryty Cache aplikacji i zmusi ją do pobrania czystej wersji. Twoje dane pojazdów są bezpieczne.");
         if (confirmed) {
             try {
-                if ('serviceWorker' in navigator) {
-                    const regs = await navigator.serviceWorker.getRegistrations();
-                    for (let r of regs) {
-                        await r.unregister();
-                    }
-                }
-                const keys = await caches.keys();
-                await Promise.all(keys.map(k => caches.delete(k)));
+                await unregisterOwnServiceWorker();
+                await clearOwnCaches();
 
                 alert("Cache wyczyszczony! Aplikacja zrestartuje się za chwilę...");
                 setTimeout(() => window.location.reload(), 1000);
-            } catch (e: any) {
-                alert("Błąd podczas czyszczenia cache: " + e.message);
+            } catch (e) {
+                alert("Błąd podczas czyszczenia cache: " + (e instanceof Error ? e.message : String(e)));
             }
         }
     };
