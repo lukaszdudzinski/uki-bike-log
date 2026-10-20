@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { storage } from '../services/storage';
-import { clearOwnCaches, unregisterOwnServiceWorker } from '../utils/appIsolation';
+import { clearAppLocalStorage, clearOwnCaches, unregisterOwnServiceWorker } from '../utils/appIsolation';
 
 export function DiagnosticsUI() {
     const [logsStr, setLogsStr] = useState<string | null>(null);
@@ -111,8 +111,8 @@ export function DiagnosticsUI() {
     };
 
     const handleClearLocalStorage = () => {
-        if (window.confirm("Usunąć dane konfiguracyjne UI z LocalStorage? (Motyw itp). Twoje tankowania w bazie nie zostaną ruszone.")) {
-            localStorage.clear();
+        if (window.confirm("Usunąć podręczne dane Bike Log (zapamiętaną lokalizację pogody i datę ostatniego sprawdzenia przypomnień)? Pojazdy, tankowania i serwisy w bazie nie zostaną ruszone, a dane innych aplikacji UKIS pozostaną nietknięte.")) {
+            clearAppLocalStorage();
             alert("Zrobione. Aplikacja się odświeży.");
             window.location.reload();
         }
@@ -195,7 +195,7 @@ export function DiagnosticsUI() {
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', marginBottom: '20px' }}>
                 <h3 style={{ color: '#eee', marginTop: 0 }}>Pamięć Podręczna</h3>
-                <p style={{ fontSize: '0.9em', color: '#ccc' }}>Użyj tej opcji <b>tylko wtedy, gdy zaciął się interfejs</b> (np. nie ładuje się motyw). Zresetuje ona wyłącznie podręczne ustawienia wyglądu. <b>Twoja historia tankowań i serwisów jest w pełni bezpieczna!</b></p>
+                <p style={{ fontSize: '0.9em', color: '#ccc' }}>Użyj tej opcji <b>tylko wtedy, gdy zaciął się interfejs</b> (np. widżet pogody pokazuje złą lokalizację). Zresetuje wyłącznie podręczne dane Bike Log: zapamiętaną lokalizację pogody i datę sprawdzenia przypomnień. <b>Twoja historia tankowań i serwisów jest w pełni bezpieczna!</b></p>
                 <button onClick={handleClearLocalStorage} style={{ width: '100%', padding: '13px', background: '#444', color: '#eee', border: '1px solid #666', borderRadius: '5px', cursor: 'pointer', marginTop: '10px', fontSize: '1em', fontWeight: 'bold', textAlign: 'center' }}>
                     Wyczyść tylko LocalStorage
                 </button>

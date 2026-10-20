@@ -71,4 +71,36 @@ test.describe('Izolacja danych Bike Log w Diagnostyce', () => {
     expect(dialogs[0]).toContain('Twardy Reset');
     expect(dialogs[0]).not.toContain('\\n'); // napis „\n” w dawnym confirm
   });
+
+  test('Wyczyść tylko LocalStorage usuwa wyłącznie klucze Bike Log', async ({ page }) => {
+    await page.route('https://api.open-meteo.com/**', r => r.abort()); // pogoda z zasianych współrzędnych
+    await page.goto('/uki-bike-log/#/diagnostics');
+    await expect(page.getByRole('heading', { name: 'Diagnostyka Systemu' })).toBeVisible({ timeout: 10000 });
+
+    await page.evaluate(
+      async ({ own, neighbour, neighbourCaches }) => {
+        for (const [k, v] of Object.entries({ ...own, ...neighbour })) localStorage.setItem(k, v);
+        for (const name of neighbourCaches) await caches.open(name);
+      },
+      { own: OWN_KEYS, neighbour: NEIGHBOUR_KEYS, neighbourCaches: NEIGHBOUR_CACHES },
+    );
+
+    const dialogs: string[] = [];
+    page.on('dialog', d => {
+      dialogs.push(d.message());
+      void d.accept();
+    });
+    const reloaded = page.waitForEvent('load');
+    await page.getByRole('button', { name: 'Wyczyść tylko LocalStorage' }).click();
+    await reloaded;
+
+    const ls = await page.evaluate(() =>
+      Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)])),
+    );
+    for (const k of Object.keys(OWN_KEYS)) expect(ls[k]).toBeUndefined();
+    expect(ls).toMatchObject(NEIGHBOUR_KEYS);
+    expect((await page.evaluate(() => caches.keys())).sort()).toEqual([...NEIGHBOUR_CACHES].sort());
+    expect(dialogs[0]).toContain('lokalizację pogody');
+    expect(dialogs[0]).toContain('innych aplikacji UKIS');
+  });
 });
