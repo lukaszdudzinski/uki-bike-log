@@ -1,19 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { storage } from '../services/storage';
+import type { ErrorLogEntry } from '../utils/errorLog';
 import { clearAppLocalStorage, clearOwnCaches, unregisterOwnServiceWorker } from '../utils/appIsolation';
 
 export function DiagnosticsUI() {
-    const [logsStr, setLogsStr] = useState<string | null>(null);
-    const importFileRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
+    const [logsStr, setLogsStr] = useState<string | null>(() => {
         try {
-            const logs = localStorage.getItem('uki_error_logs');
-            setLogsStr(logs);
-        } catch (e) {
-            setLogsStr(localStorage.getItem('uki_error_logs') || 'Brak zarejestrowanych błędów :)');
+            return localStorage.getItem('uki_error_logs');
+        } catch {
+            return null;
         }
-    }, []);
+    });
+    const importFileRef = useRef<HTMLInputElement>(null);
 
     const renderLogs = () => {
         if (!logsStr) {
@@ -23,8 +21,8 @@ export function DiagnosticsUI() {
         try {
             const logsArray = JSON.parse(logsStr);
             if (Array.isArray(logsArray) && logsArray.length > 0) {
-                const grouped: any = {};
-                logsArray.forEach(log => {
+                const grouped: Record<string, ErrorLogEntry[]> = {};
+                logsArray.forEach((log: ErrorLogEntry) => {
                     const v = log.version || 'Starsze wersje';
                     if (!grouped[v]) grouped[v] = [];
                     grouped[v].push(log);
@@ -35,7 +33,7 @@ export function DiagnosticsUI() {
                         <div style={{ color: '#FF9800', fontWeight: 'bold', fontSize: '1.1em', borderBottom: '1px solid #333', marginTop: '10px', paddingBottom: '4px' }}>
                             Wersja: {v}
                         </div>
-                        {grouped[v].map((l: any, idx: number) => (
+                        {grouped[v].map((l: ErrorLogEntry, idx: number) => (
                             <div key={idx} style={{ margin: '8px 0', borderLeft: '2px solid #E74C3C', paddingLeft: '8px' }}>
                                 <span style={{ color: '#888', fontSize: '0.85em' }}>{l.time}</span><br />
                                 <span style={{ color: '#E74C3C', fontWeight: 'bold' }}>{l.msg}</span>
@@ -47,7 +45,7 @@ export function DiagnosticsUI() {
             } else {
                 return logsStr;
             }
-        } catch (e) {
+        } catch {
             return logsStr;
         }
     };
@@ -100,9 +98,10 @@ export function DiagnosticsUI() {
                 await storage.importDatabase(jsonStr);
                 alert("Dane przywrócone pomyślnie! Aplikacja zostanie zrestartowana.");
                 window.location.reload();
-            } catch (err: any) {
-                if ((window as any).ukiLogError) {
-                    (window as any).ukiLogError("Import Error: " + err.message, err.stack);
+            } catch (err) {
+                const error = err instanceof Error ? err : new Error(String(err));
+                if (window.ukiLogError) {
+                    window.ukiLogError("Import Error: " + error.message, error.stack ?? '');
                 }
                 alert("Błąd przywracania danych. Upewnij się, że to poprawny plik kopii zapasowej. Sprawdź logi w Diagnostyce.");
             }
@@ -136,19 +135,19 @@ export function DiagnosticsUI() {
         let text = "Logi błędów Uki's Bike Log:\\n\\n";
         try {
             const logsArray = JSON.parse(logsStr);
-            const grouped: any = {};
-            logsArray.forEach((log: any) => {
+            const grouped: Record<string, ErrorLogEntry[]> = {};
+            logsArray.forEach((log: ErrorLogEntry) => {
                 const v = log.version || 'Starsze wersje';
                 if (!grouped[v]) grouped[v] = [];
                 grouped[v].push(log);
             });
             for (const v in grouped) {
                 text += `--- Wersja: ${v} ---\n`;
-                grouped[v].forEach((l: any) => {
+                grouped[v].forEach((l: ErrorLogEntry) => {
                     text += `[${l.time}] ${l.msg}\n${l.stack}\n\n`;
                 });
             }
-        } catch (e) {
+        } catch {
             text += logsStr;
         }
 

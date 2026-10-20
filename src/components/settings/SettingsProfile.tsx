@@ -9,6 +9,7 @@ export function SettingsProfile({ activeBikeId }: { activeBikeId: string }) {
 
   useEffect(() => {
     const profile = storage.getUserProfile();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
     setAvatar(profile.avatar || null);
     setNickname(profile.nickname || '');
     setLiquidGlass(profile.liquidGlassEnabled !== false);
