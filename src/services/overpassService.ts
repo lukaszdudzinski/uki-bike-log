@@ -21,7 +21,7 @@ export const overpassService = {
       if (response.ok) {
         const data = await response.json();
         if (data.elements && data.elements.length > 0) {
-          return data.elements.map((el: any) => ({ lat: el.lat, lng: el.lon }));
+          return data.elements.map((el: { lat: number; lon: number }) => ({ lat: el.lat, lng: el.lon }));
         }
       }
       return [];

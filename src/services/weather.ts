@@ -40,7 +40,7 @@ export const weatherService = {
       }
       throw new Error('Nie znaleziono adresu.');
     } catch (e) {
-      throw new Error('Błąd wyszukiwania adresu. Spróbuj inaczej sformułować zapytanie.');
+      throw new Error('Błąd wyszukiwania adresu. Spróbuj inaczej sformułować zapytanie.', { cause: e });
     }
   },
 
@@ -58,7 +58,7 @@ export const weatherService = {
       }
       throw new Error('Nie udało się wytyczyć trasy.');
     } catch (e) {
-      throw new Error('Błąd serwera tras.');
+      throw new Error('Błąd serwera tras.', { cause: e });
     }
   },
 

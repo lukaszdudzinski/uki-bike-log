@@ -147,7 +147,7 @@ export async function getRouteWithSteps(start: Coordinates, end: Coordinates): P
     const msg = (err as Error).name === 'AbortError'
       ? 'Serwer tras nie odpowiedział na czas. Sprawdź połączenie.'
       : `Błąd pobierania trasy: ${(err as Error).message}`;
-    throw new Error(msg);
+    throw new Error(msg, { cause: err });
   }
 
   if (!data.routes || data.routes.length === 0) {
@@ -193,7 +193,7 @@ export async function geocodeAddress(address: string): Promise<Coordinates> {
     const msg = (err as Error).name === 'AbortError'
       ? 'Geokodowanie nie odpowiedziało na czas. Sprawdź połączenie.'
       : `Błąd geokodowania: ${(err as Error).message}`;
-    throw new Error(msg);
+    throw new Error(msg, { cause: err });
   }
 
   if (!data || data.length === 0) {
