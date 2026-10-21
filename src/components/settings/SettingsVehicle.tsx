@@ -8,21 +8,22 @@ export function SettingsVehicle({ activeBikeId }: { activeBikeId: string }) {
 
   useEffect(() => {
     const settings = storage.getSettings();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
     setFormData(settings);
     setFrontTire(settings.frontTire || {});
     setRearTire(settings.rearTire || {});
   }, [activeBikeId]);
 
-  const handleChange = (field: keyof BikeSettings, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  const handleChange = (field: keyof BikeSettings, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleFrontTireChange = (field: keyof TireData, value: any) => {
-    setFrontTire((prev: any) => ({ ...prev, [field]: value }));
+  const handleFrontTireChange = (field: keyof TireData, value: string) => {
+    setFrontTire((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleRearTireChange = (field: keyof TireData, value: any) => {
-    setRearTire((prev: any) => ({ ...prev, [field]: value }));
+  const handleRearTireChange = (field: keyof TireData, value: string) => {
+    setRearTire((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {

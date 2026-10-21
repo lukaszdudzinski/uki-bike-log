@@ -1,18 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { storage } from '../services/storage';
+import type { ErrorLogEntry } from '../utils/errorLog';
+import { clearAppLocalStorage, clearOwnCaches, unregisterOwnServiceWorker } from '../utils/appIsolation';
 
 export function DiagnosticsUI() {
-    const [logsStr, setLogsStr] = useState<string | null>(null);
-    const importFileRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
+    const [logsStr, setLogsStr] = useState<string | null>(() => {
         try {
-            const logs = localStorage.getItem('uki_error_logs');
-            setLogsStr(logs);
-        } catch (e) {
-            setLogsStr(localStorage.getItem('uki_error_logs') || 'Brak zarejestrowanych błędów :)');
+            return localStorage.getItem('uki_error_logs');
+        } catch {
+            return null;
         }
-    }, []);
+    });
+    const importFileRef = useRef<HTMLInputElement>(null);
 
     const renderLogs = () => {
         if (!logsStr) {
@@ -22,8 +21,8 @@ export function DiagnosticsUI() {
         try {
             const logsArray = JSON.parse(logsStr);
             if (Array.isArray(logsArray) && logsArray.length > 0) {
-                const grouped: any = {};
-                logsArray.forEach(log => {
+                const grouped: Record<string, ErrorLogEntry[]> = {};
+                logsArray.forEach((log: ErrorLogEntry) => {
                     const v = log.version || 'Starsze wersje';
                     if (!grouped[v]) grouped[v] = [];
                     grouped[v].push(log);
@@ -34,7 +33,7 @@ export function DiagnosticsUI() {
                         <div style={{ color: '#FF9800', fontWeight: 'bold', fontSize: '1.1em', borderBottom: '1px solid #333', marginTop: '10px', paddingBottom: '4px' }}>
                             Wersja: {v}
                         </div>
-                        {grouped[v].map((l: any, idx: number) => (
+                        {grouped[v].map((l: ErrorLogEntry, idx: number) => (
                             <div key={idx} style={{ margin: '8px 0', borderLeft: '2px solid #E74C3C', paddingLeft: '8px' }}>
                                 <span style={{ color: '#888', fontSize: '0.85em' }}>{l.time}</span><br />
                                 <span style={{ color: '#E74C3C', fontWeight: 'bold' }}>{l.msg}</span>
@@ -46,28 +45,22 @@ export function DiagnosticsUI() {
             } else {
                 return logsStr;
             }
-        } catch (e) {
+        } catch {
             return logsStr;
         }
     };
 
     const handleHardReset = async () => {
-        const confirmed = window.confirm("Czy na pewno chcesz wykonać Twardy Reset?\\n\\nWyczyści to ukryty Cache aplikacji i zmusi ją do pobrania czystej wersji. Twoje dane pojazdów są bezpieczne.");
+        const confirmed = window.confirm("Czy na pewno chcesz wykonać Twardy Reset?\n\nWyczyści to ukryty Cache aplikacji i zmusi ją do pobrania czystej wersji. Twoje dane pojazdów są bezpieczne.");
         if (confirmed) {
             try {
-                if ('serviceWorker' in navigator) {
-                    const regs = await navigator.serviceWorker.getRegistrations();
-                    for (let r of regs) {
-                        await r.unregister();
-                    }
-                }
-                const keys = await caches.keys();
-                await Promise.all(keys.map(k => caches.delete(k)));
+                await unregisterOwnServiceWorker();
+                await clearOwnCaches();
 
                 alert("Cache wyczyszczony! Aplikacja zrestartuje się za chwilę...");
                 setTimeout(() => window.location.reload(), 1000);
-            } catch (e: any) {
-                alert("Błąd podczas czyszczenia cache: " + e.message);
+            } catch (e) {
+                alert("Błąd podczas czyszczenia cache: " + (e instanceof Error ? e.message : String(e)));
             }
         }
     };
@@ -105,9 +98,10 @@ export function DiagnosticsUI() {
                 await storage.importDatabase(jsonStr);
                 alert("Dane przywrócone pomyślnie! Aplikacja zostanie zrestartowana.");
                 window.location.reload();
-            } catch (err: any) {
-                if ((window as any).ukiLogError) {
-                    (window as any).ukiLogError("Import Error: " + err.message, err.stack);
+            } catch (err) {
+                const error = err instanceof Error ? err : new Error(String(err));
+                if (window.ukiLogError) {
+                    window.ukiLogError("Import Error: " + error.message, error.stack ?? '');
                 }
                 alert("Błąd przywracania danych. Upewnij się, że to poprawny plik kopii zapasowej. Sprawdź logi w Diagnostyce.");
             }
@@ -116,8 +110,8 @@ export function DiagnosticsUI() {
     };
 
     const handleClearLocalStorage = () => {
-        if (window.confirm("Usunąć dane konfiguracyjne UI z LocalStorage? (Motyw itp). Twoje tankowania w bazie nie zostaną ruszone.")) {
-            localStorage.clear();
+        if (window.confirm("Usunąć podręczne dane Bike Log (zapamiętaną lokalizację pogody i datę ostatniego sprawdzenia przypomnień)? Pojazdy, tankowania i serwisy w bazie nie zostaną ruszone, a dane innych aplikacji UKIS pozostaną nietknięte.")) {
+            clearAppLocalStorage();
             alert("Zrobione. Aplikacja się odświeży.");
             window.location.reload();
         }
@@ -141,19 +135,19 @@ export function DiagnosticsUI() {
         let text = "Logi błędów Uki's Bike Log:\\n\\n";
         try {
             const logsArray = JSON.parse(logsStr);
-            const grouped: any = {};
-            logsArray.forEach((log: any) => {
+            const grouped: Record<string, ErrorLogEntry[]> = {};
+            logsArray.forEach((log: ErrorLogEntry) => {
                 const v = log.version || 'Starsze wersje';
                 if (!grouped[v]) grouped[v] = [];
                 grouped[v].push(log);
             });
             for (const v in grouped) {
                 text += `--- Wersja: ${v} ---\n`;
-                grouped[v].forEach((l: any) => {
+                grouped[v].forEach((l: ErrorLogEntry) => {
                     text += `[${l.time}] ${l.msg}\n${l.stack}\n\n`;
                 });
             }
-        } catch (e) {
+        } catch {
             text += logsStr;
         }
 
@@ -200,7 +194,7 @@ export function DiagnosticsUI() {
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', marginBottom: '20px' }}>
                 <h3 style={{ color: '#eee', marginTop: 0 }}>Pamięć Podręczna</h3>
-                <p style={{ fontSize: '0.9em', color: '#ccc' }}>Użyj tej opcji <b>tylko wtedy, gdy zaciął się interfejs</b> (np. nie ładuje się motyw). Zresetuje ona wyłącznie podręczne ustawienia wyglądu. <b>Twoja historia tankowań i serwisów jest w pełni bezpieczna!</b></p>
+                <p style={{ fontSize: '0.9em', color: '#ccc' }}>Użyj tej opcji <b>tylko wtedy, gdy zaciął się interfejs</b> (np. widżet pogody pokazuje złą lokalizację). Zresetuje wyłącznie podręczne dane Bike Log: zapamiętaną lokalizację pogody i datę sprawdzenia przypomnień. <b>Twoja historia tankowań i serwisów jest w pełni bezpieczna!</b></p>
                 <button onClick={handleClearLocalStorage} style={{ width: '100%', padding: '13px', background: '#444', color: '#eee', border: '1px solid #666', borderRadius: '5px', cursor: 'pointer', marginTop: '10px', fontSize: '1em', fontWeight: 'bold', textAlign: 'center' }}>
                     Wyczyść tylko LocalStorage
                 </button>

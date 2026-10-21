@@ -1,6 +1,6 @@
 import localforage from 'localforage';
 import { storage } from '../services/storage';
-import type { BikeSettings } from '../services/storage';
+import type { BikeSettings, FuelEntry } from '../services/storage';
 
 const getStorageKeys = (bikeId: string) => {
   const prefix = bikeId === 'default' ? '' : `_${bikeId}`;
@@ -18,7 +18,7 @@ export const checkAndFireNotifications = async () => {
   if (Notification.permission !== 'granted') return;
 
   const bikes = storage.getBikes();
-  let alerts: string[] = [];
+  const alerts: string[] = [];
 
   for (const bike of bikes) {
     const keys = getStorageKeys(bike.id);
@@ -60,7 +60,7 @@ export const checkAndFireNotifications = async () => {
         // But storage.getCurrentOdo() only works for the ACTIVE bike.
         // Let's just rely on the active bike check for chain, or calculate it.
         const fuelLogsKey = keys.FUEL;
-        const fuelLogs = await localforage.getItem(fuelLogsKey) as any[];
+        const fuelLogs = await localforage.getItem(fuelLogsKey) as FuelEntry[] | null;
         let currentOdo = settings.initialOdo;
         if (fuelLogs && fuelLogs.length > 0) {
           currentOdo = Math.max(...fuelLogs.map(l => l.odo));
@@ -87,8 +87,8 @@ export const checkAndFireNotifications = async () => {
         body: body,
         icon: '/uki-bike-log/icon-192x192.png',
         badge: '/uki-bike-log/icon-192x192.png'
-      } as any);
-    } catch (e) {
+      });
+    } catch {
       new Notification(title, {
         body: body,
         icon: '/uki-bike-log/icon-192x192.png'

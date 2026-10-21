@@ -113,7 +113,7 @@ localforage.config({
 });
 
 // Synchronous memory cache
-let cache = {
+const cache = {
   bikes: [] as BikeProfile[],
   activeBikeId: 'default',
   fuel: [] as FuelEntry[],
@@ -280,7 +280,11 @@ export const storage = {
 
   // --- Backup (Exports all bikes) ---
   exportDatabase: async (): Promise<string> => {
-    const backup: any = { bikes: cache.bikes, activeBikeId: cache.activeBikeId, data: {} };
+    const backup: {
+      bikes: BikeProfile[];
+      activeBikeId: string;
+      data: Record<string, Record<'fuel' | 'service' | 'routes' | 'settings', unknown>>;
+    } = { bikes: cache.bikes, activeBikeId: cache.activeBikeId, data: {} };
     for (const bike of cache.bikes) {
       const keys = getStorageKeys(bike.id);
       backup.data[bike.id] = {

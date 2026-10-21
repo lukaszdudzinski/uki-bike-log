@@ -42,6 +42,7 @@ export default function SeasonWrapped({ onClose }: SeasonWrappedProps) {
       distance = maxOdo - minOdo;
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
     setTotalFuelLiters(liters);
     setTotalFuelCost(fuelCost);
     setRefuelsCount(fuelLogs.length);

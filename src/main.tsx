@@ -4,17 +4,18 @@ import { HashRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { GarageProvider } from './contexts/GarageContext.tsx'
+import type { ErrorLogEntry } from './utils/errorLog.ts'
 
 declare global {
   interface Window {
     ukiLogError: (msg: string, stack: string) => void;
+    showChangelogModal?: (compareVersion: string) => void;
   }
 }
 
 window.ukiLogError = (msg: string, stack: string) => {
-    let logs: any[] = [];
-    try { logs = JSON.parse(localStorage.getItem('uki_error_logs') || '[]'); } catch(e) {}
-    // @ts-ignore
+    let logs: ErrorLogEntry[] = [];
+    try { logs = JSON.parse(localStorage.getItem('uki_error_logs') || '[]'); } catch { /* uszkodzone logi — zaczynamy od pustej listy */ }
     logs.unshift({ time: new Date().toISOString(), msg, stack, version: typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'Nieznana' });
     if(logs.length > 50) logs.length = 50;
     localStorage.setItem('uki_error_logs', JSON.stringify(logs));

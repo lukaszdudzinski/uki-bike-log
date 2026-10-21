@@ -73,6 +73,7 @@ export function GarageProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- stabilizacja: refaktor w podprojekcie 4
 export function useGarage() {
   const context = useContext(GarageContext);
   if (context === undefined) {

@@ -32,7 +32,7 @@ export default function WeatherWidget() {
         code: code
       });
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Błąd API');
     } finally {
       setLoading(false);
@@ -68,6 +68,7 @@ export default function WeatherWidget() {
     
     if (lat && lon) {
       // Fetch weather from cached coordinates to avoid iOS Safari permission prompt on startup
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
       fetchWeatherApi(parseFloat(lat), parseFloat(lon));
     } else {
       setLoading(false);

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Wrench, Save, Camera, Trash2, Edit2, X } from 'lucide-react';
 import { storage, type ServiceEntry } from '../services/storage';
 
 export default function ServiceLog() {
-  const [logs, setLogs] = useState<ServiceEntry[]>([]);
+  const [logs, setLogs] = useState<ServiceEntry[]>(() => [...storage.getServiceLogs()]);
   const [odo, setOdo] = useState<number | ''>('');
   const [type, setType] = useState<'service' | 'repair' | 'accessory' | 'other'>('service');
   const [description, setDescription] = useState('');
@@ -29,10 +29,6 @@ export default function ServiceLog() {
   const refreshLogs = () => {
     setLogs([...storage.getServiceLogs()]);
   };
-
-  useEffect(() => {
-    refreshLogs();
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +131,7 @@ export default function ServiceLog() {
             <select 
               className="input-field" 
               value={type} 
-              onChange={(e) => setType(e.target.value as any)}
+              onChange={(e) => setType(e.target.value as ServiceEntry['type'])}
               style={{ width: '100%' }}
             >
               <option value="service">Serwis (Olej, klocki itp.)</option>

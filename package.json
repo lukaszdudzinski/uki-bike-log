@@ -1,7 +1,7 @@
 {
   "name": "temp-app",
   "private": true,
-  "version": "2026.10.2.1",
+  "version": "2026.10.20.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "release": "node scripts/version.mjs && git add package.json && git commit -m \"chore: bump version\" && GIT_SSH_COMMAND=\"ssh -o StrictHostKeyChecking=accept-new\" git push origin main"
+    "release": "sh -c 'node scripts/version.mjs \"$@\" && git add package.json index.html public/sw.js public/changelog.json && git commit -m \"chore: bump version\" && GIT_SSH_COMMAND=\"ssh -o StrictHostKeyChecking=accept-new\" git push origin main' release"
   },
   "dependencies": {
     "clsx": "^2.1.1",

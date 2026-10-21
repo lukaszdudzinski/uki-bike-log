@@ -44,6 +44,7 @@ export function useGeolocationTracker() {
 
   useEffect(() => {
     if (!navigator.geolocation) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
       setErrorMsg('Geolokalizacja nie wspierana');
       return;
     }
@@ -130,6 +131,7 @@ export function useGeolocationTracker() {
     document.body.removeChild(a);
   };
 
+  /* eslint-disable react-hooks/refs -- stabilizacja: refaktor w podprojekcie 4 */
   return {
     userLoc,
     speed,
@@ -139,4 +141,5 @@ export function useGeolocationTracker() {
     gpsTrack: gpsTrackRef.current,
     exportGPX
   };
+  /* eslint-enable react-hooks/refs */
 }

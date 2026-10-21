@@ -53,10 +53,9 @@ export default function Settings({ isDark, setIsDark }: SettingsProps) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', margin: '30px 0', padding: '0 4px' }}>
         <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Wersja Aplikacji</span>
         <div style={{ textAlign: 'right' }}>
-          {/* @ts-ignore */}
           <span style={{ color: '#00C3FF', fontSize: '0.9rem', fontWeight: 'bold' }}>v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.x.x'} ⓘ</span>
           <br/>
-          <button onClick={() => { if ((window as any).showChangelogModal) (window as any).showChangelogModal('all'); }} style={{ background: 'none', border: 'none', color: '#FF9800', textDecoration: 'underline', marginTop: '6px', cursor: 'pointer', padding: 0, fontSize: '0.9rem' }}>
+          <button onClick={() => { window.showChangelogModal?.('all'); }} style={{ background: 'none', border: 'none', color: '#FF9800', textDecoration: 'underline', marginTop: '6px', cursor: 'pointer', padding: 0, fontSize: '0.9rem' }}>
             Zobacz co nowego (Changelog)
           </button>
         </div>

@@ -59,6 +59,7 @@ export default function NavigationPage({ initialDestination = '', onExit }: Navi
   // Automatycznie startuj nawigację jeśli podano cel z zewnątrz
   useEffect(() => {
     if (initialDestination && initialDestination.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
       setInputValue(initialDestination);
     }
   }, [initialDestination]);

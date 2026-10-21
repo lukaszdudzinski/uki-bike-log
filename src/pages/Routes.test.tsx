@@ -1,10 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import type { ReactNode } from 'react';
 import Routes from './Routes';
 
 // Mock Leaflet as it might crash in JSDOM
 vi.mock('react-leaflet', () => ({
-  MapContainer: ({ children }: any) => <div>{children}</div>,
+  MapContainer: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   TileLayer: () => <div>TileLayer</div>,
   Marker: () => <div>Marker</div>,
   Polyline: () => <div>Polyline</div>,

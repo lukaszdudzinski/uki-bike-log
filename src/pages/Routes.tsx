@@ -74,15 +74,16 @@ export default function Routes({ onStartNavigation }: RoutesProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [scanStatus, setScanStatus] = useState<string>('');
 
+  const refreshRoutes = () => setRoutes([...storage.getRoutes()]);
+  const refreshHistory = () => setHistory([...storage.getRouteHistory()]);
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- stabilizacja: refaktor w podprojekcie 4
     refreshRoutes();
     setHistory(storage.getRouteHistory());
     setRetentionDays(storage.getHistoryRetentionDays());
     weatherService.getLatestRadarUrl().then(url => { if (url) setRadarUrl(url); });
   }, []);
-
-  const refreshRoutes = () => setRoutes([...storage.getRoutes()]);
-  const refreshHistory = () => setHistory([...storage.getRouteHistory()]);
 
   // ─── CRUD Tras ─────────────────────────────────────────────────────────────
 

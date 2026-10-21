@@ -93,14 +93,17 @@ export function useDrivingPOIs(
         setCameraWarning(true);
         try {
           // Beep sound
-          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const osc = audioContext.createOscillator();
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(800, audioContext.currentTime);
-          osc.connect(audioContext.destination);
-          osc.start();
-          osc.stop(audioContext.currentTime + 0.5);
-        } catch (e) {}
+          const Ctx = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+          if (Ctx) {
+            const audioContext = new Ctx();
+            const osc = audioContext.createOscillator();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, audioContext.currentTime);
+            osc.connect(audioContext.destination);
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.5);
+          }
+        } catch { /* brak dźwięku nie blokuje ostrzeżenia */ }
       } else if (minD >= 0.8 && cameraWarningRef.current) {
         cameraWarningRef.current = false;
         setCameraWarning(false);
