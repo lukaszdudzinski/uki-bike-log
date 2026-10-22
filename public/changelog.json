@@ -1,5 +1,14 @@
 [
   {
+    "version": "v2026.10.22.1",
+    "date": "2026-10-22",
+    "changes": [
+      "🔔 Powiadomienia Bike Log pojawiają się tylko wtedy, gdy aplikacja jest na ekranie — już nie przy otwieraniu innych aplikacji UKIS.",
+      "⏰ Nowe ustawienia przypomnień: wybierz, o czym i ile dni wcześniej (30, 14, 7 lub 3) Bike Log ma przypominać — bez codziennych powtórek.",
+      "🛠️ Poprawiono przypomnienie o przeglądzie, które codziennie błędnie informowało o jego wygaśnięciu; powiadomienia mają teraz pełną treść i ikonę Bike Log."
+    ]
+  },
+  {
     "version": "v2026.10.20.1",
     "date": "2026-10-20",
     "changes": [
