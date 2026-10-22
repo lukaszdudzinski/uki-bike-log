@@ -56,6 +56,7 @@ export function SettingsVehicle({ activeBikeId }: { activeBikeId: string }) {
         lastServiceOdo: oilOdo,
         lastValveClearanceOdo: valveOdo,
         lastChainOdo: chainOdo,
+        chainIntervalKm: Number(formData.chainIntervalKm) >= 50 ? Math.round(Number(formData.chainIntervalKm)) : currentSettings.chainIntervalKm || 500,
         insuranceCost: formData.insuranceCost ? Number(formData.insuranceCost) : undefined,
         frontTire: fTire,
         rearTire: rTire
@@ -144,6 +145,10 @@ export function SettingsVehicle({ activeBikeId }: { activeBikeId: string }) {
         <div className="input-group" style={{ marginBottom: 0 }}>
           <label className="input-label">Smarowanie łańcucha (km)</label>
           <input type="number" className="input-field" value={formData.lastChainOdo || ''} onChange={e => handleChange('lastChainOdo', e.target.value)} />
+        </div>
+        <div className="input-group" style={{ marginBottom: 0 }}>
+          <label className="input-label" htmlFor="vehicle-chain-interval">Smarowanie łańcucha co (km)</label>
+          <input id="vehicle-chain-interval" type="number" min={50} step={50} className="input-field" value={formData.chainIntervalKm || ''} onChange={e => handleChange('chainIntervalKm', e.target.value)} />
         </div>
       </div>
 

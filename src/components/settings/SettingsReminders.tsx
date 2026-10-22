@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Bell, Calendar } from 'lucide-react';
 import { checkAndFireNotifications, requestNotificationPermission, generateCalendarICS, loadReminderPrefs, saveReminderPrefs } from '../../utils/notifications';
 import { LEAD_DAYS_OPTIONS, type LeadDays, type ReminderPrefs, type ReminderType } from '../../utils/reminders';
-import { storage } from '../../services/storage';
 
 const TYPE_LABELS: Record<ReminderType, string> = {
   oc: 'Ubezpieczenie OC',
@@ -13,21 +12,10 @@ const TYPE_LABELS: Record<ReminderType, string> = {
 
 export function SettingsReminders() {
   const [prefs, setPrefs] = useState<ReminderPrefs>(() => loadReminderPrefs());
-  const [chainKm, setChainKm] = useState<string>(() => String(storage.getSettings()?.chainIntervalKm || 500));
 
   const updatePrefs = (next: ReminderPrefs) => {
     setPrefs(next);
     saveReminderPrefs(next);
-  };
-
-  const saveChainKm = () => {
-    const km = Math.round(Number(chainKm));
-    if (!Number.isFinite(km) || km < 50) {
-      setChainKm(String(storage.getSettings().chainIntervalKm || 500));
-      return;
-    }
-    storage.saveSettings({ ...storage.getSettings(), chainIntervalKm: km });
-    setChainKm(String(km));
   };
 
   return (
@@ -78,22 +66,8 @@ export function SettingsReminders() {
             </select>
           </div>
 
-          <div className="input-group" style={{ marginBottom: 0 }}>
-            <label className="input-label" htmlFor="reminder-chain-km">Smarowanie łańcucha co (km)</label>
-            <input
-              id="reminder-chain-km"
-              type="number"
-              min={50}
-              step={50}
-              className="input-field"
-              value={chainKm}
-              onChange={e => setChainKm(e.target.value)}
-              onBlur={saveChainKm}
-            />
-          </div>
-
           <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)', lineHeight: '1.4' }}>
-            Przypomnienie o terminie przychodzi najwyżej trzy razy: w wybranym dniu, dzień przed terminem i w dniu terminu. O łańcuchu przypomnimy po przejechaniu ustawionej liczby km i ponownie, gdy przekroczysz ją o 40%. Nigdy codziennie. Powiadomienia pojawiają się po otwarciu Bike Log.
+            Przypomnienie o terminie przychodzi najwyżej trzy razy: w wybranym dniu, dzień przed terminem i w dniu terminu. O łańcuchu przypomnimy po przejechaniu liczby km ustawionej w danych pojazdu (pole „Smarowanie łańcucha co (km)”) i ponownie, gdy przekroczysz ją o 40%. Nigdy codziennie. Powiadomienia pojawiają się po otwarciu Bike Log.
           </p>
         </fieldset>
 
