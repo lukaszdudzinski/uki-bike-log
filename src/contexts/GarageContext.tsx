@@ -22,7 +22,18 @@ export function GarageProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    storage.initDB().then(() => {
+    storage.initDB().then(async () => {
+      // Dotknięcie powiadomienia otwiera Bike Log z ?bike=<id>: przełączamy na ten pojazd
+      const params = new URLSearchParams(window.location.search);
+      const requestedBike = params.get('bike');
+      if (requestedBike) {
+        if (requestedBike !== storage.getActiveBikeId() && storage.getBikes().some(b => b.id === requestedBike)) {
+          await storage.switchBike(requestedBike);
+        }
+        params.delete('bike');
+        const query = params.toString();
+        window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
+      }
       setBikes([...storage.getBikes()]);
       setActiveBike(storage.getActiveBike());
       setIsLoading(false);

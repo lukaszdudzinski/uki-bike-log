@@ -1,6 +1,19 @@
 import localforage from 'localforage';
 import { storage } from '../services/storage';
 import type { BikeSettings, FuelEntry } from '../services/storage';
+import {
+  DEFAULT_REMINDER_PREFS,
+  LEAD_DAYS_OPTIONS,
+  buildDigest,
+  computeReminders,
+  markSent,
+  selectNew,
+  type LeadDays,
+  type Reminder,
+  type ReminderPrefs,
+  type ReminderType,
+  type SentLog,
+} from './reminders';
 
 const getStorageKeys = (bikeId: string) => {
   const prefix = bikeId === 'default' ? '' : `_${bikeId}`;
@@ -10,93 +23,94 @@ const getStorageKeys = (bikeId: string) => {
   };
 };
 
-export const checkAndFireNotifications = async () => {
-  const lastCheck = localStorage.getItem('lastNotificationCheck');
-  const today = new Date().toISOString().split('T')[0];
-  if (lastCheck === today) return;
+export const REMINDER_PREFS_KEY = 'ukis.bike-log.notifications.prefs';
+export const REMINDER_SENT_KEY = 'ukis.bike-log.notifications.sent';
 
-  if (Notification.permission !== 'granted') return;
+const BASE = '/uki-bike-log/';
+const ICON = `${BASE}pwa-192x192.png`;
+const DIGEST_TAG = 'ukis-bikelog-digest';
+// Powyżej tej liczby nowych przypomnień naraz wysyłamy jedno zbiorcze powiadomienie
+const MAX_SEPARATE_NOTIFICATIONS = 3;
 
-  const bikes = storage.getBikes();
-  const alerts: string[] = [];
+const readJson = <T,>(key: string): T | null => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+};
 
-  for (const bike of bikes) {
+export const loadReminderPrefs = (): ReminderPrefs => {
+  const saved = readJson<Partial<ReminderPrefs>>(REMINDER_PREFS_KEY);
+  const leadDays = LEAD_DAYS_OPTIONS.includes(saved?.leadDays as LeadDays) ? (saved!.leadDays as LeadDays) : DEFAULT_REMINDER_PREFS.leadDays;
+  const enabled = { ...DEFAULT_REMINDER_PREFS.enabled };
+  for (const type of Object.keys(enabled) as ReminderType[]) {
+    if (typeof saved?.enabled?.[type] === 'boolean') enabled[type] = saved.enabled[type];
+  }
+  return { leadDays, enabled };
+};
+
+export const saveReminderPrefs = (prefs: ReminderPrefs) => {
+  localStorage.setItem(REMINDER_PREFS_KEY, JSON.stringify(prefs));
+};
+
+const showSystemNotification = async (title: string, options: NotificationOptions) => {
+  // Tylko rejestracja Bike Log (domena jest wspólna dla aplikacji UKIS)
+  const registration = await navigator.serviceWorker?.getRegistration(BASE);
+  if (registration) {
+    await registration.showNotification(title, options);
+  } else {
+    new Notification(title, options);
+  }
+};
+
+/**
+ * Wysyła powiadomienia o NOWYCH etapach przypomnień. Nic nie robi, gdy Bike Log nie jest na ekranie:
+ * telefon potrafi przeładować uśpioną kartę Bike Log w tle, np. po otwarciu innej aplikacji UKIS.
+ * Zwraca wysłane przypomnienia.
+ */
+export const checkAndFireNotifications = async (): Promise<Reminder[]> => {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return [];
+  if (document.visibilityState !== 'visible') return [];
+
+  const prefs = loadReminderPrefs();
+  const today = new Date();
+  const all: Reminder[] = [];
+
+  for (const bike of storage.getBikes()) {
     const keys = getStorageKeys(bike.id);
     const settings: BikeSettings | null = await localforage.getItem(keys.SETTINGS);
-    
-    if (settings) {
-      // Check OC
-      if (settings.insuranceExpiry) {
-        const diff = (new Date(settings.insuranceExpiry).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
-        if (diff > 0 && diff <= 14) {
-          alerts.push(`OC dla ${bike.name} wygasa za ${Math.ceil(diff)} dni!`);
-        } else if (diff <= 0) {
-          alerts.push(`OC dla ${bike.name} wygasło!`);
-        }
-      }
-      
-      // Check AC
-      if (settings.insuranceAcExpiry) {
-        const diff = (new Date(settings.insuranceAcExpiry).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
-        if (diff > 0 && diff <= 14) {
-          alerts.push(`AC dla ${bike.name} wygasa za ${Math.ceil(diff)} dni!`);
-        }
-      }
-      
-      // Check Tech Inspection (Przegląd)
-      if (settings.lastInspectionDate) {
-        const diff = (new Date(settings.lastInspectionDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
-        if (diff > 0 && diff <= 14) {
-          alerts.push(`Przegląd dla ${bike.name} wygasa za ${Math.ceil(diff)} dni!`);
-        } else if (diff <= 0) {
-          alerts.push(`Przegląd dla ${bike.name} wygasł!`);
-        }
-      }
-
-      // Check Chain
-      if (settings.chainIntervalKm && settings.lastChainOdo) {
-        // We need the current ODO for this bike.
-        // It's saved in the last fuel log or settings.initialOdo.
-        // But storage.getCurrentOdo() only works for the ACTIVE bike.
-        // Let's just rely on the active bike check for chain, or calculate it.
-        const fuelLogsKey = keys.FUEL;
-        const fuelLogs = await localforage.getItem(fuelLogsKey) as FuelEntry[] | null;
-        let currentOdo = settings.initialOdo;
-        if (fuelLogs && fuelLogs.length > 0) {
-          currentOdo = Math.max(...fuelLogs.map(l => l.odo));
-        }
-        
-        const chainTraveled = currentOdo - settings.lastChainOdo;
-        if (chainTraveled >= 700) {
-          alerts.push(`[RED ALERT] ${bike.name} - Przejechano ${chainTraveled} km bez smarowania łańcucha!`);
-        } else if (chainTraveled >= 500) {
-          alerts.push(`${bike.name} - Czas nasmarować łańcuch. Przejechano ${chainTraveled} km.`);
-        }
-      }
-    }
+    if (!settings) continue;
+    const fuelLogs = (await localforage.getItem<FuelEntry[]>(keys.FUEL)) || [];
+    const odo = Math.max(settings.initialOdo || 0, ...fuelLogs.map(l => l.odo));
+    all.push(...computeReminders(bike, settings, odo, prefs, today));
   }
 
-  if (alerts.length > 0) {
-    const title = alerts.length === 1 ? 'Uki\'s Bike Log' : `Uki's Bike Log (${alerts.length} przypomnienia)`;
-    const body = alerts.join(', ');
-    
-    // Fire local push notification
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      registration.showNotification(title, {
-        body: body,
-        icon: '/uki-bike-log/icon-192x192.png',
-        badge: '/uki-bike-log/icon-192x192.png'
+  const sent = readJson<SentLog>(REMINDER_SENT_KEY) || {};
+  const fresh = selectNew(all, sent);
+  if (fresh.length === 0) return [];
+
+  try {
+    if (fresh.length > MAX_SEPARATE_NOTIFICATIONS) {
+      const digest = buildDigest(fresh);
+      await showSystemNotification(digest.title, {
+        body: digest.body, icon: ICON, badge: ICON, tag: DIGEST_TAG, data: { url: `${BASE}#/` },
       });
-    } catch {
-      new Notification(title, {
-        body: body,
-        icon: '/uki-bike-log/icon-192x192.png'
-      });
+    } else {
+      for (const r of fresh) {
+        await showSystemNotification(r.title, {
+          body: r.body, icon: ICON, badge: ICON, tag: r.id, data: { url: `${BASE}?bike=${encodeURIComponent(r.bikeId)}#/` },
+        });
+      }
     }
+  } catch (e) {
+    window.ukiLogError?.(`Powiadomienia: ${e instanceof Error ? e.message : String(e)}`, e instanceof Error ? e.stack || '' : '');
+    return [];
   }
 
-  localStorage.setItem('lastNotificationCheck', today);
+  localStorage.setItem(REMINDER_SENT_KEY, JSON.stringify(markSent(sent, fresh)));
+  return fresh;
 };
 
 export const requestNotificationPermission = async () => {

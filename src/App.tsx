@@ -36,6 +36,16 @@ function App() {
     }
   }, [isDark, isLoading, activeBike]);
 
+  // Powrót do Bike Log (np. następnego dnia bez przeładowania) też sprawdza przypomnienia
+  useEffect(() => {
+    if (isLoading || !activeBike) return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') checkAndFireNotifications();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [isLoading, activeBike]);
+
   if (isLoading || !activeBike) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>

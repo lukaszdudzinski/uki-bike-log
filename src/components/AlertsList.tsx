@@ -40,10 +40,12 @@ export default function AlertsList({ settings, odo, setSettings }: AlertsListPro
   const isValveDanger = valveKmRemaining <= 0;
 
   // Chain
+  // Progi liczone od interwału z ustawień (domyślnie 500 km: 500 / 600 / 700 km jak wcześniej)
+  const chainInterval = settings.chainIntervalKm > 0 ? settings.chainIntervalKm : 500;
   const chainTraveled = odo - settings.lastChainOdo;
-  const isChainWarning = chainTraveled >= 500 && chainTraveled < 600;
-  const isChainDanger = chainTraveled >= 600 && chainTraveled < 700;
-  const isChainRedAlert = chainTraveled >= 700;
+  const isChainWarning = chainTraveled >= chainInterval && chainTraveled < Math.round(chainInterval * 1.2);
+  const isChainDanger = chainTraveled >= Math.round(chainInterval * 1.2) && chainTraveled < Math.round(chainInterval * 1.4);
+  const isChainRedAlert = chainTraveled >= Math.round(chainInterval * 1.4);
 
   return (
     <div>
