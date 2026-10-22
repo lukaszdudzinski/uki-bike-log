@@ -76,3 +76,18 @@ self.addEventListener('message', (event) => {
         self.skipWaiting();
     }
 });
+
+// Dotknięcie powiadomienia Bike Log: pokaż otwarty Bike Log albo otwórz go na właściwym pojeździe
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const target = new URL((event.notification.data && event.notification.data.url) || '/uki-bike-log/', self.location.origin).href;
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+            const own = windows.find((w) => w.url.indexOf(self.registration.scope) === 0);
+            if (own) {
+                return own.navigate(target).then((w) => (w || own).focus()).catch(() => own.focus());
+            }
+            return self.clients.openWindow(target);
+        })
+    );
+});
