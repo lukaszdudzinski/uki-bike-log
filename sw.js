@@ -1,0 +1,93 @@
+const CACHE_NAME = 'ukis-bikelog-v2026.10.22.1';
+const CACHE_PREFIX = 'ukis-bikelog-';
+// Tylko cache Bike Log. Domena lukaszdudzinski.github.io jest wspólna dla rodziny UKIS (R1).
+function isOwnCache(key) {
+    return key.indexOf(CACHE_PREFIX) === 0 ||
+        (key.indexOf('workbox-') === 0 && key.endsWith('-' + self.registration.scope));
+}
+
+// Core assets to pre-cache
+const CORE_ASSETS = [
+    '/uki-bike-log/',
+    '/uki-bike-log/index.html',
+    '/uki-bike-log/favicon-32x32.png',
+    '/uki-bike-log/logo.png',
+    '/uki-bike-log/pwa-updater.js'
+];
+
+self.addEventListener('install', (e) => {
+    e.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return Promise.all(CORE_ASSETS.map(url => fetch(new Request(url + '?_t=' + Date.now(), { cache: 'no-store' })).then(r => { if(!r.ok) throw new Error('Fetch failed'); return cache.put(new Request(url), r); })));
+        })
+    );
+});
+
+self.addEventListener('activate', (e) => {
+    e.waitUntil(
+        caches.keys().then((keyList) => {
+            return Promise.all(keyList.map((key) => {
+                if (key !== CACHE_NAME && isOwnCache(key)) {
+                    return caches.delete(key);
+                }
+            }));
+        })
+    );
+    // NIE wywołujemy self.clients.claim() - nowy SW ma czekać na sygnał
+    // od użytkownika (przycisk Zaktualizuj), a nie przejmować kontrolę samoczynnie!
+});
+
+self.addEventListener('fetch', (e) => {
+    // Only cache http/https requests
+    if (!e.request.url.startsWith('http')) {
+        return;
+    }
+    
+    // Nie cache'uj zapytań o changelog
+    if (e.request.url.includes('changelog.json')) {
+        return;
+    }
+
+    e.respondWith(
+        caches.match(e.request).then((response) => {
+            if (response) {
+                return response; // Hit cache
+            }
+            return fetch(e.request).then((fetchResponse) => {
+                // Return if not valid
+                if (!fetchResponse || fetchResponse.status !== 200 || fetchResponse.type !== 'basic') {
+                    return fetchResponse;
+                }
+
+                // Clone response to cache it dynamically
+                const responseToCache = fetchResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(e.request, responseToCache);
+                });
+
+                return fetchResponse;
+            });
+        })
+    );
+});
+
+self.addEventListener('message', (event) => {
+    if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
+        self.skipWaiting();
+    }
+});
+
+// Dotknięcie powiadomienia Bike Log: pokaż otwarty Bike Log albo otwórz go na właściwym pojeździe
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const target = new URL((event.notification.data && event.notification.data.url) || '/uki-bike-log/', self.location.origin).href;
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+            const own = windows.find((w) => w.url.indexOf(self.registration.scope) === 0);
+            if (own) {
+                return own.navigate(target).then((w) => (w || own).focus()).catch(() => own.focus());
+            }
+            return self.clients.openWindow(target);
+        })
+    );
+});

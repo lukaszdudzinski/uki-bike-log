@@ -1,0 +1,488 @@
+[
+  {
+    "version": "v2026.10.22.1",
+    "date": "2026-10-22",
+    "changes": [
+      "🔔 Powiadomienia Bike Log pojawiają się tylko wtedy, gdy aplikacja jest na ekranie — już nie przy otwieraniu innych aplikacji UKIS.",
+      "⏰ Nowe ustawienia przypomnień: wybierz, o czym i ile dni wcześniej (30, 14, 7 lub 3) Bike Log ma przypominać — bez codziennych powtórek.",
+      "🛠️ Poprawiono przypomnienie o przeglądzie, które codziennie błędnie informowało o jego wygaśnięciu; powiadomienia mają teraz pełną treść i ikonę Bike Log."
+    ]
+  },
+  {
+    "version": "v2026.10.20.1",
+    "date": "2026-10-20",
+    "changes": [
+      "🔒 Lepsza izolacja danych: aktualizacja i narzędzia serwisowe Bike Log nie usuwają już pamięci offline ani ustawień innych aplikacji UKIS.",
+      "📱 Przywrócono instalację Bike Log na ekranie głównym telefonu (manifest PWA) oraz tytuł karty przeglądarki.",
+      "🛠️ Usprawniono stabilność wydań: każda wersja przechodzi automatyczne testy przed publikacją."
+    ]
+  },
+  {
+    "version": "v2026.10.2.1",
+    "date": "2026-10-02",
+    "changes": [
+      "🎨 Ujednolicono styl wizualny interfejsu tras i nawigacji: Zastąpiono symbole znakowe i emotikony wektorowymi ikonami SVG (Lucide) dla spójnego wyglądu przycisków, kafelków i komunikatów."
+    ]
+  },
+  {
+    "version": "v2026.9.28.5",
+    "date": "2026-09-28",
+    "changes": [
+      "🛠️ Stabilność Prędkościomierza: Przywrócono bezpośredni odczyt ze sprzętowego sensora GPS, eliminując sztuczne pływanie prędkości na postoju."
+    ]
+  },
+  {
+    "version": "v2026.9.28.4",
+    "date": "2026-09-28",
+    "changes": [
+      "⚡ Prędkościomierz GPS i Stabilność: Dodano hybrydową kalkulację prędkości (Haversine delta fallback dla iOS Safari) oraz czytelny licznik km/h na dolnym pasku nawigacji."
+    ]
+  },
+  {
+    "version": "v2026.9.28.3",
+    "date": "2026-09-28",
+    "changes": [
+      "🛠️ Stabilność i Testy: Zaktualizowano testy automatyczne dla historii tras i retencji danych, zweryfikowano pełny build i poprawność działania."
+    ]
+  },
+  {
+    "version": "v2026.9.28.2",
+    "date": "2026-09-28",
+    "changes": [
+      "✨ Trasy i Nawigacja: Przywrócono pełny moduł tras z pulpitu, dodano edycję i usuwanie Domu/Pracy, historię przejazdów z retencją danych, ostrzeganie przed fotoradarami oraz prędkościomierz GPS."
+    ]
+  },
+  {
+    "version": "v2026.9.28.1",
+    "date": "2026-09-28",
+    "changes": [
+      "✨ Moduł Tras i Nawigacji: Dodano szybkie skróty Dom i Praca, oznaczanie ulubionych tras gwiazdką, edycję adresów oraz bezpośrednie uruchamianie nawigacji jednym dotknięciem."
+    ]
+  },
+  {
+    "version": "v2026.9.24.2",
+    "date": "2026-09-24",
+    "changes": [
+      "📱 Nawigacja w Szybkich akcjach: przycisk 🧭 dostępny bezpośrednio z ekranu głównego zamiast na dolnym pasku. 🛠️ Poprawiono panel pogody – ikonka odświeżania nie nachodzi na napisy."
+    ]
+  },
+  {
+    "version": "v2026.9.24.1",
+    "date": "2026-09-24",
+    "changes": [
+      "📱 Nawigacja dostępna z paska dolnego: nowy przycisk 🧭 Nawigacja umożliwia natychmiastowe wyznaczenie trasy bez przechodzenia przez zakładkę Trasy."
+    ]
+  },
+  {
+    "version": "v2026.9.23.2",
+    "date": "2026-09-23",
+    "changes": [
+      "🛠️ Nawigacja – Poprawki po Code Review: naprawiono wycieki pamięci GPS, błąd geometrii off-route, throttling re-renderów, obsługę głosu na iOS oraz dokładność kółka GPS na mapie."
+    ]
+  },
+  {
+    "version": "v2026.9.23.1",
+    "date": "2026-09-23",
+    "changes": [
+      "✨ Nawigacja Turn-by-Turn: Wbudowana nawigacja GPS z komunikatami głosowymi po polsku, mapą na żywo i automatycznym przeliczaniem trasy po zjechaniu z kursu."
+    ]
+  },
+  {
+    "version": "v2026.9.7.8",
+    "date": "2026-09-07",
+    "changes": [
+      "🛠️ Przepisano silnik aktualizacji PWA: Scalono logikę banera i okna Changelog w jeden, niezawodny plik bez zewnętrznych zależności. Naprawiono przyciski 'Co nowego?' i 'Zaktualizuj' na banerze."
+    ]
+  },
+  {
+    "version": "v2026.9.7.7",
+    "date": "2026-09-07",
+    "changes": [
+      "🩹 Naprawiono błąd 'Co nowego?' w banerze: Usunięto niepoprawne słowo kluczowe ES module z pliku ChangelogUI.js, które blokowało wyświetlanie okna changeloga."
+    ]
+  },
+  {
+    "version": "v2026.9.7.6",
+    "date": "2026-09-07",
+    "changes": [
+      "🛠️ Naprawiono mechanizm aktualizacji PWA: aktualizacje pobierają się w tle, ale instalowane są wyłącznie po jawnym kliknięciu przycisku Zaktualizuj przez użytkownika."
+    ]
+  },
+  {
+    "version": "v2026.9.7.5",
+    "date": "2026-09-07",
+    "changes": [
+      "🔧 Test banera nr 2: Upewniamy się, że wszystko działa w 100% poprawnie!"
+    ]
+  },
+  {
+    "version": "v2026.9.7.4",
+    "date": "2026-09-07",
+    "changes": [
+      "🔧 Test Ostateczny: PWA Updater powrócił do żywych i wyświetla baner poprawnie."
+    ]
+  },
+  {
+    "version": "v2026.9.7.3",
+    "date": "2026-09-07",
+    "changes": [
+      "🩹 Poprawka krytyczna: Naprawiono błąd w pliku pwa-updater.js, który uniemożliwiał wyświetlanie się banera na ekranie!"
+    ]
+  },
+  {
+    "version": "v2026.9.7.2",
+    "date": "2026-09-07",
+    "changes": [
+      "🔧 Test systemu aktualizacji: Wymuszenie paczki, aby przetestować działanie pomarańczowego banera PWA i upewnić się, że wszystko ładuje się poprawnie!"
+    ]
+  },
+  {
+    "version": "v2026.9.7.1",
+    "date": "2026-09-07",
+    "changes": [
+      "🩹 Poprawka krytyczna CSS: Naprawiono literówkę flex-direction, która psuła wyświetlanie modalu aktualizacji na urządzeniach mobilnych."
+    ]
+  },
+  {
+    "version": "v2026.9.6.1",
+    "date": "2026-09-06",
+    "changes": [
+      "🛠️ Wdrożono niezależny, stabilny mechanizm ChangelogUI, idealnie odwzorowujący logikę aktualizacji z Uki's BodyBuild."
+    ]
+  },
+  {
+    "version": "v2026.9.3.3",
+    "date": "2026-09-03",
+    "changes": [
+      "🎨 Dostosowano wygląd okna aktualizacji (Changelog Modal) do stylistyki znanej z aplikacji Uki Body Build."
+    ]
+  },
+  {
+    "version": "v2026.9.3.2",
+    "date": "2026-09-03",
+    "changes": [
+      "🔧 Poprawka techniczna: usunięto błąd budowania zapobiegający publikacji poprzedniej wersji (ErrorBoundary)."
+    ]
+  },
+  {
+    "version": "v2026.9.3.1",
+    "date": "2026-09-03",
+    "changes": [
+      "🩹 Naprawiono krytyczny błąd (czarny ekran) po aktualizacji, dodając mechanizm samo-naprawy (ErrorBoundary), który automatycznie odświeża moduły przy błędzie wczytywania."
+    ]
+  },
+  {
+    "version": "v2026.9.2.1",
+    "date": "2026-09-02",
+    "changes": [
+      "📱 Poprawiono widoczność rozwijanej listy garażu, pozycję przycisku lokalizacji, uczytelniono treść powiadomień na iOS oraz dodano pole Numer Rejestracyjny."
+    ]
+  },
+  {
+    "version": "v2026.8.31.1",
+    "date": "2026-08-31",
+    "changes": [
+      "🛠️ Naprawiono problem z powracającym pytaniem o lokalizację na iOS (PWA), poprzez buforowanie ostatnich współrzędnych i odpytywanie GPS wyłącznie na żądanie (ręczne odświeżenie)."
+    ]
+  },
+  {
+    "version": "v2026.8.29.1",
+    "date": "2026-08-29",
+    "changes": [
+      "🛠️ Poprawki powiadomień: Zlikwidowano uciążliwe pytania o lokalizację na starcie i naprawiono eksport terminów OC/Przeglądu do kalendarza na iOS"
+    ]
+  },
+  {
+    "version": "v2026.8.26.7",
+    "date": "2026-08-26",
+    "changes": [
+      "🚀 Krytyczna naprawa pętli aktualizacji PWA i stabilności"
+    ]
+  },
+  {
+    "version": "v2026.8.26.6",
+    "date": "2026-08-26",
+    "changes": [
+      "🛠️ Krytyczna poprawka PWA: Rozwiązano błąd mechanizmu instalacji aktualizacji polegający na niepotrzebnym usuwaniu świeżego cache'u przed zrestartowaniem aplikacji (co skutkowało pobieraniem starej wersji z CDN)."
+    ]
+  },
+  {
+    "version": "v2026.8.26.5",
+    "date": "2026-08-26",
+    "changes": [
+      "🛠️ Architektura: Przeprowadzono gruntowną refaktoryzację modułu Trybu Jazdy, dzieląc go na mniejsze komponenty i wydzielając logikę do odrębnych serwisów."
+    ]
+  },
+  {
+    "version": "v2026.8.26.4",
+    "date": "2026-08-26",
+    "changes": [
+      "🛠️ Naprawiono moduł Powiadomień i Kalendarza: powiadomienia i zapis do kalendarza ponownie mają prawidłowy dostęp do danych o pojazdach i nie kończą się pustym wynikiem.",
+      "✏️ Zmieniono niezrozumiałą etykietę 'Założona przy' na 'Przebieg przy montażu' w sekcji Menedżera Opon, aby ułatwić uzupełnianie danych."
+    ]
+  },
+  {
+    "version": "v2026.8.26.3",
+    "date": "2026-08-26",
+    "changes": [
+      "✨ Edycja w Historii Serwisowej: Zyskujesz pełną kontrolę! Możesz teraz edytować i usuwać wpisy kosztów serwisowych oraz akcesoriów, co pozwala błyskawicznie korygować pomyłki.",
+      "🛠️ Naprawiono błąd duplikowania rekordów: Od teraz każde zapisane zdarzenie z garażu lub warsztatu dodaje się bezszelestnie, dokładnie jeden raz, wprost do bezpiecznej, wewnętrznej bazy PWA."
+    ]
+  },
+  {
+    "version": "v2026.8.26.2",
+    "date": "2026-08-26",
+    "changes": [
+      "⚡ Optymalizacja Startu (Code Splitting): Wdrożono mechanizm leniwego ładowania (lazy loading) modułów aplikacji. Pulpit ładuje się teraz błyskawicznie, pobierając z sieci ułamek dawnej wielkości danych!",
+      "🛠️ Architektura (Settings): Potężna struktura Ustawień została rozbita na mniejsze moduły z profesjonalnym zarządzaniem stanem, by uniknąć problemów z nadpisywaniem formularzy (usunięto anty-wzorce manipulacji DOM)."
+    ]
+  },
+  {
+    "version": "v2026.8.26.1",
+    "date": "2026-08-26",
+    "changes": [
+      "✨ Refaktoryzacja (Faza 1 i 2): Wdrożono nowy, profesjonalny silnik nawigacyjny React Router. Rozwiązuje to problem z zapamiętywaniem otwartej zakładki po odświeżeniu.",
+      "🛠️ Architektura: Potężna zakładka Opcje (Settings) została przeniesiona do osobnego pliku, co znacznie odciążyło główny silnik aplikacji.",
+      "🛠️ Diagnostyka: Zmodernizowano moduł diagnostyczny – działa teraz jako w pełni natywny, czysty komponent bez ingerencji w strukturę przeglądarki."
+    ]
+  },
+  {
+    "version": "v2026.8.25.2",
+    "date": "2026-08-25",
+    "changes": [
+      "🎨 UI: Dopasowano styl przycisku dodawania zdjęć do Historii Serwisowej do głównego motywu aplikacji (ikona aparatu i spójne tło)."
+    ]
+  },
+  {
+    "version": "v2026.8.25.1",
+    "date": "2026-08-25",
+    "changes": [
+      "🎨 UI: Uporządkowano wyrównanie pól w ściągawce części, a baner 'Postaw kawę' przeniesiono w bardziej dostępne miejsce na pulpicie głównym.",
+      "🛠️ Safari Fix: Naprawiono problem z pobieraniem przypomnień .ics w przeglądarce Safari na iOS.",
+      "🎨 UI: Przywrócono minimalistyczny przycisk zamykania (X) w Trybie Jazdy, zachowując przy tym funkcjonalność zapisu plików GPX."
+    ]
+  },
+  {
+    "version": "v2026.8.24.1",
+    "date": "2026-08-24",
+    "changes": [
+      "✨ Finanse i TCO: Dodano zaawansowany kalkulator kosztów, który potrafi wyliczyć kwotę, jaką wydajesz na każdy przejechany kilometr wraz z wykresem wydatków.",
+      "✨ Podsumowanie Sezonu (Wrapped): Ekran podsumowujący przejechane kilometry i koszty na wzór Spotify Wrapped z neonową grafiką do pochwalenia się w mediach społecznościowych.",
+      "✨ Zapis Trasy (GPX): W Trybie Jazdy aplikacja śledzi teraz Twoją drogę. Po zakończeniu wyprawy możesz zapisać plik GPX z przebytą trasą do udostępnienia lub nawigacji.",
+      "✨ Części i Płyny: Cyfrowy garaż został wyposażony w notatnik, gdzie łatwo zapiszesz modele filtrów, akumulatora czy świec dla danego motocykla - koniec ze żmudnym szukaniem po instrukcjach!"
+    ]
+  },
+  {
+    "version": "v2026.8.21.7",
+    "date": "2026-08-21",
+    "changes": [
+      "🚀 Usprawniono Tryb Jazdy: Dodano przycisk minimalizacji ('_'), pozwalający na używanie reszty aplikacji (np. kalkulatora spalania) podczas gdy Tryb Jazdy działa i liczy dystans w tle."
+    ]
+  },
+  {
+    "version": "v2026.8.21.6",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Zachowano dużą grafikę motocykla wykraczającą poza obrys, przy jednoczesnym zmniejszeniu wysokości przycisku 'Trybu Jazdy' (w stylu 3D)."
+    ]
+  },
+  {
+    "version": "v2026.8.21.5",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Dopasowano proporcje przycisku Trybu Jazdy oraz rozmiar grafiki motocykla do bardziej ergonomicznych wymiarów."
+    ]
+  },
+  {
+    "version": "v2026.8.21.4",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Wstawiono wycięty motocykl użytkownika (PNG bez tła) na główne ekrany aplikacji."
+    ]
+  },
+  {
+    "version": "v2026.8.21.3",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Przywrócono systemową emotikonę motocykla 🏍️ na prośbę użytkownika."
+    ]
+  },
+  {
+    "version": "v2026.8.21.2",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 UI: Powiększono ikonę motocykla w panelach trybu jazdy i opon na prośbę użytkownika."
+    ]
+  },
+  {
+    "version": "v2026.8.21.1",
+    "date": "2026-08-21",
+    "changes": [
+      "🎨 Wizualne: Zastąpiono emotikony motocykla ikoną z podkładką z prawdziwego pojazdu.",
+      "📱 Usprawniono UX Trybu Jazdy: Ostrzeżenie o burzy nie miga już całym ekranem na czerwono, lecz w elegancki, mniej rozpraszający sposób pulsuje ikoną z zaprogramowanym dystansem ostrzegania.",
+      "✨ Nowa funkcja: W Historii Serwisowej można od teraz dołączać zdjęcia paragonów lub użytych części z możliwością ich powiększenia (zapisywane bezpiecznie na urządzeniu)."
+    ]
+  },
+  {
+    "version": "v2026.8.20.3",
+    "changes": [
+      "✨ Automatyczny Kalkulator Spalania: Aplikacja wylicza teraz średnie spalanie l/100km pomiędzy tankowaniami do pełna (widoczne w Historii Tankowań).",
+      "✨ Prognoza Zasięgu: Na pulpicie głównym, obok średniego spalania, pojawiła się predykcja - na ile kilometrów wystarczy Ci pełen bak."
+    ]
+  },
+  {
+    "version": "v2026.8.20.2",
+    "changes": [
+      "✨ Nowy Moduł: Menedżer Opon (Tire Tracker)! Dodaj informacje o oponach w Opcjach, a na pulpicie pojawi się pasek postępu zużycia bieżnika wraz z przypomnieniami."
+    ]
+  },
+  {
+    "version": "v2026.8.20.1",
+    "changes": [
+      "✨ Profil Użytkownika: dodano możliwość ustawienia globalnego awatara i nicku (wspólne dla wszystkich motocykli).",
+      "✨ Personalizacja Garażu: dodano opcję wgrywania własnego tła (Cover Photo) dla każdego motocykla z poziomu Opcji, które staje się wizytówką pojazdu na pulpicie."
+    ]
+  },
+  {
+    "version": "v2026.8.19.01",
+    "changes": [
+      "🛠️ Rozwiązano problem z czarnymi kwadratami 'Zoom Level Not Supported' na radarze pogodowym - chmury opadowe są teraz widoczne nawet przy maksymalnym przybliżeniu mapy."
+    ]
+  },
+  {
+    "version": "v2026.8.18.02",
+    "changes": [
+      "🗺️ Usunięto błąd odświeżania GPS, który uniemożliwiał swobodne oddalanie mapy (efekt przyciągania do określonego przybliżenia)."
+    ]
+  },
+  {
+    "version": "v2026.8.18.01",
+    "changes": [
+      "🗺️ Zwiększono intensywność kolorów radaru pogodowego i odblokowano maksymalne oddalanie mapy.",
+      "🛠️ Kolejna optymalizacja silnika aktualizacji PWA (rozwiązanie konfliktów wersji z pamięci podręcznej przeglądarki)."
+    ]
+  },
+  {
+    "version": "v2026.8.17.05",
+    "changes": [
+      "☁️ Gorąca poprawka: Synchronizacja modułu Moje Trasy z nowym silnikiem RainViewer API."
+    ]
+  },
+  {
+    "version": "v2026.8.17.04",
+    "changes": [
+      "🛠️ Krytyczna poprawka mechanizmu PWA: usunięto błąd powodujący wpadanie aplikacji w nieskończoną pętlę instalacji aktualizacji.",
+      "☁️ Zoptymalizowano silnik pobierania kafelków mapy radarowej RainViewer, zapewniając bezpośrednie i niezawodne wczytywanie chmur burzowych na żywo."
+    ]
+  },
+  {
+    "version": "v2026.8.17.02",
+    "changes": [
+      "✨ Nowy algorytm meteorologiczny w Trybie Jazdy: ostrzega przed burzą/deszczem analizując symultanicznie 5 punktów geodezyjnych w ustalonej odległości.",
+      "⚙️ W Opcjach aplikacji można teraz wybrać promień wczesnego ostrzegania o opadach (10 km, 30 km lub 50 km).",
+      "🗺️ Dodano sprzętowe sterowanie przybliżaniem/oddalaniem mapy pogodowej."
+    ]
+  },
+  {
+    "version": "v2026.8.15.22",
+    "changes": [
+      "✨ Nowość w Trybie Jazdy: Zintegrowano żyroskop telefonu, dodając dynamiczny wskaźnik pochylenia motocykla (w stopniach) działający w czasie rzeczywistym."
+    ]
+  },
+  {
+    "version": "v2026.8.15.21",
+    "changes": [
+      "🛠️ Naprawiono moduł aktualizacji PWA – poprawiono przycisk instalacji oraz przywrócono wbudowany podgląd listy zmian."
+    ]
+  },
+  {
+    "version": "2026.08.15.20",
+    "changes": [
+      "Zoptymalizowano dolny pasek nawigacyjny: usunięto zbędne zakładki (Diagnostyka, Kawa) przenosząc je do sekcji Opcje. Uporządkowano ikony (dodano ikonę Home dla Pulpitu).",
+      "Wdrożono natywne wsparcie dla przeglądarek mobilnych, rozwiązując problem z nakładającym się lub przesuwającym się dolnym paskiem przy przewijaniu ekranu.",
+      "Zintegrowano nowy, kuloodporny i niezależny od głównego interfejsu mechanizm aktualizacji PWA, poprawiający responsywność paska 'Co nowego?'.",
+      "Zintegrowano zakładkę Diagnostyka umożliwiającą pełen eksport i import zawartości bazy danych, a także mechanizm twardego resetu Cache PWA."
+    ]
+  },
+  {
+    "version": "2026.08.06.12",
+    "changes": [
+      "Aktualizacja wpisów w historii zmian (Co nowego?)."
+    ]
+  },
+  {
+    "version": "2026.08.06.11",
+    "changes": [
+      "Krótszy tekst na przycisku aktualizacji ('Zaktualizuj' zamiast 'Odśwież (Zaktualizuj)')."
+    ]
+  },
+  {
+    "version": "2026.08.06.10",
+    "changes": [
+      "Poprawka wizualna: tło w Trybie Jazdy jest teraz w pełni matowe, co zapobiega prześwitywaniu innych ekranów pod spodem."
+    ]
+  },
+  {
+    "version": "2026.08.06.09",
+    "changes": [
+      "Całkowita przebudowa Trybu Jazdy (Responsive Design) - obsługa orientacji poziomej i pionowej ekranu.",
+      "Dodano nową opcję wizualną: 'Efekt Liquid Glass' (do włączenia w zakładce Opcje)."
+    ]
+  },
+  {
+    "version": "2026.08.06.08",
+    "changes": [
+      "Aktualizacja historii zmian (Co nowego?) - pełen wykaz nowości od wersji .05.",
+      "Poprawka formatu numeracji wersji (zastosowano kropkę po roku)."
+    ]
+  },
+  {
+    "version": "2026.08.06.07",
+    "changes": [
+      "Automatyczne sprawdzanie aktualizacji w tle oraz przy wybudzeniu/powrocie do aplikacji.",
+      "Dodanie znaczników ułatwień dostępu (Aria) m.in. dla przycisku wyjścia z Trybu Jazdy."
+    ]
+  },
+  {
+    "version": "2026.08.06.06",
+    "changes": [
+      "Zakończenie stabilizacji automatycznych testów E2E (Playwright). Pełen zielony pasek."
+    ]
+  },
+  {
+    "version": "2026.08.06.05",
+    "changes": [
+      "Inicjalizacja pełnego środowiska testów automatycznych Playwright dla kluczowych modułów (Garaż, Paliwo, Serwis, Nawigacja)."
+    ]
+  },
+  {
+    "version": "2026.08.06.04",
+    "changes": [
+      "Nowy ekran z listą zmian (Co nowego?) dodany do banera aktualizacji.",
+      "Możliwość podglądu zmian wszystkich nowszych wersji przed instalacją aktualizacji."
+    ]
+  },
+  {
+    "version": "2026.08.06.03",
+    "changes": [
+      "Moduł AWARIA / ASSISTANCE na pulpicie głównym stale widoczny.",
+      "Szybki skrót do ustawień w przypadku braku dodanego ubezpieczenia."
+    ]
+  },
+  {
+    "version": "2026.08.06.02",
+    "changes": [
+      "Mechanizm ręcznego potwierdzania aktualizacji (pomarańczowy baner u góry ekranu).",
+      "Dodano sekcję TCO (Całkowity Koszt Utrzymania) na ekranie Statystyk.",
+      "Dodano możliwość przeliczania kosztów paliwa w wybranym przedziale czasowym (od-do).",
+      "W Opcjach dodano pola do numeru polisy, nazwy ubezpieczyciela oraz numeru ratunkowego."
+    ]
+  },
+  {
+    "version": "2026.08.06.01",
+    "changes": [
+      "Dodano wyliczanie trendu cen paliwa (wykres liniowy).",
+      "Obsługa awatarów i nicków w profilu użytkownika (Opcje)."
+    ]
+  }
+]
