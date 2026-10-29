@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.10.29.4",
+    "date": "2026-10-29",
+    "changes": [
+      "✨ Po aktualizacji Bike Log od razu pokazuje listę zmian, tak jak BodyBuild, więc wiesz, co nowego w aplikacji."
+    ]
+  },
+  {
     "version": "v2026.10.29.3",
     "date": "2026-10-29",
     "changes": [

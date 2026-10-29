@@ -24,6 +24,28 @@
         }).then(function () {});
     }
 
+    // ─── „Co nowego” po aktualizacji (jak BodyBuild) ─────────────────────────────
+    var LAST_VERSION_KEY = 'ukis.bike-log.last-version';
+    var UPDATED_FROM_KEY = 'ukis.bike-log.updated-from';
+    // Ostatnia wersja z produkcji sprzed zapamiętywania wersji: pierwsze uruchomienie pokazuje zmiany od niej
+    var FIRST_TRACKED_SINCE = '2026.10.22.1';
+
+    function currentVersion() {
+        var meta = document.querySelector('meta[name="app-version"]');
+        return meta ? meta.content : null;
+    }
+
+    // Zwraca wersję, od której pokazać zmiany (albo null), i zapamiętuje bieżącą jako obejrzaną.
+    function changelogSinceAfterUpdate(storage, current) {
+        if (!current) return null;
+        var from = storage.getItem(UPDATED_FROM_KEY);
+        var last = storage.getItem(LAST_VERSION_KEY);
+        storage.removeItem(UPDATED_FROM_KEY);
+        storage.setItem(LAST_VERSION_KEY, current);
+        var since = from || last || FIRST_TRACKED_SINCE;
+        return since !== current ? since : null;
+    }
+
     function unregisterOwnServiceWorker() {
         return navigator.serviceWorker.getRegistration(OWN_SCOPE).then(function (reg) {
             return reg && reg.scope === OWN_SCOPE ? reg.unregister() : false;
@@ -182,6 +204,14 @@
                 ChangelogModal.show(compareVer, false);
             };
 
+            // Po aktualizacji sama lista zmian od wersji, której użytkownik używał
+            try {
+                var since = changelogSinceAfterUpdate(localStorage, currentVersion());
+                if (since) setTimeout(function () { ChangelogModal.show(since, false); }, 800);
+            } catch (e) {
+                console.warn('[PWA] Co nowego:', e);
+            }
+
             // Nasłuchuj controllerchange — reload TYLKO gdy użytkownik kliknął
             navigator.serviceWorker.addEventListener('controllerchange', function () {
                 if (PWAUpdater._userClickedUpdate) {
@@ -242,6 +272,10 @@
 
         doUpdate: function () {
             PWAUpdater._userClickedUpdate = true;
+            try {
+                var from = currentVersion();
+                if (from) localStorage.setItem(UPDATED_FROM_KEY, from);
+            } catch (e) { /* pamięć niedostępna: lista zmian pojawi się dzięki LAST_VERSION_KEY */ }
             Banner.setUpdating();
 
             if (PWAUpdater._pendingWorker) {
@@ -266,7 +300,10 @@
         isOwnCache: isOwnCache,
         clearOwnCaches: clearOwnCaches,
         unregisterOwnServiceWorker: unregisterOwnServiceWorker,
-        PWAUpdater: PWAUpdater
+        PWAUpdater: PWAUpdater,
+        LAST_VERSION_KEY: LAST_VERSION_KEY,
+        UPDATED_FROM_KEY: UPDATED_FROM_KEY,
+        changelogSinceAfterUpdate: changelogSinceAfterUpdate
     };
 
     // ─── Start ───────────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ukis-bikelog-v2026.10.29.3';
+const CACHE_NAME = 'ukis-bikelog-v2026.10.29.4';
 const CACHE_PREFIX = 'ukis-bikelog-';
 // Tylko cache Bike Log. Domena lukaszdudzinski.github.io jest wspólna dla rodziny UKIS (R1).
 function isOwnCache(key) {
