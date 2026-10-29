@@ -1,5 +1,26 @@
 [
   {
+    "version": "v2026.10.29.3",
+    "date": "2026-10-29",
+    "changes": [
+      "🐛 Przełącznik „Powiadomienia w tle” sam prosi o zgodę na iPhonie."
+    ]
+  },
+  {
+    "version": "v2026.10.29.2",
+    "date": "2026-10-29",
+    "changes": [
+      "🐛 Włączanie powiadomień w tle działa na iPhonie dodanym do ekranu początkowego, a ewentualny błąd jest widoczny w ustawieniach."
+    ]
+  },
+  {
+    "version": "v2026.10.29.1",
+    "date": "2026-10-29",
+    "changes": [
+      "🔔 Przypomnienia o OC, AC i przeglądzie przychodzą także przy zamkniętej aplikacji. Na iPhonie po dodaniu Bike Log do ekranu początkowego."
+    ]
+  },
+  {
     "version": "v2026.10.22.1",
     "date": "2026-10-22",
     "changes": [
