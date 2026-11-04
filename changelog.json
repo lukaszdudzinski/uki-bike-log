@@ -1,5 +1,12 @@
 [
   {
+    "version": "v2026.11.4.1",
+    "date": "2026-11-04",
+    "changes": [
+      "🛡️ Gdy aplikacja nie może wczytać ekranu, nie instaluje sama nowej wersji. O aktualizacji decydujesz Ty przyciskiem."
+    ]
+  },
+  {
     "version": "v2026.10.30.1",
     "date": "2026-10-30",
     "changes": [
