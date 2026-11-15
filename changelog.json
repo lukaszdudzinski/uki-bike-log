@@ -1,5 +1,13 @@
 [
   {
+    "version": "v2026.11.14.1",
+    "date": "2026-11-14",
+    "changes": [
+      "🛡️ Nowa wersja instaluje się tylko po kliknięciu „Zaktualizuj”, także po zamknięciu aplikacji, a przez 7 dni możesz wrócić do poprzedniej.",
+      "📦 Serwis, kopia zapasowa i profil mają nowy, wspólny wygląd UKIS, a wczytanie kopii nie usuwa już Twojego nicku i zdjęcia. Motyw wybierasz teraz w karcie profilu."
+    ]
+  },
+  {
     "version": "v2026.11.4.1",
     "date": "2026-11-04",
     "changes": [
